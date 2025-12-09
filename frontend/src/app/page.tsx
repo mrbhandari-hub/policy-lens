@@ -1,13 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards } from '@/components';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
 import { SAMPLE_CASES } from '@/data/samples';
+import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function PolicyLensPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [response, setResponse] = useState<PolicyLensResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,12 +56,88 @@ export default function PolicyLensPage() {
 
       const data = await res.json();
       setResponse(data);
+
+      // Auto-save the results to Supabase and update URL
+      // Use imagePreview from state to preserve data URI format, or construct it if needed
+      saveSharedQuery(data, request.content_text, imagePreview || undefined);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
     }
   };
+
+  // Save to Supabase and update URL
+  const saveSharedQuery = async (data: PolicyLensResponse, text: string, img?: string) => {
+    try {
+      const { data: saved, error: saveError } = await supabase
+        .from('shared_queries')
+        .insert({
+          query_text: text,
+          image_url: img || null,
+          verdicts: data, // Storing full response object
+          metadata: { saved_at: new Date().toISOString() }
+        })
+        .select()
+        .single();
+
+      if (saveError) {
+        console.error('Share save error:', saveError);
+        return;
+      }
+
+      if (saved) {
+        // Update URL without reloading
+        const newUrl = `/?id=${saved.id}`;
+        router.replace(newUrl, { scroll: false });
+      }
+    } catch (err) {
+      console.error('Failed to save share:', err);
+    }
+  };
+
+  // Load from Supabase if ID is present
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id) return;
+
+    const fetchShared = async () => {
+      try {
+        // Avoid overwriting if we already have data and it matches? 
+        // Actually, just fetch it.
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('shared_queries')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setContentText(data.query_text);
+          if (data.image_url) {
+            setImagePreview(data.image_url);
+            // Try to extract base64 if it is one
+            if (data.image_url.startsWith('data:')) {
+              setImageBase64(data.image_url.split(',')[1]);
+            }
+          }
+          if (data.verdicts) {
+            setResponse(data.verdicts as PolicyLensResponse);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading shared query:', err);
+        setError('Failed to load shared query');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchShared();
+  }, [searchParams]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
