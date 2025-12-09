@@ -92,21 +92,17 @@ export default function PolicyLensPage() {
                 defaultValue=""
               >
                 <option value="" disabled>Select a scenario...</option>
-                <optgroup label="⚠️ Violating Content">
-                  {SAMPLE_CASES.filter(c => c.category === 'violating').map(c => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="⚖️ Borderline Content">
-                  {SAMPLE_CASES.filter(c => c.category === 'borderline').map(c => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="✅ Benign Content">
-                  {SAMPLE_CASES.filter(c => c.category === 'benign').map(c => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </optgroup>
+                {/* Group by Policy Category */}
+                {Array.from(new Set(SAMPLE_CASES.map(c => c.policyCategory))).sort().map(category => (
+                  <optgroup key={category} label={category}>
+                    {SAMPLE_CASES.filter(c => c.policyCategory === category).map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.category === 'violating' ? '🔴 ' : c.category === 'borderline' ? '⚖️ ' : '✅ '}
+                        {c.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
           </div>
