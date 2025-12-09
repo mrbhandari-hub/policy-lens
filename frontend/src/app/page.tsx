@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards } from '@/components';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
@@ -9,7 +9,8 @@ import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export default function PolicyLensPage() {
+// Inner component that uses useSearchParams
+function PolicyLensContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -248,5 +249,26 @@ export default function PolicyLensPage() {
         </footer>
       </div>
     </main>
+  );
+}
+
+// Loading fallback for Suspense
+function LoadingFallback() {
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-slate-400">Loading PolicyLens...</p>
+      </div>
+    </main>
+  );
+}
+
+// Default export wrapped in Suspense for useSearchParams
+export default function PolicyLensPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PolicyLensContent />
+    </Suspense>
   );
 }
