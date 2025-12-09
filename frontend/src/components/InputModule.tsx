@@ -329,8 +329,8 @@ export function InputModule({
             {/* Submit Button */}
             <button
                 onClick={handleSubmit}
-                disabled={loading || !contentText.trim() || selectedJudges.length < 2}
-                className={`w-full py-4 rounded-lg font-semibold text-lg transition-all ${loading || !contentText.trim() || selectedJudges.length < 2
+                disabled={loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1}
+                className={`w-full py-4 rounded-lg font-semibold text-lg transition-all ${loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1
                     ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 shadow-lg hover:shadow-purple-500/25'
                     }`}

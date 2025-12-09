@@ -79,9 +79,12 @@ class JudgeEngine:
         # Synthesize results (can run while we have verdicts)
         synthesis = await self._synthesize(valid_verdicts, request)
         
+        # Safe text for preview
+        safe_text = request.content_text or "[Image Only Content]"
+        
         return PolicyLensResponse(
             request_id=request_id,
-            content_preview=request.content_text[:200] + "..." if len(request.content_text) > 200 else request.content_text,
+            content_preview=safe_text[:200] + "..." if len(safe_text) > 200 else safe_text,
             judge_verdicts=valid_verdicts,
             synthesis=synthesis
         )
@@ -89,7 +92,7 @@ class JudgeEngine:
     def _run_judge_sync(
         self,
         judge_id: str,
-        content_text: str,
+        content_text: Optional[str],
         context_hint: Optional[str],
         image_bytes: Optional[bytes]
     ) -> JudgeVerdict:
@@ -100,10 +103,11 @@ class JudgeEngine:
         parts = []
         
         # Add text content
+        safe_text = content_text or ""
         content_prompt = f"""
 CONTENT TO ANALYZE:
 ---
-{content_text}
+{safe_text}
 ---
 """
         if context_hint:

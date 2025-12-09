@@ -52,7 +52,7 @@ class SynthesisResult(BaseModel):
 
 class PolicyLensRequest(BaseModel):
     """Input request for content analysis"""
-    content_text: str = Field(..., max_length=10000, description="Text content to analyze")
+    content_text: Optional[str] = Field(None, max_length=10000, description="Text content to analyze")
     content_image_base64: Optional[str] = Field(None, description="Base64-encoded image (JPG/PNG)")
     context_hint: Optional[str] = Field(
         None, 
