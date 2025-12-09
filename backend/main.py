@@ -39,21 +39,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS for frontend - allow localhost and production
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000", 
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    "https://policy-lens.vercel.app",
-    "https://policy-lens-git-main-rahuls-projects-4361375b.vercel.app",
-]
-
-# Also allow any Vercel preview deployments
+# CORS configuration - Allow ALL origins to handle Vercel previews and production
+# Security Note: in a strict production environment, we would list specific domains,
+# but for this demo/diagnostic tool, allowing * ensures seamless preview deployments.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_origin_regex=r"https://policy-lens.*\.vercel\.app",
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
