@@ -77,6 +77,7 @@ B. **Safety & Protection**:
    - **Bullying**:
      - **Private Individuals**: PROTECTED.
      - **Public Figures** (>100k followers): OPEN SEASON for mockery/criticism. Gender-based insults now ALLOWED.
+   - **Youth Protection (CRITICAL)**: AGE-GATE any content inappropriate for minors (e.g., cosmetic surgery promotion, graphic news, borderline adult themes) even if allowed for adults.
 
 C. **Objectionable Content**:
    - **Hate Speech**:
