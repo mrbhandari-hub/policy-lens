@@ -6,6 +6,14 @@ import { JudgeInfo, PolicyLensRequest } from '@/types';
 interface InputModuleProps {
     onAnalyze: (request: PolicyLensRequest) => void;
     loading: boolean;
+    contentText: string;
+    onContentTextChange: (text: string) => void;
+    contextHint: string;
+    onContextHintChange: (hint: string) => void;
+    imageBase64: string | undefined;
+    onImageBase64Change: (base64: string | undefined) => void;
+    imagePreview: string | null;
+    onImagePreviewChange: (preview: string | null) => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -16,9 +24,18 @@ interface JudgePromptModal {
     prompt: string;
 }
 
-export function InputModule({ onAnalyze, loading }: InputModuleProps) {
-    const [contentText, setContentText] = useState('');
-    const [contextHint, setContextHint] = useState('');
+export function InputModule({
+    onAnalyze,
+    loading,
+    contentText,
+    onContentTextChange,
+    contextHint,
+    onContextHintChange,
+    imageBase64,
+    onImageBase64Change,
+    imagePreview,
+    onImagePreviewChange
+}: InputModuleProps) {
     const [selectedJudges, setSelectedJudges] = useState<string[]>([
         'meta',
         'youtube',
@@ -27,8 +44,6 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
         'google_search',
     ]);
     const [availableJudges, setAvailableJudges] = useState<JudgeInfo[]>([]);
-    const [imageBase64, setImageBase64] = useState<string | undefined>();
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [promptModal, setPromptModal] = useState<JudgePromptModal>({ isOpen: false, judgeName: '', prompt: '' });
     const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -65,11 +80,11 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
         const reader = new FileReader();
         reader.onloadend = () => {
             const base64 = (reader.result as string).split(',')[1];
-            setImageBase64(base64);
-            setImagePreview(reader.result as string);
+            onImageBase64Change(base64);
+            onImagePreviewChange(reader.result as string);
         };
         reader.readAsDataURL(file);
-    }, []);
+    }, [onImageBase64Change, onImagePreviewChange]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -169,7 +184,7 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
                 </label>
                 <textarea
                     value={contentText}
-                    onChange={(e) => setContentText(e.target.value)}
+                    onChange={(e) => onContentTextChange(e.target.value)}
                     placeholder="Paste the content you want to analyze..."
                     className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
                     rows={6}
@@ -211,8 +226,8 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
                             </div>
                             <button
                                 onClick={() => {
-                                    setImageBase64(undefined);
-                                    setImagePreview(null);
+                                    onImageBase64Change(undefined);
+                                    onImagePreviewChange(null);
                                 }}
                                 className="bg-red-500 hover:bg-red-400 text-white rounded-full w-8 h-8 text-lg flex items-center justify-center transition-colors"
                             >
@@ -249,7 +264,7 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
                 <input
                     type="text"
                     value={contextHint}
-                    onChange={(e) => setContextHint(e.target.value)}
+                    onChange={(e) => onContextHintChange(e.target.value)}
                     placeholder="e.g., 'Verified news account reporting on a war zone'"
                     className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
                 />

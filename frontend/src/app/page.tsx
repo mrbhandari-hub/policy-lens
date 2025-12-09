@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards } from '@/components';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
+import { SAMPLE_CASES } from '@/data/samples';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -10,6 +11,27 @@ export default function PolicyLensPage() {
   const [response, setResponse] = useState<PolicyLensResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Input State (Lifted from InputModule)
+  const [contentText, setContentText] = useState('');
+  const [contextHint, setContextHint] = useState('');
+  const [imageBase64, setImageBase64] = useState<string | undefined>();
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleSampleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const sampleId = e.target.value;
+    if (!sampleId) return;
+
+    const sample = SAMPLE_CASES.find(c => c.id === sampleId);
+    if (sample) {
+      setContentText(sample.content);
+      setContextHint(sample.context || '');
+      // If we had images in samples, we would set them here.
+      // For now, reset images to focus on text samples unless sample has image
+      setImageBase64(sample.imageBase64);
+      setImagePreview(sample.imageBase64 ? `data:image/jpeg;base64,${sample.imageBase64}` : null);
+    }
+  };
 
   const handleAnalyze = async (request: PolicyLensRequest) => {
     setLoading(true);
@@ -58,8 +80,51 @@ export default function PolicyLensPage() {
           </p>
         </header>
 
+        {/* Sample Selector */}
+        <div className="flex justify-center mb-8">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+            <div className="relative flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+              <span className="pl-3 pr-2 text-slate-400 text-sm font-medium">✨ Try a Sample:</span>
+              <select
+                onChange={handleSampleSelect}
+                className="bg-transparent text-white text-sm py-2 pl-2 pr-8 focus:outline-none cursor-pointer hover:text-purple-300 transition-colors"
+                defaultValue=""
+              >
+                <option value="" disabled>Select a scenario...</option>
+                <optgroup label="⚠️ Violating Content">
+                  {SAMPLE_CASES.filter(c => c.category === 'violating').map(c => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="⚖️ Borderline Content">
+                  {SAMPLE_CASES.filter(c => c.category === 'borderline').map(c => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="✅ Benign Content">
+                  {SAMPLE_CASES.filter(c => c.category === 'benign').map(c => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Input Module */}
-        <InputModule onAnalyze={handleAnalyze} loading={loading} />
+        <InputModule
+          onAnalyze={handleAnalyze}
+          loading={loading}
+          contentText={contentText}
+          onContentTextChange={setContentText}
+          contextHint={contextHint}
+          onContextHintChange={setContextHint}
+          imageBase64={imageBase64}
+          onImageBase64Change={setImageBase64}
+          imagePreview={imagePreview}
+          onImagePreviewChange={setImagePreview}
+        />
 
         {/* Error Display */}
         {error && (
