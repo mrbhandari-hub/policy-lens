@@ -47,6 +47,10 @@ export function InputModule({
     const [isDragging, setIsDragging] = useState(false);
     const [promptModal, setPromptModal] = useState<JudgePromptModal>({ isOpen: false, judgeName: '', prompt: '' });
     const dropZoneRef = useRef<HTMLDivElement>(null);
+    
+    // Advanced analysis modes
+    const [runDebate, setRunDebate] = useState(false);
+    const [runCrossModel, setRunCrossModel] = useState(false);
 
     const viewJudgePrompt = async (judgeId: string, judgeName: string, e: React.MouseEvent) => {
         e.stopPropagation(); // Don't toggle selection
@@ -168,6 +172,8 @@ export function InputModule({
             content_image_base64: imageBase64,
             context_hint: contextHint || undefined,
             selected_judges: selectedJudges,
+            run_debate: runDebate,
+            run_cross_model: runCrossModel,
         });
     };
 
@@ -323,6 +329,63 @@ export function InputModule({
                 </div>
                 <div className="text-slate-500 text-xs mt-2">
                     Selected: {selectedJudges.length} of {availableJudges.length} judges
+                </div>
+            </div>
+
+            {/* Advanced Analysis Modes */}
+            <div className="mb-6 bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">⚡</span>
+                    <label className="text-slate-300 text-sm font-medium">Advanced Analysis Modes</label>
+                </div>
+                <div className="grid md:grid-cols-2 gap-3">
+                    {/* Debate Mode Toggle */}
+                    <label
+                        className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                            runDebate
+                                ? 'bg-red-900/20 border-red-700/50 text-white'
+                                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                        }`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={runDebate}
+                            onChange={(e) => setRunDebate(e.target.checked)}
+                            className="mt-1 accent-red-500"
+                        />
+                        <div>
+                            <div className="font-medium text-sm flex items-center gap-2">
+                                <span>⚔️</span> Pro/Con Debate
+                            </div>
+                            <p className="text-xs opacity-70 mt-1">
+                                Advocate argues for takedown, Defender argues to allow, Referee decides
+                            </p>
+                        </div>
+                    </label>
+
+                    {/* Cross-Model Toggle */}
+                    <label
+                        className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                            runCrossModel
+                                ? 'bg-blue-900/20 border-blue-700/50 text-white'
+                                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                        }`}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={runCrossModel}
+                            onChange={(e) => setRunCrossModel(e.target.checked)}
+                            className="mt-1 accent-blue-500"
+                        />
+                        <div>
+                            <div className="font-medium text-sm flex items-center gap-2">
+                                <span>🤖</span> Cross-Model Agreement
+                            </div>
+                            <p className="text-xs opacity-70 mt-1">
+                                Compare GPT-4, Claude, and Gemini verdicts for confidence estimation
+                            </p>
+                        </div>
+                    </label>
                 </div>
             </div>
 

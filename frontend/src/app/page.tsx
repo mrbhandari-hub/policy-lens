@@ -2,12 +2,14 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards } from '@/components';
+import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards, DebateCard, CrossModelCard } from '@/components';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
 import { SAMPLE_CASES } from '@/data/samples';
 import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+type ResultTab = 'jury' | 'debate' | 'crossmodel';
 
 // Inner component that uses useSearchParams
 function PolicyLensContent() {
@@ -17,6 +19,7 @@ function PolicyLensContent() {
   const [response, setResponse] = useState<PolicyLensResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ResultTab>('jury');
 
   // Input State (Lifted from InputModule)
   const [contentText, setContentText] = useState('');
@@ -218,17 +221,70 @@ function PolicyLensContent() {
         {/* Results */}
         {response && (
           <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Top: Synthesis Card */}
-            <SynthesisCard synthesis={response.synthesis} />
+            {/* Tab Navigation */}
+            {(response.debate || response.cross_model) && (
+              <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl p-2">
+                <button
+                  onClick={() => setActiveTab('jury')}
+                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
+                    activeTab === 'jury'
+                      ? 'bg-purple-600 text-white shadow-lg'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                  }`}
+                >
+                  <span>⚖️</span> Jury Verdicts
+                </button>
+                {response.debate && (
+                  <button
+                    onClick={() => setActiveTab('debate')}
+                    className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
+                      activeTab === 'debate'
+                        ? 'bg-red-600 text-white shadow-lg'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <span>⚔️</span> Pro/Con Debate
+                  </button>
+                )}
+                {response.cross_model && (
+                  <button
+                    onClick={() => setActiveTab('crossmodel')}
+                    className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
+                      activeTab === 'crossmodel'
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <span>🤖</span> Cross-Model
+                  </button>
+                )}
+              </div>
+            )}
 
-            {/* Middle: Disagreement Matrix */}
-            <DisagreementMatrix
-              verdicts={response.judge_verdicts}
-              distribution={response.synthesis.verdict_distribution}
-            />
+            {/* Tab Content */}
+            {activeTab === 'jury' && (
+              <>
+                {/* Top: Synthesis Card */}
+                <SynthesisCard synthesis={response.synthesis} />
 
-            {/* Bottom: Detailed Rationale */}
-            <JudgeDetailCards verdicts={response.judge_verdicts} />
+                {/* Middle: Disagreement Matrix */}
+                <DisagreementMatrix
+                  verdicts={response.judge_verdicts}
+                  distribution={response.synthesis.verdict_distribution}
+                />
+
+                {/* Bottom: Detailed Rationale */}
+                <JudgeDetailCards verdicts={response.judge_verdicts} />
+              </>
+            )}
+
+            {activeTab === 'debate' && response.debate && (
+              <DebateCard debate={response.debate} />
+            )}
+
+            {activeTab === 'crossmodel' && response.cross_model && (
+              <CrossModelCard crossModel={response.cross_model} />
+            )}
 
             {/* Request metadata */}
             <div className="text-center text-slate-500 text-sm py-4">

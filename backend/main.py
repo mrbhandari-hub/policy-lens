@@ -1,4 +1,5 @@
 """PolicyLens v2.0 - FastAPI Server"""
+import asyncio
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -8,18 +9,21 @@ load_dotenv()
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from models import PolicyLensRequest, PolicyLensResponse
+from models import PolicyLensRequest, PolicyLensResponse, DebateResult, CrossModelResult
 from judges import get_available_judges, get_judge_prompt
 from engine import JudgeEngine
+from multi_model import get_multi_model_engine, MultiModelEngine
 
 
-# Initialize engine on startup
+# Initialize engines on startup
 engine: JudgeEngine = None
+multi_engine: MultiModelEngine = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine
+    global engine, multi_engine
+    
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key or api_key == "your-google-api-key-here":
         print("⚠️  WARNING: GOOGLE_API_KEY not set. The /analyze endpoint will not work.")
@@ -28,7 +32,13 @@ async def lifespan(app: FastAPI):
         engine = None
     else:
         engine = JudgeEngine(api_key=api_key)
-        print("✓ PolicyLens engine initialized with Gemini 3 Pro Preview")
+        print("✓ PolicyLens jury engine initialized")
+    
+    # Initialize multi-model engine (for debate and cross-model)
+    print("Initializing multi-model engine...")
+    multi_engine = get_multi_model_engine()
+    print("✓ Multi-model engine ready")
+    
     yield
 
 
@@ -85,6 +95,8 @@ async def analyze_content(request: PolicyLensRequest):
     Select 3-5 judges to form a panel. Returns:
     - Individual verdicts from each judge
     - Synthesis with consensus badge and disagreement analysis
+    - Optional: Pro/Con debate result (if run_debate=True)
+    - Optional: Cross-model agreement result (if run_cross_model=True)
     """
     if not engine:
         raise HTTPException(
@@ -98,11 +110,67 @@ async def analyze_content(request: PolicyLensRequest):
             detail="Select at least 2 judges for meaningful comparison"
         )
     
-    # No upper limit - all judges can be selected (parallel execution handles performance)
+    # Build list of tasks to run in parallel
+    tasks = []
+    task_names = []
+    
+    # Always run the jury analysis
+    tasks.append(engine.evaluate_content(request))
+    task_names.append("jury")
+    
+    # Optionally run debate
+    if request.run_debate and multi_engine:
+        tasks.append(multi_engine.run_debate(
+            content_text=request.content_text or "",
+            context_hint=request.context_hint
+        ))
+        task_names.append("debate")
+    
+    # Optionally run cross-model
+    if request.run_cross_model and multi_engine:
+        tasks.append(multi_engine.run_cross_model(
+            content_text=request.content_text or "",
+            context_hint=request.context_hint
+        ))
+        task_names.append("cross_model")
     
     try:
-        response = await engine.evaluate_content(request)
+        # Run all analyses in parallel
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Process results
+        response = None
+        debate_result = None
+        cross_model_result = None
+        
+        for i, result in enumerate(results):
+            name = task_names[i]
+            
+            if isinstance(result, Exception):
+                print(f"Error in {name} analysis: {result}")
+                if name == "jury":
+                    # Jury is required, re-raise
+                    raise result
+                continue
+            
+            if name == "jury":
+                response = result
+            elif name == "debate":
+                debate_result = result
+            elif name == "cross_model":
+                cross_model_result = result
+        
+        if response is None:
+            raise HTTPException(status_code=500, detail="Jury analysis failed")
+        
+        # Add optional results to response
+        response.debate = debate_result
+        response.cross_model = cross_model_result
+        
         return response
+        
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
