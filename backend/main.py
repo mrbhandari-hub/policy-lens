@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import PolicyLensRequest, PolicyLensResponse
-from judges import get_available_judges
+from judges import get_available_judges, get_judge_prompt
 from engine import JudgeEngine
 
 
@@ -39,10 +39,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS for frontend
+# CORS for frontend - allow localhost and production
+CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", 
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "https://policy-lens.vercel.app",
+    "https://policy-lens-git-main-rahuls-projects-4361375b.vercel.app",
+]
+
+# Also allow any Vercel preview deployments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=r"https://policy-lens.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,6 +69,21 @@ async def health_check():
 async def list_judges():
     """Get available judge personas"""
     return {"judges": get_available_judges()}
+
+
+@app.get("/judges/{judge_id}")
+async def get_judge_details(judge_id: str):
+    """Get full details for a specific judge, including the system prompt"""
+    try:
+        judge = get_judge_prompt(judge_id)
+        return {
+            "id": judge_id,
+            "name": judge["name"],
+            "description": judge["description"],
+            "system_prompt": judge["system_prompt"]
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @app.post("/analyze", response_model=PolicyLensResponse)
@@ -81,11 +107,7 @@ async def analyze_content(request: PolicyLensRequest):
             detail="Select at least 2 judges for meaningful comparison"
         )
     
-    if len(request.selected_judges) > 6:
-        raise HTTPException(
-            status_code=400,
-            detail="Maximum 6 judges per analysis"
-        )
+    # No upper limit - all judges can be selected (parallel execution handles performance)
     
     try:
         response = await engine.evaluate_content(request)

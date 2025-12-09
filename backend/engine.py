@@ -1,8 +1,14 @@
-"""PolicyLens v2.0 - Judge Engine (Gemini Integration)"""
+"""PolicyLens v2.0 - Judge Engine (Gemini Integration)
+
+Optimized for parallel execution - all judges run concurrently.
+"""
 import asyncio
 import json
 import uuid
+import base64
+import os
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
 
 from google import genai
 from google.genai import types
@@ -11,11 +17,18 @@ from models import (
     JudgeVerdict, PolicyLensRequest, PolicyLensResponse,
     SynthesisResult, ConsensusBadge, VerdictTier
 )
-from judges import get_judge_prompt, JUDGES
+from judges import get_judge_prompt
 
 
-# Model configuration - Using Gemini 3 Pro Preview
-MODEL_ID = "gemini-3-pro-preview"
+# Model configuration
+# gemini-2.0-flash is ~3x faster than gemini-3-pro-preview
+# Set POLICYLENS_FAST_MODE=1 for speed, or leave unset for quality
+FAST_MODE = os.getenv("POLICYLENS_FAST_MODE", "1") == "1"
+MODEL_ID = "gemini-2.0-flash" if FAST_MODE else "gemini-3-pro-preview"
+
+# Thread pool for parallel API calls (Gemini SDK is synchronous)
+# 25 workers ensures all 18 judges + synthesis can run truly in parallel
+_executor = ThreadPoolExecutor(max_workers=25)
 
 
 class JudgeEngine:
@@ -23,22 +36,47 @@ class JudgeEngine:
     
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
+        self.api_key = api_key
+        print(f"  Using model: {MODEL_ID} ({'fast mode' if FAST_MODE else 'quality mode'})")
     
     async def evaluate_content(self, request: PolicyLensRequest) -> PolicyLensResponse:
-        """Run all selected judges in parallel and synthesize results"""
+        """Run all selected judges in TRUE parallel and synthesize results"""
         request_id = str(uuid.uuid4())
         
-        # Run judges in parallel
-        judge_tasks = [
-            self._run_judge(judge_id, request)
+        # Pre-process image once (not per-judge)
+        image_bytes = None
+        if request.content_image_base64:
+            image_bytes = base64.b64decode(request.content_image_base64)
+        
+        # Create all judge tasks
+        loop = asyncio.get_event_loop()
+        judge_futures = [
+            loop.run_in_executor(
+                _executor,
+                self._run_judge_sync,
+                judge_id,
+                request.content_text,
+                request.context_hint,
+                image_bytes
+            )
             for judge_id in request.selected_judges
         ]
-        verdicts = await asyncio.gather(*judge_tasks)
         
-        # Filter out any failed evaluations
-        valid_verdicts = [v for v in verdicts if v is not None]
+        # Run ALL judges truly in parallel
+        verdicts = await asyncio.gather(*judge_futures, return_exceptions=True)
         
-        # Synthesize results
+        # Filter out failures
+        valid_verdicts = [
+            v for v in verdicts 
+            if isinstance(v, JudgeVerdict)
+        ]
+        
+        # Log any errors
+        for i, v in enumerate(verdicts):
+            if isinstance(v, Exception):
+                print(f"Judge {request.selected_judges[i]} failed: {v}")
+        
+        # Synthesize results (can run while we have verdicts)
         synthesis = await self._synthesize(valid_verdicts, request)
         
         return PolicyLensResponse(
@@ -48,75 +86,69 @@ class JudgeEngine:
             synthesis=synthesis
         )
     
-    async def _run_judge(
-        self, 
-        judge_id: str, 
-        request: PolicyLensRequest
-    ) -> Optional[JudgeVerdict]:
-        """Execute a single judge evaluation"""
-        try:
-            judge_config = get_judge_prompt(judge_id)
-            
-            # Build the content parts
-            parts = []
-            
-            # Add text content
-            content_prompt = f"""
+    def _run_judge_sync(
+        self,
+        judge_id: str,
+        content_text: str,
+        context_hint: Optional[str],
+        image_bytes: Optional[bytes]
+    ) -> JudgeVerdict:
+        """Synchronous judge execution (runs in thread pool)"""
+        judge_config = get_judge_prompt(judge_id)
+        
+        # Build the content parts
+        parts = []
+        
+        # Add text content
+        content_prompt = f"""
 CONTENT TO ANALYZE:
 ---
-{request.content_text}
+{content_text}
 ---
 """
-            if request.context_hint:
-                content_prompt += f"""
+        if context_hint:
+            content_prompt += f"""
 PROVIDED CONTEXT:
-{request.context_hint}
+{context_hint}
 ---
 """
-            content_prompt += """
+        content_prompt += """
 Analyze this content and provide your verdict as a JSON object.
 """
-            parts.append(types.Part.from_text(text=content_prompt))
-            
-            # Add image if provided
-            if request.content_image_base64:
-                import base64
-                # Decode base64 to bytes
-                image_bytes = base64.b64decode(request.content_image_base64)
-                parts.append(types.Part.from_bytes(
-                    data=image_bytes,
-                    mime_type="image/jpeg"  # Adjust based on actual format
-                ))
-            
-            # Configure for structured JSON output
-            config = types.GenerateContentConfig(
-                system_instruction=judge_config["system_prompt"],
-                response_mime_type="application/json",
-                temperature=0.3,  # Lower temperature for more consistent judgments
-            )
-            
-            response = await asyncio.to_thread(
-                self.client.models.generate_content,
-                model=MODEL_ID,
-                contents=[types.Content(role="user", parts=parts)],
-                config=config
-            )
-            
-            # Parse the structured response
-            verdict_data = json.loads(response.text)
-            verdict_data["judge_id"] = judge_id  # Ensure correct ID
-            return JudgeVerdict(**verdict_data)
-            
-        except Exception as e:
-            print(f"Error running judge {judge_id}: {e}")
-            return None
+        parts.append(types.Part.from_text(text=content_prompt))
+        
+        # Add image if provided
+        if image_bytes:
+            parts.append(types.Part.from_bytes(
+                data=image_bytes,
+                mime_type="image/jpeg"
+            ))
+        
+        # Configure for structured JSON output
+        config = types.GenerateContentConfig(
+            system_instruction=judge_config["system_prompt"],
+            response_mime_type="application/json",
+            temperature=0.3,
+        )
+        
+        # Make the API call (this blocks, but we're in a thread)
+        response = self.client.models.generate_content(
+            model=MODEL_ID,
+            contents=[types.Content(role="user", parts=parts)],
+            config=config
+        )
+        
+        # Parse response
+        verdict_data = json.loads(response.text)
+        verdict_data["judge_id"] = judge_id
+        return JudgeVerdict(**verdict_data)
     
     async def _synthesize(
-        self, 
+        self,
         verdicts: list[JudgeVerdict],
         request: PolicyLensRequest
     ) -> SynthesisResult:
-        """Meta-Judge: Analyze the verdicts and generate synthesis"""
+        """Meta-Judge: Analyze verdicts and generate synthesis"""
         
         # Calculate verdict distribution
         distribution: dict[str, int] = {tier.value: 0 for tier in VerdictTier}
@@ -138,46 +170,17 @@ Analyze this content and provide your verdict as a JSON object.
         else:
             badge = ConsensusBadge.CHAOS
         
-        # Generate the "Crux" narrative using Gemini
-        crux_prompt = f"""
-You are the Meta-Judge synthesizing multiple content moderation verdicts.
-
-ORIGINAL CONTENT (preview):
-{request.content_text[:500]}
-
-JUDGE VERDICTS:
-{json.dumps([v.model_dump() for v in verdicts], indent=2, default=str)}
-
-Analyze the disagreements and generate:
-1. A one-sentence "crux narrative" explaining WHY the judges disagree (focus on the philosophical tension)
-2. The primary axis of tension (e.g., "Intent vs Harm", "Safety vs Expression", "Context vs Content")
-
-Respond with JSON:
-{{
-  "crux_narrative": "<one sentence explaining the core disagreement>",
-  "primary_tension": "<2-4 word tension axis>"
-}}
-"""
-        
+        # Generate the "Crux" narrative using Gemini (in thread pool)
+        loop = asyncio.get_event_loop()
         try:
-            config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.5,
+            crux_data = await loop.run_in_executor(
+                _executor,
+                self._generate_crux_sync,
+                verdicts,
+                request.content_text[:500]
             )
-            
-            response = await asyncio.to_thread(
-                self.client.models.generate_content,
-                model=MODEL_ID,
-                contents=[types.Content(role="user", parts=[
-                    types.Part.from_text(text=crux_prompt)
-                ])],
-                config=config
-            )
-            
-            crux_data = json.loads(response.text)
             crux_narrative = crux_data.get("crux_narrative", "Unable to determine disagreement pattern.")
             primary_tension = crux_data.get("primary_tension", "Unknown")
-            
         except Exception as e:
             print(f"Error generating synthesis: {e}")
             crux_narrative = "Synthesis unavailable due to processing error."
@@ -189,3 +192,46 @@ Respond with JSON:
             crux_narrative=crux_narrative,
             primary_tension=primary_tension
         )
+    
+    def _generate_crux_sync(
+        self,
+        verdicts: list[JudgeVerdict],
+        content_preview: str
+    ) -> dict:
+        """Generate crux narrative synchronously (runs in thread pool)"""
+        crux_prompt = f"""
+You are the Meta-Judge synthesizing multiple content moderation verdicts from different platform perspectives.
+
+ORIGINAL CONTENT (preview):
+{content_preview}
+
+JUDGE VERDICTS:
+{json.dumps([v.model_dump() for v in verdicts], indent=2, default=str)}
+
+Analyze the disagreements and generate:
+1. A one-sentence "crux narrative" explaining WHY the judges disagree (focus on the philosophical tension between platforms)
+2. The primary axis of tension (e.g., "Youth Safety vs Expression", "Brand Safety vs Free Speech", "Proactive vs Reactive Moderation")
+
+Be specific about WHICH platforms disagree and WHY based on their stated policies.
+
+Respond with JSON:
+{{
+  "crux_narrative": "<one sentence explaining the core disagreement>",
+  "primary_tension": "<2-4 word tension axis>"
+}}
+"""
+        
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.5,
+        )
+        
+        response = self.client.models.generate_content(
+            model=MODEL_ID,
+            contents=[types.Content(role="user", parts=[
+                types.Part.from_text(text=crux_prompt)
+            ])],
+            config=config
+        )
+        
+        return json.loads(response.text)

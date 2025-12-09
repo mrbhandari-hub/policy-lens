@@ -10,19 +10,43 @@ interface InputModuleProps {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+interface JudgePromptModal {
+    isOpen: boolean;
+    judgeName: string;
+    prompt: string;
+}
+
 export function InputModule({ onAnalyze, loading }: InputModuleProps) {
     const [contentText, setContentText] = useState('');
     const [contextHint, setContextHint] = useState('');
     const [selectedJudges, setSelectedJudges] = useState<string[]>([
-        'walled_garden',
-        'town_square',
-        'viral_stage',
+        'meta',
+        'youtube',
+        'tiktok',
+        'x_twitter',
+        'google_search',
     ]);
     const [availableJudges, setAvailableJudges] = useState<JudgeInfo[]>([]);
     const [imageBase64, setImageBase64] = useState<string | undefined>();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [promptModal, setPromptModal] = useState<JudgePromptModal>({ isOpen: false, judgeName: '', prompt: '' });
     const dropZoneRef = useRef<HTMLDivElement>(null);
+
+    const viewJudgePrompt = async (judgeId: string, judgeName: string, e: React.MouseEvent) => {
+        e.stopPropagation(); // Don't toggle selection
+        try {
+            const res = await fetch(`${API_URL}/judges/${judgeId}`);
+            const data = await res.json();
+            setPromptModal({
+                isOpen: true,
+                judgeName: judgeName,
+                prompt: data.system_prompt
+            });
+        } catch (err) {
+            console.error('Failed to fetch judge prompt:', err);
+        }
+    };
 
     useEffect(() => {
         // Fetch available judges on mount
@@ -168,10 +192,10 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
                     onDrop={handleDrop}
                     onPaste={handlePaste}
                     className={`relative border-2 border-dashed rounded-lg p-4 transition-all ${isDragging
-                            ? 'border-purple-500 bg-purple-500/10'
-                            : imagePreview
-                                ? 'border-green-500/50 bg-green-500/5'
-                                : 'border-slate-600 hover:border-slate-500'
+                        ? 'border-purple-500 bg-purple-500/10'
+                        : imagePreview
+                            ? 'border-green-500/50 bg-green-500/5'
+                            : 'border-slate-600 hover:border-slate-500'
                         }`}
                 >
                     {imagePreview ? (
@@ -233,26 +257,57 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
 
             {/* Judge Selection */}
             <div className="mb-6">
-                <label className="block text-slate-400 text-sm mb-3">
-                    Select Judges (2-6)
-                </label>
+                <div className="flex items-center justify-between mb-3">
+                    <label className="block text-slate-400 text-sm">
+                        Select Judges (minimum 2)
+                    </label>
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedJudges(availableJudges.map(j => j.id))}
+                            className="text-xs px-3 py-1 rounded bg-purple-600/30 text-purple-300 hover:bg-purple-600/50 transition-colors"
+                        >
+                            Select All ({availableJudges.length})
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSelectedJudges([])}
+                            className="text-xs px-3 py-1 rounded bg-slate-700/50 text-slate-400 hover:bg-slate-600/50 transition-colors"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {availableJudges.map((judge) => (
-                        <button
+                        <div
                             key={judge.id}
                             onClick={() => toggleJudge(judge.id)}
-                            className={`p-3 rounded-lg border text-left transition-all ${selectedJudges.includes(judge.id)
+                            className={`p-3 rounded-lg border text-left transition-all cursor-pointer relative group ${selectedJudges.includes(judge.id)
                                 ? 'bg-purple-600/30 border-purple-500 text-white'
                                 : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:border-slate-500'
                                 }`}
                         >
-                            <div className="font-medium text-sm">{judge.name}</div>
-                            <div className="text-xs opacity-70 mt-1">{judge.description}</div>
-                        </button>
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <div className="font-medium text-sm">{judge.name}</div>
+                                    <div className="text-xs opacity-70 mt-1">{judge.description}</div>
+                                </div>
+                                <button
+                                    onClick={(e) => viewJudgePrompt(judge.id, judge.name, e)}
+                                    className="ml-2 p-1 rounded-full opacity-50 hover:opacity-100 hover:bg-slate-600/50 transition-all"
+                                    title="View system prompt"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     ))}
                 </div>
                 <div className="text-slate-500 text-xs mt-2">
-                    Selected: {selectedJudges.length} judges
+                    Selected: {selectedJudges.length} of {availableJudges.length} judges
                 </div>
             </div>
 
@@ -289,6 +344,38 @@ export function InputModule({ onAnalyze, loading }: InputModuleProps) {
                     `⚖️ Analyze Content`
                 )}
             </button>
+
+            {/* Prompt Modal */}
+            {promptModal.isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+                    onClick={() => setPromptModal({ ...promptModal, isOpen: false })}
+                >
+                    <div
+                        className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl border border-slate-600"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                            <h3 className="text-lg font-semibold text-white">
+                                🧠 System Prompt: {promptModal.judgeName}
+                            </h3>
+                            <button
+                                onClick={() => setPromptModal({ ...promptModal, isOpen: false })}
+                                className="text-slate-400 hover:text-white p-1"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
+                            <pre className="text-sm text-slate-300 whitespace-pre-wrap font-mono bg-slate-900/50 p-4 rounded-lg overflow-x-auto">
+                                {promptModal.prompt}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
