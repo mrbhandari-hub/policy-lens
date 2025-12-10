@@ -1,13 +1,8 @@
 'use client';
 
-export function LandingHero() {
-    const scrollToDemo = () => {
-        const element = document.getElementById('live-demo');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
+import Link from 'next/link';
 
+export function LandingHero() {
     return (
         <section className="relative pt-20 pb-32 overflow-hidden">
             {/* Background Effects */}
@@ -36,12 +31,12 @@ export function LandingHero() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                    <button
-                        onClick={scrollToDemo}
+                    <Link
+                        href="/analyze"
                         className="px-8 py-4 rounded-full bg-white text-slate-900 font-bold text-lg hover:bg-slate-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] active:scale-95"
                     >
                         Launch Analysis Engine ↓
-                    </button>
+                    </Link>
                     <a
                         href="https://github.com/mrbhandari-hub/policy-lens"
                         target="_blank"
