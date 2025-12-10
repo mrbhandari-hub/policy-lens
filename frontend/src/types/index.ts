@@ -97,4 +97,12 @@ export interface JudgeInfo {
     id: string;
     name: string;
     description: string;
+    category: string;
+}
+
+export interface JudgeCategory {
+    name: string;
+    description: string;
+    icon: string;
+    order: number;
 }

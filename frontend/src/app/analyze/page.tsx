@@ -8,10 +8,13 @@ import {
   DisagreementMatrix, 
   JudgeDetailCards, 
   DebateCard, 
-  CrossModelCard
+  CrossModelCard,
+  ShareButton,
+  VerdictSummary,
+  SampleSelector
 } from '@/components';
+import { SampleCase } from '@/data/samples';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
-import { SAMPLE_CASES } from '@/data/samples';
 import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -33,20 +36,28 @@ function AnalyzeContent() {
   const [contextHint, setContextHint] = useState('');
   const [imageBase64, setImageBase64] = useState<string | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [shareId, setShareId] = useState<string | null>(null);
+  const [sampleSelectorExpanded, setSampleSelectorExpanded] = useState(false);
 
-  const handleSampleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const sampleId = e.target.value;
-    if (!sampleId) return;
+  // Export JSON functionality
+  const exportJSON = () => {
+    if (!response) return;
+    const blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `policylens-${response.request_id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
-    const sample = SAMPLE_CASES.find(c => c.id === sampleId);
-    if (sample) {
-      setContentText(sample.content);
-      setContextHint(sample.context || '');
-      // If we had images in samples, we would set them here.
-      // For now, reset images to focus on text samples unless sample has image
-      setImageBase64(sample.imageBase64);
-      setImagePreview(sample.imageBase64 ? `data:image/jpeg;base64,${sample.imageBase64}` : null);
-    }
+  const handleSampleSelect = (sample: SampleCase) => {
+    setContentText(sample.content);
+    setContextHint(sample.context || '');
+    // If we had images in samples, we would set them here.
+    // For now, reset images to focus on text samples unless sample has image
+    setImageBase64(sample.imageBase64);
+    setImagePreview(sample.imageBase64 ? `data:image/jpeg;base64,${sample.imageBase64}` : null);
   };
 
   const handleAnalyze = async (request: PolicyLensRequest) => {
@@ -100,6 +111,7 @@ function AnalyzeContent() {
 
       if (saved) {
         // Update URL without reloading - explicitly use /analyze path
+        setShareId(saved.id);
         const newUrl = `/analyze?id=${saved.id}`;
         router.replace(newUrl, { scroll: false });
       }
@@ -135,6 +147,7 @@ function AnalyzeContent() {
 
         if (data) {
           setContentText(data.query_text);
+          setShareId(data.id);
           if (data.image_url) {
             setImagePreview(data.image_url);
             // Try to extract base64 if it is one
@@ -178,32 +191,11 @@ function AnalyzeContent() {
         </header>
 
         {/* Sample Selector */}
-        <div className="flex justify-center mb-8">
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
-            <div className="relative flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-              <span className="pl-3 pr-2 text-slate-400 text-sm font-medium">✨ Try a Sample:</span>
-              <select
-                onChange={handleSampleSelect}
-                className="bg-transparent text-white text-sm py-2 pl-2 pr-8 focus:outline-none cursor-pointer hover:text-purple-300 transition-colors"
-                defaultValue=""
-              >
-                <option value="" disabled>Select a scenario...</option>
-                {/* Group by Policy Category */}
-                {Array.from(new Set(SAMPLE_CASES.map(c => c.policyCategory))).sort().map(category => (
-                  <optgroup key={category} label={category}>
-                    {SAMPLE_CASES.filter(c => c.policyCategory === category).map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.category === 'violating' ? '🔴 ' : c.category === 'borderline' ? '⚖️ ' : '✅ '}
-                        {c.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+        <SampleSelector
+          onSelect={handleSampleSelect}
+          isExpanded={sampleSelectorExpanded}
+          onToggle={() => setSampleSelectorExpanded(!sampleSelectorExpanded)}
+        />
 
         {/* Input Module */}
         <InputModule
@@ -276,7 +268,10 @@ function AnalyzeContent() {
             {/* Tab Content */}
             {activeTab === 'jury' && (
               <>
-                {/* Top: Synthesis Card */}
+                {/* At-a-Glance Verdict Summary */}
+                <VerdictSummary verdicts={response.judge_verdicts} />
+
+                {/* Synthesis Card */}
                 <SynthesisCard synthesis={response.synthesis} />
 
                 {/* Middle: Disagreement Matrix */}
@@ -298,9 +293,25 @@ function AnalyzeContent() {
               <CrossModelCard crossModel={response.cross_model} />
             )}
 
-            {/* Request metadata */}
-            <div className="text-center text-slate-500 text-sm py-4">
-              Request ID: <code className="bg-slate-800 px-2 py-1 rounded">{response.request_id}</code>
+            {/* Results Footer with Export and Share */}
+            <div className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+              <div className="text-slate-500 text-sm">
+                Request ID: <code className="bg-slate-900 px-2 py-1 rounded text-slate-400">{response.request_id}</code>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={exportJSON}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-600/50 hover:text-white transition-all text-sm font-medium"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export JSON
+                </button>
+                {shareId && (
+                  <ShareButton shareId={shareId} />
+                )}
+              </div>
             </div>
           </div>
         )}

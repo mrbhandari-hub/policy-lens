@@ -249,7 +249,7 @@ Now render your verdict.
         )
         
         response = self.google_client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.0-flash",
             contents=[types.Content(role="user", parts=[
                 types.Part.from_text(text=user_content)
             ])],
@@ -265,7 +265,8 @@ Now render your verdict.
     async def run_cross_model(
         self,
         content_text: str,
-        context_hint: Optional[str] = None
+        context_hint: Optional[str] = None,
+        image_bytes: Optional[bytes] = None
     ) -> CrossModelResult:
         """Run the same analysis across GPT-4, Claude, and Gemini"""
         
@@ -283,25 +284,28 @@ Now render your verdict.
             futures.append(loop.run_in_executor(
                 _executor,
                 self._run_gemini_analyst_sync,
-                content_prompt
+                content_prompt,
+                image_bytes
             ))
-            model_info.append(("google", "gemini-2.0-flash"))
+            model_info.append(("google", "gemini-3.0-flash"))
         
         if self.openai_client:
             futures.append(loop.run_in_executor(
                 _executor,
                 self._run_openai_analyst_sync,
-                content_prompt
+                content_prompt,
+                image_bytes
             ))
-            model_info.append(("openai", "gpt-4o"))
+            model_info.append(("openai", "o4-mini"))
         
         if self.anthropic_client:
             futures.append(loop.run_in_executor(
                 _executor,
                 self._run_anthropic_analyst_sync,
-                content_prompt
+                content_prompt,
+                image_bytes
             ))
-            model_info.append(("anthropic", "claude-sonnet-4-20250514"))
+            model_info.append(("anthropic", "claude-sonnet-4-5"))
         
         if not futures:
             raise RuntimeError("At least one API key required for cross-model analysis")
@@ -372,17 +376,60 @@ Now render your verdict.
             parts.append(f"{v.model_family.title()} ({v.model_id}): {v.verdict_tier.value}")
         return "Model disagreement: " + " vs ".join(parts)
     
-    def _run_gemini_analyst_sync(self, content_prompt: str) -> dict:
-        """Run Gemini as neutral analyst"""
-        return self._run_gemini_sync(NEUTRAL_ANALYST_PROMPT, content_prompt)
+    def _run_gemini_analyst_sync(self, content_prompt: str, image_bytes: Optional[bytes] = None) -> dict:
+        """Run Gemini as neutral analyst with optional image"""
+        from google.genai import types
+        
+        # Build parts list
+        parts = [types.Part.from_text(text=content_prompt)]
+        
+        # Add image if provided
+        if image_bytes:
+            parts.append(types.Part.from_bytes(
+                data=image_bytes,
+                mime_type="image/jpeg"
+            ))
+        
+        config = types.GenerateContentConfig(
+            system_instruction=NEUTRAL_ANALYST_PROMPT,
+            response_mime_type="application/json",
+            temperature=0.4,
+        )
+        
+        response = self.google_client.models.generate_content(
+            model="gemini-3.0-flash",
+            contents=[types.Content(role="user", parts=parts)],
+            config=config
+        )
+        
+        return json.loads(response.text)
     
-    def _run_openai_analyst_sync(self, content_prompt: str) -> dict:
-        """Run OpenAI GPT-4 as neutral analyst"""
+    def _run_openai_analyst_sync(self, content_prompt: str, image_bytes: Optional[bytes] = None) -> dict:
+        """Run OpenAI GPT-4 as neutral analyst with optional image"""
+        import base64
+        
+        # Build message content
+        if image_bytes:
+            # GPT-4o supports vision via base64 data URLs
+            image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+            user_content = [
+                {"type": "text", "text": content_prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_b64}",
+                        "detail": "high"
+                    }
+                }
+            ]
+        else:
+            user_content = content_prompt
+        
         response = self.openai_client.chat.completions.create(
-            model="gpt-4o",
+            model="o4-mini",
             messages=[
                 {"role": "system", "content": NEUTRAL_ANALYST_PROMPT},
-                {"role": "user", "content": content_prompt}
+                {"role": "user", "content": user_content}
             ],
             response_format={"type": "json_object"},
             temperature=0.4
@@ -390,17 +437,37 @@ Now render your verdict.
         
         return json.loads(response.choices[0].message.content)
     
-    def _run_anthropic_analyst_sync(self, content_prompt: str) -> dict:
-        """Run Anthropic Claude as neutral analyst"""
+    def _run_anthropic_analyst_sync(self, content_prompt: str, image_bytes: Optional[bytes] = None) -> dict:
+        """Run Anthropic Claude as neutral analyst with optional image"""
+        import base64
+        
         # Claude doesn't have native JSON mode, so we ask nicely
-        full_prompt = f"{content_prompt}\n\nRespond with ONLY valid JSON, no other text."
+        text_prompt = f"{content_prompt}\n\nRespond with ONLY valid JSON, no other text."
+        
+        # Build message content
+        if image_bytes:
+            # Claude supports vision via base64 image blocks
+            image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+            user_content = [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_b64
+                    }
+                },
+                {"type": "text", "text": text_prompt}
+            ]
+        else:
+            user_content = text_prompt
         
         response = self.anthropic_client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=1024,
             system=NEUTRAL_ANALYST_PROMPT,
             messages=[
-                {"role": "user", "content": full_prompt}
+                {"role": "user", "content": user_content}
             ]
         )
         

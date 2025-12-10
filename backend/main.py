@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import PolicyLensRequest, PolicyLensResponse, DebateResult, CrossModelResult
-from judges import get_available_judges, get_judge_prompt
+from judges import get_available_judges, get_judge_prompt, get_judge_categories
 from engine import JudgeEngine
 from multi_model import get_multi_model_engine, MultiModelEngine
 
@@ -68,8 +68,11 @@ async def health_check():
 
 @app.get("/judges")
 async def list_judges():
-    """Get available judge personas"""
-    return {"judges": get_available_judges()}
+    """Get available judge personas with categories"""
+    return {
+        "judges": get_available_judges(),
+        "categories": get_judge_categories()
+    }
 
 
 @app.get("/judges/{judge_id}")
@@ -128,9 +131,16 @@ async def analyze_content(request: PolicyLensRequest):
     
     # Optionally run cross-model
     if request.run_cross_model and multi_engine:
+        # Decode image if provided
+        image_bytes = None
+        if request.content_image_base64:
+            import base64
+            image_bytes = base64.b64decode(request.content_image_base64)
+        
         tasks.append(multi_engine.run_cross_model(
             content_text=request.content_text or "",
-            context_hint=request.context_hint
+            context_hint=request.context_hint,
+            image_bytes=image_bytes
         ))
         task_names.append("cross_model")
     
