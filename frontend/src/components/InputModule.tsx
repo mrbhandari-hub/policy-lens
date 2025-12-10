@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { JudgeInfo, JudgeCategory, PolicyLensRequest } from '@/types';
+import { SampleCase, SAMPLE_CASES } from '@/data/samples';
 
 interface InputModuleProps {
     onAnalyze: (request: PolicyLensRequest) => void;
@@ -14,9 +15,21 @@ interface InputModuleProps {
     onImageBase64Change: (base64: string | undefined) => void;
     imagePreview: string | null;
     onImagePreviewChange: (preview: string | null) => void;
+    onSampleSelect?: (sample: SampleCase) => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const MAX_JUDGES = 20;
+
+// Quick Start Presets - click to replace, shift+click to add to selection
+const JUDGE_PRESETS = [
+    { id: 'platforms', label: '🏢 Platforms', description: 'Meta, YouTube, TikTok, X, Google', judges: ['meta', 'youtube', 'tiktok', 'x_twitter', 'google_search'] },
+    { id: 'parents', label: '👨‍👩‍👧 Parents', description: 'All 6 parent personas', judges: ['helicopter_parent', 'traditional_family_parent', 'mainstream_suburban_parent', 'progressive_urban_parent', 'free_range_parent', 'digital_native_parent'] },
+    { id: 'mpaa', label: '🎬 MPAA', description: 'G, PG, PG-13, R, NC-17 raters', judges: ['mpaa_g_rater', 'mpaa_pg_rater', 'mpaa_pg13_rater', 'mpaa_r_rater', 'mpaa_nc17_rater'] },
+    { id: 'oversight', label: '⚖️ Oversight', description: 'Meta Board, Ofcom, eSafety, etc.', judges: ['meta_oversight_board', 'uk_ofcom', 'australia_esafety', 'singapore_imda', 'gifct_reviewer'] },
+    { id: 'ideological', label: '🎭 Ideological', description: 'Libertarian, Conservative, Progressive', judges: ['civil_libertarian', 'global_conservative', 'global_progressive'] },
+    { id: 'safety', label: '🛡️ Safety', description: 'Child safety, CT, Brand safety', judges: ['child_safety_advocate', 'counterterrorism_expert', 'brand_safety_advertiser'] },
+];
 
 interface JudgePromptModal {
     isOpen: boolean;
@@ -185,8 +198,10 @@ export function InputModule({
     imageBase64,
     onImageBase64Change,
     imagePreview,
-    onImagePreviewChange
+    onImagePreviewChange,
+    onSampleSelect
 }: InputModuleProps) {
+    const [showSamples, setShowSamples] = useState(false);
     const [selectedJudges, setSelectedJudges] = useState<string[]>([
         'meta',
         'youtube',
@@ -196,7 +211,7 @@ export function InputModule({
     ]);
     const [availableJudges, setAvailableJudges] = useState<JudgeInfo[]>([]);
     const [categories, setCategories] = useState<Record<string, JudgeCategory>>({});
-    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['platform', 'parent', 'rating']));
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
     const [compactMode, setCompactMode] = useState(false); // Default to detailed view so users can see info buttons
     const [isDragging, setIsDragging] = useState(false);
@@ -336,8 +351,11 @@ export function InputModule({
             // Deselect all in this category
             setSelectedJudges(prev => prev.filter(id => !categoryJudgeIds.includes(id)));
         } else {
-            // Select all in this category
-            setSelectedJudges(prev => [...new Set([...prev, ...categoryJudgeIds])]);
+            // Select all in this category (respecting max limit)
+            setSelectedJudges(prev => {
+                const combined = [...new Set([...prev, ...categoryJudgeIds])];
+                return combined.slice(0, MAX_JUDGES);
+            });
         }
     };
 
@@ -420,11 +438,16 @@ export function InputModule({
     }, [handlePaste]);
 
     const toggleJudge = (judgeId: string) => {
-        setSelectedJudges((prev) =>
-            prev.includes(judgeId)
-                ? prev.filter((id) => id !== judgeId)
-                : [...prev, judgeId]
-        );
+        setSelectedJudges((prev) => {
+            if (prev.includes(judgeId)) {
+                return prev.filter((id) => id !== judgeId);
+            }
+            // Check if we're at the limit
+            if (prev.length >= MAX_JUDGES) {
+                return prev;
+            }
+            return [...prev, judgeId];
+        });
     };
 
     const handleSubmit = () => {
@@ -445,33 +468,93 @@ export function InputModule({
 
     return (
         <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-6 shadow-xl">
-            <h2 className="text-white text-xl font-semibold mb-4 flex items-center gap-2">
-                <span className="text-2xl">🔍</span> Content Analysis
-            </h2>
-
-            {/* Text Input */}
-            <div className="mb-4">
-                <label className="block text-slate-400 text-sm mb-2">
-                    Content to Analyze (max 10,000 characters)
-                </label>
-                <textarea
-                    value={contentText}
-                    onChange={(e) => onContentTextChange(e.target.value)}
-                    placeholder="Paste the content you want to analyze..."
-                    className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={6}
-                    maxLength={10000}
-                />
-                <div className="text-slate-500 text-xs mt-1 text-right">
-                    {contentText.length}/10,000
+            
+            {/* ═══════════════════════════════════════════════════════════════
+                STEP 1: CONTENT UNDER REVIEW
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold">
+                        1
+                    </div>
+                    <div>
+                        <h2 className="text-white text-lg font-semibold">Content Under Review</h2>
+                        <p className="text-slate-500 text-xs">What needs a policy decision?</p>
+                    </div>
+                    {/* Try a Sample - lightweight link */}
+                    {onSampleSelect && (
+                        <button
+                            type="button"
+                            onClick={() => setShowSamples(!showSamples)}
+                            className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                        >
+                            <span>✨</span>
+                            {showSamples ? 'Hide samples' : 'Try a sample case'}
+                        </button>
+                    )}
                 </div>
-            </div>
 
-            {/* Image Upload / Paste / Drop Zone */}
-            <div className="mb-4">
-                <label className="block text-slate-400 text-sm mb-2">
-                    Image (optional - upload, paste, or drag & drop)
-                </label>
+                {/* Sample picker dropdown */}
+                {showSamples && onSampleSelect && (
+                    <div className="ml-11 mb-4 p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
+                        <div className="text-xs text-slate-400 mb-2">Quick samples:</div>
+                        <div className="flex flex-wrap gap-2">
+                            {SAMPLE_CASES.slice(0, 8).map(sample => (
+                                <button
+                                    key={sample.id}
+                                    type="button"
+                                    onClick={() => {
+                                        onSampleSelect(sample);
+                                        setShowSamples(false);
+                                    }}
+                                    className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
+                                        sample.category === 'violating' 
+                                            ? 'bg-red-900/20 border-red-700/50 text-red-300 hover:bg-red-900/40'
+                                            : sample.category === 'borderline'
+                                                ? 'bg-yellow-900/20 border-yellow-700/50 text-yellow-300 hover:bg-yellow-900/40'
+                                                : 'bg-green-900/20 border-green-700/50 text-green-300 hover:bg-green-900/40'
+                                    }`}
+                                    title={sample.content.substring(0, 100) + '...'}
+                                >
+                                    {sample.category === 'violating' ? '🔴' : sample.category === 'borderline' ? '🟡' : '🟢'} {sample.label.replace(/^[🔴🟡🟢⚖️✅]\s*/, '').substring(0, 25)}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowSamples(false)}
+                            className="text-xs text-slate-500 hover:text-slate-300 mt-2"
+                        >
+                            ← Close
+                        </button>
+                    </div>
+                )}
+
+                {/* Step 1 content container */}
+                <div className="ml-11 space-y-4">
+                    {/* Text Input */}
+                    <div>
+                        <label className="block text-slate-400 text-sm mb-2">
+                            Text or post content
+                        </label>
+                        <textarea
+                            value={contentText}
+                            onChange={(e) => onContentTextChange(e.target.value)}
+                            placeholder="Paste the content you want to analyze..."
+                            className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                            rows={5}
+                            maxLength={10000}
+                        />
+                        <div className="text-slate-500 text-xs mt-1 text-right">
+                            {contentText.length}/10,000
+                        </div>
+                    </div>
+
+                    {/* Image Upload / Paste / Drop Zone */}
+                    <div>
+                        <label className="block text-slate-400 text-sm mb-2">
+                            Image (optional)
+                        </label>
                 <div
                     ref={dropZoneRef}
                     onDragOver={handleDragOver}
@@ -525,152 +608,130 @@ export function InputModule({
                             <p className="text-slate-500 text-xs mt-2">Supports JPG, PNG, GIF, WebP</p>
                         </div>
                     )}
-                </div>
-            </div>
+                    </div>
+                    </div>
 
-            {/* Context Hint */}
-            <div className="mb-6">
-                <label className="block text-slate-400 text-sm mb-2">
-                    Context/Intent (optional)
-                </label>
-                <input
-                    type="text"
-                    value={contextHint}
-                    onChange={(e) => onContextHintChange(e.target.value)}
-                    placeholder="e.g., 'Verified news account reporting on a war zone'"
-                    className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                />
-            </div>
-
-            {/* Judge Selection */}
-            <div className="mb-6">
-                {/* Header with count and controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    {/* Context Hint */}
                     <div>
-                        <label className="block text-slate-300 text-sm font-medium">
-                            Select Judges ({selectedJudges.length} of {availableJudges.length})
+                        <label className="block text-slate-400 text-sm mb-2">
+                            Additional context (optional)
                         </label>
-                        <p className="text-slate-500 text-xs">{Object.keys(categories).length} categories • minimum 2 required • <span className="text-purple-400">click &quot;View&quot; to see how each judge thinks</span></p>
+                        <input
+                            type="text"
+                            value={contextHint}
+                            onChange={(e) => onContextHintChange(e.target.value)}
+                            placeholder="e.g., 'Verified journalist reporting from conflict zone'"
+                            className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+                        />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setCompactMode(!compactMode)}
-                            className={`text-xs px-2 py-1 rounded transition-colors ${
-                                compactMode ? 'bg-slate-600 text-white' : 'bg-slate-700/50 text-slate-400'
-                            }`}
-                        >
-                            {compactMode ? '☰ Compact' : '▤ Detailed'}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(availableJudges.map(j => j.id))}
-                            className="text-xs px-2 py-1 rounded bg-purple-600/30 text-purple-300 hover:bg-purple-600/50 transition-colors"
-                        >
-                            All
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges([])}
-                            className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400 hover:bg-slate-600/50 transition-colors"
-                        >
-                            Clear
-                        </button>
+                </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-700/50 my-6" />
+
+            {/* ═══════════════════════════════════════════════════════════════
+                STEP 2: ASSEMBLE YOUR PANEL
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold">
+                        2
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="text-white text-lg font-semibold">Assemble Your Panel</h2>
+                        <p className="text-slate-500 text-xs">Who should weigh in on this decision?</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            selectedJudges.length >= MAX_JUDGES 
+                                ? 'bg-purple-600/40 text-purple-300' 
+                                : selectedJudges.length < 2 
+                                    ? 'bg-amber-600/40 text-amber-300' 
+                                    : 'bg-green-600/40 text-green-300'
+                        }`}>
+                            {selectedJudges.length}/{MAX_JUDGES}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => setCompactMode(!compactMode)}
+                                className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+                                title={compactMode ? 'Show detailed view' : 'Show compact view'}
+                            >
+                                {compactMode ? '▤' : '☰'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJudges([])}
+                                className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+                                title="Clear all"
+                            >
+                                ✕
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Search */}
-                <div className="relative mb-4">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search judges by name or description..."
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-8 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                    />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-lg"
-                        >
-                            ×
-                        </button>
-                    )}
-                </div>
-
-                {/* Quick Start Presets */}
-                <div className="mb-4">
-                    <div className="text-xs text-slate-500 mb-2">⚡ Quick Presets:</div>
-                    <div className="flex flex-wrap gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['meta', 'youtube', 'tiktok', 'x_twitter', 'google_search'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600/30 to-blue-700/30 text-blue-300 border border-blue-500/30 hover:border-blue-400/50 transition-all"
-                        >
-                            🏢 Platforms
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['helicopter_parent', 'traditional_family_parent', 'mainstream_suburban_parent', 'progressive_urban_parent', 'free_range_parent', 'digital_native_parent'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-600/30 to-pink-700/30 text-pink-300 border border-pink-500/30 hover:border-pink-400/50 transition-all"
-                        >
-                            👨‍👩‍👧‍👦 All Parents
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['mpaa_g_rater', 'mpaa_pg_rater', 'mpaa_pg13_rater', 'mpaa_r_rater', 'mpaa_nc17_rater'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-600/30 to-violet-700/30 text-violet-300 border border-violet-500/30 hover:border-violet-400/50 transition-all"
-                        >
-                            🎬 MPAA Ratings
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['tv_y_rater', 'tv_pg_rater', 'tv_14_rater', 'tv_ma_rater'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600/30 to-purple-700/30 text-purple-300 border border-purple-500/30 hover:border-purple-400/50 transition-all"
-                        >
-                            📺 TV Ratings
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['meta_oversight_board', 'uk_ofcom', 'australia_esafety', 'singapore_imda', 'gifct_reviewer'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-cyan-600/30 to-cyan-700/30 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400/50 transition-all"
-                        >
-                            ⚖️ Oversight
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['civil_libertarian', 'global_conservative', 'global_progressive'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600/30 to-amber-700/30 text-amber-300 border border-amber-500/30 hover:border-amber-400/50 transition-all"
-                        >
-                            🎭 Ideological
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setSelectedJudges(['child_safety_advocate', 'counterterrorism_expert', 'brand_safety_advertiser'])}
-                            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-red-600/30 to-red-700/30 text-red-300 border border-red-500/30 hover:border-red-400/50 transition-all"
-                        >
-                            🛡️ Safety
-                        </button>
+                <div className="ml-11">
+                    {/* Search */}
+                    <div className="relative mb-3">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search judges..."
+                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-8 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-lg"
+                            >
+                                ×
+                            </button>
+                        )}
                     </div>
-                </div>
+
+                    {/* Quick Presets - Simplified */}
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                        <span className="text-xs text-slate-500">⚡ Quick:</span>
+                        {JUDGE_PRESETS.map(preset => (
+                            <button
+                                key={preset.id}
+                                type="button"
+                                onClick={(e) => {
+                                    if (e.shiftKey) {
+                                        setSelectedJudges(prev => [...new Set([...prev, ...preset.judges])].slice(0, MAX_JUDGES));
+                                    } else {
+                                        setSelectedJudges(preset.judges);
+                                    }
+                                }}
+                                className="text-xs px-2.5 py-1 rounded-full bg-slate-700/60 text-slate-300 border border-slate-600 hover:bg-slate-600/60 hover:text-white transition-all"
+                                title={`${preset.description} (⇧+click to add)`}
+                            >
+                                {preset.label}
+                            </button>
+                        ))}
+                    </div>
                 
-                {/* Expand/Collapse controls */}
-                <div className="flex justify-end gap-2 mb-2 text-xs">
-                    <button onClick={() => setExpandedCategories(new Set(sortedCategories))} className="text-slate-400 hover:text-purple-400">
-                        Expand all
-                    </button>
-                    <span className="text-slate-600">|</span>
-                    <button onClick={() => setExpandedCategories(new Set())} className="text-slate-400 hover:text-purple-400">
-                        Collapse all
-                    </button>
-                </div>
+                    {/* Expand/Collapse controls */}
+                    <div className="flex justify-end gap-2 mb-2 text-xs">
+                        <button onClick={() => setExpandedCategories(new Set(sortedCategories))} className="text-slate-400 hover:text-purple-400">
+                            Expand all
+                        </button>
+                        <span className="text-slate-600">|</span>
+                        <button onClick={() => setExpandedCategories(new Set())} className="text-slate-400 hover:text-purple-400">
+                            Collapse all
+                        </button>
+                    </div>
 
-                {/* Grouped Judge Selection */}
-                <div className="space-y-2">
-                    {sortedCategories.map((categoryId) => {
+                    {/* Grouped Judge Selection */}
+                    <div className="space-y-2">
+                        {sortedCategories.map((categoryId) => {
                         const category = categories[categoryId];
                         const categoryJudges = judgesByCategory[categoryId] || [];
                         const selectedInCategory = categoryJudges.filter(j => selectedJudges.includes(j.id)).length;
@@ -812,104 +873,103 @@ export function InputModule({
                     })}
                 </div>
 
-                {/* No results */}
-                {sortedCategories.length === 0 && searchQuery && (
-                    <div className="text-center py-6 text-slate-500">
-                        <div className="text-2xl mb-2">🔍</div>
-                        <p>No judges found for &quot;{searchQuery}&quot;</p>
-                        <button onClick={() => setSearchQuery('')} className="text-purple-400 hover:text-purple-300 text-sm mt-2">
-                            Clear search
-                        </button>
-                    </div>
-                )}
-
-                {/* Selection summary */}
-                {selectedJudges.length > 0 && (
-                    <div className="mt-3 text-xs text-slate-500">
-                        Selected: {selectedJudges.length} judges
-                        {selectedJudges.length < 2 && <span className="text-amber-400 ml-2">⚠ Select at least 2</span>}
-                    </div>
-                )}
-            </div>
-
-            {/* Advanced Analysis Modes */}
-            <div className="mb-6 bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg">⚡</span>
-                    <label className="text-slate-300 text-sm font-medium">Advanced Analysis Modes</label>
-                </div>
-                <div className="grid md:grid-cols-2 gap-3">
-                    {/* Debate Mode Toggle */}
-                    <div
-                        className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all relative ${
-                            runDebate
-                                ? 'bg-red-900/20 border-red-700/50 text-white'
-                                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                        }`}
-                        onClick={() => setRunDebate(!runDebate)}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={runDebate}
-                            onChange={(e) => setRunDebate(e.target.checked)}
-                            className="mt-1 accent-red-500"
-                        />
-                        <div className="flex-1">
-                            <div className="font-medium text-sm flex items-center gap-2">
-                                <span>⚔️</span> Pro/Con Debate
-                            </div>
-                            <p className="text-xs opacity-70 mt-1">
-                                Advocate argues for takedown, Defender argues to allow, Referee decides
-                            </p>
+                    {/* No results */}
+                    {sortedCategories.length === 0 && searchQuery && (
+                        <div className="text-center py-6 text-slate-500">
+                            <div className="text-2xl mb-2">🔍</div>
+                            <p>No judges found for &quot;{searchQuery}&quot;</p>
+                            <button onClick={() => setSearchQuery('')} className="text-purple-400 hover:text-purple-300 text-sm mt-2">
+                                Clear search
+                            </button>
                         </div>
-                        <button
-                            onClick={(e) => openMethodologyModal('debate', e)}
-                            className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-700/50 hover:bg-purple-600/70 transition-all group"
-                            title="View methodology & prompts"
-                        >
-                            <svg className="w-4 h-4 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </button>
-                    </div>
+                    )}
 
-                    {/* Cross-Model Toggle */}
-                    <div
-                        className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all relative ${
-                            runCrossModel
-                                ? 'bg-blue-900/20 border-blue-700/50 text-white'
-                                : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                        }`}
-                        onClick={() => setRunCrossModel(!runCrossModel)}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={runCrossModel}
-                            onChange={(e) => setRunCrossModel(e.target.checked)}
-                            className="mt-1 accent-blue-500"
-                        />
-                        <div className="flex-1">
-                            <div className="font-medium text-sm flex items-center gap-2">
-                                <span>🤖</span> Cross-Model Agreement
-                            </div>
-                            <p className="text-xs opacity-70 mt-1">
-                                Compare GPT-4, Claude, and Gemini verdicts for confidence estimation
-                            </p>
+                    {/* Status & Tips */}
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                        <div className="text-slate-500">
+                            {selectedJudges.length < 2 && <span className="text-amber-400">⚠ Need {2 - selectedJudges.length} more</span>}
+                            {selectedJudges.length >= 2 && selectedJudges.length < MAX_JUDGES && <span className="text-green-400">✓ Ready to analyze</span>}
+                            {selectedJudges.length >= MAX_JUDGES && <span className="text-purple-400">✓ Max capacity</span>}
                         </div>
-                        <button
-                            onClick={(e) => openMethodologyModal('crossmodel', e)}
-                            className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-700/50 hover:bg-blue-600/70 transition-all group"
-                            title="View methodology & prompts"
-                        >
-                            <svg className="w-4 h-4 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </button>
+                        <div className="text-slate-600 hidden sm:block">
+                            💡 ⇧+click presets to combine
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Divider */}
+            <div className="border-t border-slate-700/50 my-6" />
+
+            {/* ═══════════════════════════════════════════════════════════════
+                STEP 3: DEEP DIVE OPTIONS (OPTIONAL)
+            ═══════════════════════════════════════════════════════════════ */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-600 text-white text-sm font-bold">
+                        3
+                    </div>
+                    <div>
+                        <h2 className="text-white text-lg font-semibold">Deep Dive <span className="text-slate-500 text-sm font-normal">(optional)</span></h2>
+                        <p className="text-slate-500 text-xs">Additional analysis modes for complex cases</p>
+                    </div>
+                </div>
+
+                <div className="ml-11 flex flex-wrap items-center gap-3">
+                <label
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                        runDebate
+                            ? 'bg-red-900/30 border-red-600/50 text-white'
+                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'
+                    }`}
+                >
+                    <input
+                        type="checkbox"
+                        checked={runDebate}
+                        onChange={(e) => setRunDebate(e.target.checked)}
+                        className="accent-red-500"
+                    />
+                    <span className="text-sm">⚔️ Debate</span>
+                    <button
+                        onClick={(e) => openMethodologyModal('debate', e)}
+                        className="p-1 rounded-full hover:bg-slate-700/50 transition-all"
+                        title="View methodology"
+                    >
+                        <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </label>
+                <label
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                        runCrossModel
+                            ? 'bg-blue-900/30 border-blue-600/50 text-white'
+                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'
+                    }`}
+                >
+                    <input
+                        type="checkbox"
+                        checked={runCrossModel}
+                        onChange={(e) => setRunCrossModel(e.target.checked)}
+                        className="accent-blue-500"
+                    />
+                    <span className="text-sm">🤖 Cross-Model</span>
+                    <button
+                        onClick={(e) => openMethodologyModal('crossmodel', e)}
+                        className="p-1 rounded-full hover:bg-slate-700/50 transition-all"
+                        title="View methodology"
+                    >
+                        <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                </label>
+                </div>
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════════════
+                SUBMIT
+            ═══════════════════════════════════════════════════════════════ */}
             <button
                 onClick={handleSubmit}
                 disabled={loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1}

@@ -10,8 +10,7 @@ import {
   DebateCard, 
   CrossModelCard,
   ShareButton,
-  VerdictSummary,
-  SampleSelector
+  VerdictSummary
 } from '@/components';
 import { SampleCase } from '@/data/samples';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
@@ -37,7 +36,6 @@ function AnalyzeContent() {
   const [imageBase64, setImageBase64] = useState<string | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [shareId, setShareId] = useState<string | null>(null);
-  const [sampleSelectorExpanded, setSampleSelectorExpanded] = useState(false);
 
   // Export JSON functionality
   const exportJSON = () => {
@@ -190,13 +188,6 @@ function AnalyzeContent() {
           </a>
         </header>
 
-        {/* Sample Selector */}
-        <SampleSelector
-          onSelect={handleSampleSelect}
-          isExpanded={sampleSelectorExpanded}
-          onToggle={() => setSampleSelectorExpanded(!sampleSelectorExpanded)}
-        />
-
         {/* Input Module */}
         <InputModule
           onAnalyze={handleAnalyze}
@@ -209,6 +200,7 @@ function AnalyzeContent() {
           onImageBase64Change={setImageBase64}
           imagePreview={imagePreview}
           onImagePreviewChange={setImagePreview}
+          onSampleSelect={handleSampleSelect}
         />
 
         {/* Error Display */}

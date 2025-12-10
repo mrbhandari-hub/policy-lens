@@ -138,6 +138,24 @@ You MUST respond with valid JSON:
 
 
 # =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+def _detect_image_type(image_bytes: bytes) -> str:
+    """Detect image MIME type from magic bytes"""
+    if image_bytes[:3] == b'\xff\xd8\xff':
+        return "image/jpeg"
+    elif image_bytes[:8] == b'\x89PNG\r\n\x1a\n':
+        return "image/png"
+    elif image_bytes[:6] in (b'GIF87a', b'GIF89a'):
+        return "image/gif"
+    elif image_bytes[:4] == b'RIFF' and image_bytes[8:12] == b'WEBP':
+        return "image/webp"
+    # Default to JPEG if unknown
+    return "image/jpeg"
+
+
+# =============================================================================
 # CLIENT INITIALIZATION
 # =============================================================================
 
@@ -249,7 +267,7 @@ Now render your verdict.
         )
         
         response = self.google_client.models.generate_content(
-            model="gemini-3.0-flash",
+            model="gemini-2.0-flash",
             contents=[types.Content(role="user", parts=[
                 types.Part.from_text(text=user_content)
             ])],
@@ -287,7 +305,7 @@ Now render your verdict.
                 content_prompt,
                 image_bytes
             ))
-            model_info.append(("google", "gemini-3.0-flash"))
+            model_info.append(("google", "gemini-2.0-flash"))
         
         if self.openai_client:
             futures.append(loop.run_in_executor(
@@ -385,9 +403,10 @@ Now render your verdict.
         
         # Add image if provided
         if image_bytes:
+            media_type = _detect_image_type(image_bytes)
             parts.append(types.Part.from_bytes(
                 data=image_bytes,
-                mime_type="image/jpeg"
+                mime_type=media_type
             ))
         
         config = types.GenerateContentConfig(
@@ -397,7 +416,7 @@ Now render your verdict.
         )
         
         response = self.google_client.models.generate_content(
-            model="gemini-3.0-flash",
+            model="gemini-2.0-flash",
             contents=[types.Content(role="user", parts=parts)],
             config=config
         )
@@ -412,12 +431,13 @@ Now render your verdict.
         if image_bytes:
             # GPT-4o supports vision via base64 data URLs
             image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+            media_type = _detect_image_type(image_bytes)
             user_content = [
                 {"type": "text", "text": content_prompt},
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image_b64}",
+                        "url": f"data:{media_type};base64,{image_b64}",
                         "detail": "high"
                     }
                 }
@@ -431,8 +451,8 @@ Now render your verdict.
                 {"role": "system", "content": NEUTRAL_ANALYST_PROMPT},
                 {"role": "user", "content": user_content}
             ],
-            response_format={"type": "json_object"},
-            temperature=0.4
+            response_format={"type": "json_object"}
+            # Note: o4-mini doesn't support custom temperature, uses default (1)
         )
         
         return json.loads(response.choices[0].message.content)
@@ -448,12 +468,13 @@ Now render your verdict.
         if image_bytes:
             # Claude supports vision via base64 image blocks
             image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+            media_type = _detect_image_type(image_bytes)
             user_content = [
                 {
                     "type": "image",
                     "source": {
                         "type": "base64",
-                        "media_type": "image/jpeg",
+                        "media_type": media_type,
                         "data": image_b64
                     }
                 },

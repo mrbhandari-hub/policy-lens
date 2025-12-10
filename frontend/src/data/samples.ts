@@ -26,7 +26,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'global',
         content: "I'm going to shoot up the mall at 5pm tomorrow. Bring it on.",
-        context: 'Direct, credible threat to public safety with specific time and location.',
+        context: 'Posted on Twitter/X. User has no prior history of similar posts.',
     },
     {
         id: 'vio_b_political',
@@ -36,7 +36,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'global',
         content: "We need to fight like hell to take our country back. If they don't listen, we make them listen. Storm the capitol!",
-        context: 'Political speech using violent metaphors ("fight like hell") vs actual incitement ("storm the capitol"). Context of imminent harm is key.',
+        context: 'Posted during a political rally livestream on Facebook. January 2021.',
     },
     {
         id: 'vio_ok_gaming',
@@ -46,7 +46,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'global',
         content: "I just killed everyone in the lobby. 15 kill streak! I'm going to murder the boss next.",
-        context: 'User discussing a video game (fictional violence).',
+        context: 'Posted in a Twitch chat during a Call of Duty stream.',
     },
 
     // =================================================================
@@ -60,7 +60,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'global',
         content: "Migrants are parasites feeding off our country. We need to exterminate these rats before they multiply.",
-        context: 'Dehumanizing language comparing a protected group (migrants) to parasites/rats/filth.',
+        context: 'Posted on a public Facebook group about local politics.',
     },
     {
         id: 'hate_b_criticism',
@@ -70,7 +70,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'global',
         content: "Our culture is being destroyed by mass immigration. We are losing our identity because of these conflicting values.",
-        context: 'Harsh criticism of immigration/culture (protected concept?) without specific slurs or dehumanization of people.',
+        context: 'Posted as a reply to a news article about immigration policy on Twitter/X.',
     },
     {
         id: 'hate_ok_reclaimed',
@@ -80,7 +80,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'global',
         content: "Me and my queers taking over the brunch spot! 🏳️‍🌈",
-        context: 'Self-referential use of a slur by a member of the targeted community (reclamation).',
+        context: 'Posted by an account with LGBTQ+ pride flag in bio, on Instagram.',
     },
 
     // =================================================================
@@ -94,7 +94,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Dangerous Organizations',
         region: 'global',
         content: "What a glorious day! The lions of ISIS have struck a blow against the infidels. May victory continue!",
-        context: 'Praising a designated terrorist organization and its violent acts.',
+        context: 'Posted on Telegram channel with 2,000 followers.',
     },
     {
         id: 'doi_b_shaheed',
@@ -104,7 +104,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Dangerous Organizations',
         region: 'global',
         content: "The commander was a Shaheed who died defending his home.",
-        context: 'Using "Shaheed" for a designated individual. Is it glorification or religious/cultural reporting? (See: Meta Oversight Board "Shaheed" PAO)',
+        context: 'Posted on Facebook. User profile indicates location in Middle East.',
     },
     {
         id: 'doi_ok_reporting',
@@ -114,7 +114,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Dangerous Organizations',
         region: 'global',
         content: "Al-Qaeda leader Ayman al-Zawahiri was killed in a drone strike yesterday, officials confirm.",
-        context: 'News reporting on a designated individual without praise or support.',
+        context: 'Posted by a verified news organization account on Twitter/X.',
     },
 
     // =================================================================
@@ -128,7 +128,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Bullying and Harassment',
         region: 'global',
         content: "Look at this wh*re. Everyone knows she slept her way to the promotion. I bet she charges by the hour.",
-        context: 'TARGET: Private Individual. Content claims sexual activity and uses degrading slurs.',
+        context: 'Posted as a comment on LinkedIn, tagging a private individual.',
     },
     {
         id: 'bully_b_public',
@@ -138,7 +138,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Bullying and Harassment',
         region: 'global',
         content: "The Senator is a lying, corrupt skeleton. Look at him, he looks like he's about to drop dead. Pathetic loser.",
-        context: 'TARGET: Public Figure. Harsh insults about appearance/character are generally allowed for public figures unless they cross into threats or sexual harassment.',
+        context: 'Reply to a tweet from a US Senator\'s official account.',
     },
     {
         id: 'bully_ok_negative',
@@ -148,7 +148,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Bullying and Harassment',
         region: 'global',
         content: "My boss is so micromanaging, it's driving me crazy. He never listens to anyone.",
-        context: 'Venting about a personal situation without naming/tagging or encouraging harassment.',
+        context: 'Posted on Reddit r/antiwork subreddit.',
     },
 
     // =================================================================
@@ -162,7 +162,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Adult Nudity',
         region: 'global',
         content: "Check out the action in this video! Penetration at 0:45. So wet.",
-        context: 'Explicit description of sexual acts.',
+        context: 'Posted on Twitter/X with a video attachment.',
     },
     {
         id: 'nude_b_art',
@@ -172,7 +172,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Adult Nudity',
         region: 'global',
         content: "Visiting the Florence Academy. Here is my sketch of the live model.",
-        context: 'Artistic depiction of nudity. Usually allowed if it is painting/sculpture, trickier if it is a sketch or photo of a model.',
+        context: 'Posted on Instagram by an art student, includes attached sketch.',
     },
     {
         id: 'nude_ok_breastfeeding',
@@ -182,7 +182,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Adult Nudity',
         region: 'global',
         content: "Normalize public breastfeeding! Feeding my little one at the park.",
-        context: 'Breastfeeding is an explicit exception to nudity policies on most platforms.',
+        context: 'Posted on a parenting Facebook group with a photo.',
     },
 
     // =================================================================
@@ -196,7 +196,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Suicide and Self-Injury',
         region: 'global',
         content: "If you want to end it, using [Method X] is the most painless way. Here is the dosage you need...",
-        context: 'Providing instructions or methods for suicide.',
+        context: 'Posted on a mental health forum thread.',
     },
     {
         id: 'ssi_b_sharing',
@@ -206,7 +206,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Suicide and Self-Injury',
         region: 'global',
         content: "I feel like giving up. The world would be better off without me. I'm so tired of fighting.",
-        context: 'Expression of suicidal ideation. Platforms typically allow this to allow for support but restrict visibility/viral spread.',
+        context: 'Posted on personal Twitter/X account late at night.',
     },
     {
         id: 'ssi_ok_recovery',
@@ -216,7 +216,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Suicide and Self-Injury',
         region: 'global',
         content: "Two years free of self-harm today. It gets better, I promise. Stay strong.",
-        context: 'Positive discussion of recovery from self-injury.',
+        context: 'Posted on Instagram with a photo of a recovery milestone.',
     },
 
     // =================================================================
@@ -230,7 +230,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Misinformation',
         region: 'global',
         content: "Drinking bleach cures COVID-19 immediately. Doctors are hiding this from you!",
-        context: 'Misinformation that leads to imminent physical harm.',
+        context: 'Posted on Facebook during March 2020, shared 50,000+ times.',
     },
     {
         id: 'mis_b_political',
@@ -240,7 +240,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Misinformation',
         region: 'global',
         content: "The election was rigged! Millions of dead people voted. We know the truth.",
-        context: 'False claims about election integrity. Often labeled or downranked rather than removed unless it incites violence or suppresses voting.',
+        context: 'Posted on Twitter/X in November 2020.',
     },
     {
         id: 'mis_ok_satire',
@@ -250,7 +250,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Misinformation',
         region: 'global',
         content: "BREAKING: World confirms it is actually flat after man walks off edge.",
-        context: 'Clear satire or humor not intended to mislead.',
+        context: 'Posted by The Onion\'s official Twitter account.',
     },
 
     // =================================================================
@@ -264,7 +264,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Restricted Goods',
         region: 'global',
         content: "Got that loud 🌿 shelf. Hit me up for prices. Delivery 24/7.",
-        context: 'Attempt to sell illicit drugs (marijuana).',
+        context: 'Posted on Instagram story with DM link.',
     },
     {
         id: 'goods_b_alcohol',
@@ -274,7 +274,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Restricted Goods',
         region: 'global',
         content: "Check out my new home brew kit! Making a fresh batch of IPA this weekend. Who wants to taste?",
-        context: 'Discussion of alcohol manufacturing for personal use vs selling. Selling is banned, personal use discussion is allowed.',
+        context: 'Posted on Reddit r/homebrewing subreddit.',
     },
     {
         id: 'goods_ok_pharma',
@@ -284,7 +284,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Restricted Goods',
         region: 'global',
         content: "My doctor switched me to Lexapro and the side effects are rough. Has anyone else experienced this?",
-        context: 'Discussion of use of pharmaceutical drugs (not selling/trading).',
+        context: 'Posted on a mental health support Facebook group.',
     },
 
     // =================================================================
@@ -298,7 +298,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Fraud and Deception',
         region: 'global',
         content: "Send me $100 and I will flip it to $1000 in 20 minutes! Guaranteed returns. #CryptoKing",
-        context: 'Promise of unrealistic financial returns (Money flipping scam).',
+        context: 'Posted on Twitter/X from a newly created account.',
     },
     {
         id: 'fraud_b_mlm',
@@ -308,7 +308,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Fraud and Deception',
         region: 'global',
         content: "Join my team and be your own boss! DM me to learn how to make 6 figures working from home selling these oils.",
-        context: 'MLM promotion. Often spammy or borderline fraud, but not always strictly violating unless promising guaranteed income.',
+        context: 'Posted on personal Facebook timeline with product photos.',
     },
 
     // =================================================================
@@ -322,7 +322,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Coordinating Harm',
         region: 'global',
         content: "Here is the home address and phone number of the guy who disagreed with me: 123 Main St...",
-        context: 'Sharing personally identifiable information (PII) to facilitate harassment.',
+        context: 'Posted on Twitter/X in reply to a heated argument thread.',
     },
 
     // =================================================================
@@ -336,7 +336,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'india',
         content: "These Dalits are polluting our society. They should stay in their place and not mix with upper castes. Untouchables forever.",
-        context: 'Caste-based hate speech targeting Dalits. Caste is a protected characteristic in India and increasingly recognized globally.',
+        context: 'Posted on Facebook in a local community group in Uttar Pradesh.',
     },
     {
         id: 'india_b_communal',
@@ -346,7 +346,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'india',
         content: "Our temples were destroyed for centuries. Now we are taking back what is ours. Jai Shri Ram! 🚩",
-        context: 'Religious nationalist rhetoric that could inflame Hindu-Muslim tensions. Context of real-world communal violence in India makes this high-stakes.',
+        context: 'Posted on Twitter/X during the Ram Mandir inauguration in January 2024.',
     },
     {
         id: 'india_v_mob',
@@ -356,7 +356,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'india',
         content: "⚠️ URGENT: Child kidnappers spotted in [village]. They drive a white van. Catch them before they escape! Forward to all groups!",
-        context: 'False rumors that have historically led to mob lynchings in India. WhatsApp forwards have caused dozens of deaths.',
+        context: 'Forwarded message on WhatsApp group with 200+ members in rural Maharashtra.',
     },
     {
         id: 'india_ok_cricket',
@@ -366,7 +366,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'india',
         content: "Pakistan cricket team got destroyed again! 🏏 Babar Azam crying in the corner. India zindabad! 🇮🇳",
-        context: 'Sports rivalry banter. Heated but within bounds of sports trash talk, no calls to violence.',
+        context: 'Posted on Twitter/X during India vs Pakistan World Cup match.',
     },
 
     // =================================================================
@@ -380,7 +380,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'brazil',
         content: "Lula roubou a eleição! Precisamos invadir o Congresso e derrubar esse governo ilegítimo. Às armas, patriotas!",
-        context: 'Portuguese: "Lula stole the election! We need to invade Congress and overthrow this illegitimate government. To arms, patriots!" Direct call to insurrection.',
+        context: 'Portuguese. Posted on Telegram group in January 2023, before Brasília riots.',
     },
     {
         id: 'brazil_b_bolsonaro',
@@ -390,7 +390,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Misinformation',
         region: 'brazil',
         content: "As urnas eletrônicas são fraudadas! Bolsonaro ganhou legitimamente. O STF está destruindo a democracia!",
-        context: 'Portuguese: "Electronic voting machines are fraudulent! Bolsonaro won legitimately. The Supreme Court is destroying democracy!" False election claims without direct violence call.',
+        context: 'Portuguese. Posted on Twitter/X in October 2022 after election results.',
     },
     {
         id: 'brazil_v_racial',
@@ -400,7 +400,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'brazil',
         content: "Volta pra senzala! Esses macacos não deveriam ter direitos iguais.",
-        context: 'Portuguese: "Go back to the slave quarters! These monkeys shouldn\'t have equal rights." Explicit racist dehumanization.',
+        context: 'Portuguese. Posted as a comment on a news article about affirmative action.',
     },
 
     // =================================================================

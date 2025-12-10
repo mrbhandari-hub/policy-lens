@@ -83,12 +83,6 @@ export function SynthesisCard({ synthesis }: SynthesisCardProps) {
                     </blockquote>
                 </div>
 
-                {/* Watermark */}
-                <div className="pt-4 border-t border-slate-700/50">
-                    <p className="text-yellow-500/70 text-sm flex items-center gap-2">
-                        {synthesis.watermark}
-                    </p>
-                </div>
             </div>
         </div>
     );
