@@ -37,14 +37,6 @@ export function LandingHero() {
                     >
                         Launch Analysis Engine ↓
                     </Link>
-                    <a
-                        href="https://github.com/mrbhandari-hub/policy-lens"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-8 py-4 rounded-full bg-slate-800 text-white font-medium text-lg border border-slate-700 hover:bg-slate-700 transition-all flex items-center gap-2"
-                    >
-                        <span className="text-xl">🐙</span> View on GitHub
-                    </a>
                 </div>
             </div>
         </section>
