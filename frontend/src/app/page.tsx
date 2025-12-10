@@ -2,7 +2,16 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { InputModule, SynthesisCard, DisagreementMatrix, JudgeDetailCards, DebateCard, CrossModelCard } from '@/components';
+import { 
+  InputModule, 
+  SynthesisCard, 
+  DisagreementMatrix, 
+  JudgeDetailCards, 
+  DebateCard, 
+  CrossModelCard,
+  LandingHero,
+  LandingFeatures
+} from '@/components';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
 import { SAMPLE_CASES } from '@/data/samples';
 import { supabase } from '@/lib/supabaseClient';
@@ -108,8 +117,6 @@ function PolicyLensContent() {
 
     const fetchShared = async () => {
       try {
-        // Avoid overwriting if we already have data and it matches? 
-        // Actually, just fetch it.
         setLoading(true);
         const { data, error } = await supabase
           .from('shared_queries')
@@ -130,6 +137,10 @@ function PolicyLensContent() {
           }
           if (data.verdicts) {
             setResponse(data.verdicts as PolicyLensResponse);
+            // Scroll to results if loading shared link
+            setTimeout(() => {
+              document.getElementById('live-demo')?.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
           }
         }
       } catch (err) {
@@ -151,20 +162,11 @@ function PolicyLensContent() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <header className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-purple-600/20 border border-purple-500/30 rounded-full px-4 py-1 mb-4">
-            <span className="text-purple-400 text-sm font-medium">Trust & Safety Tool</span>
-          </div>
-          <h1 className="text-5xl font-bold text-white mb-3">
-            PolicyLens <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">v2.0</span>
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Multi-Perspective Content Analysis Engine — See where policies diverge and understand why.
-          </p>
-        </header>
+      <LandingHero />
+      <LandingFeatures />
 
+      <div id="live-demo" className="relative z-10 container mx-auto px-4 py-16 max-w-6xl border-t border-slate-800/50">
+        
         {/* Sample Selector */}
         <div className="flex justify-center mb-8">
           <div className="relative group">
