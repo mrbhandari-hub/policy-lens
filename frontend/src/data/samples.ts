@@ -414,7 +414,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Dangerous Organizations',
         region: 'mena',
         content: "الشهيد محمد ضيف قاد المقاومة ببسالة. رحمه الله.",
-        context: 'Arabic: "Martyr Mohammad Deif led the resistance bravely. May God have mercy on him." Using Shaheed for designated terrorist organization leader vs. religious/cultural expression.',
+        context: 'Arabic. Posted on Facebook from a Gaza-based account in October 2023.',
     },
     {
         id: 'mena_v_antisemitic',
@@ -424,7 +424,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'mena',
         content: "اليهود يسيطرون على العالم والبنوك. هم وراء كل الحروب والمعاناة.",
-        context: 'Arabic: "Jews control the world and banks. They are behind all wars and suffering." Classic antisemitic conspiracy tropes.',
+        context: 'Arabic. Posted on a public Telegram channel with 10,000+ subscribers.',
     },
     {
         id: 'mena_b_blasphemy',
@@ -434,7 +434,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'mena',
         content: "The Prophet was just a man, not divine. We should question these ancient texts critically instead of following blindly.",
-        context: 'Religious criticism that may be considered blasphemy in some jurisdictions. Illegal in many MENA countries but protected speech in West.',
+        context: 'Posted on Twitter/X by an account based in Saudi Arabia.',
     },
     {
         id: 'mena_ok_ramadan',
@@ -444,7 +444,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'mena',
         content: "رمضان كريم! 🌙 May this holy month bring peace to all. Fasting day 15, almost there!",
-        context: 'Religious celebration post. Positive community content.',
+        context: 'Posted on Instagram during Ramadan 2024.',
     },
 
     // =================================================================
@@ -458,7 +458,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'europe',
         content: "The so-called 'Holocaust' is the biggest lie of the 20th century. 6 million? Impossible. The numbers don't add up.",
-        context: 'Holocaust denial - illegal in Germany, France, and many EU countries. Violates NetzDG and DSA requirements.',
+        context: 'Posted on a public Facebook group based in Germany.',
     },
     {
         id: 'europe_b_migration',
@@ -468,7 +468,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'europe',
         content: "Die Flüchtlinge zerstören unsere Kultur. Deutschland für Deutsche! Wir wollen unsere Heimat zurück.",
-        context: 'German: "The refugees are destroying our culture. Germany for Germans! We want our homeland back." Nationalist rhetoric without direct violence.',
+        context: 'German. Posted on Twitter/X during 2015 refugee crisis.',
     },
     {
         id: 'europe_v_netzg',
@@ -478,7 +478,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Bullying and Harassment',
         region: 'europe',
         content: "Die Grünen-Politikerin ist eine Fotze und gehört vergewaltigt.",
-        context: 'German: Gendered slur and rape threat against politician. Criminal under §185 StGB (Insult) and §241 StGB (Threats). NetzDG requires 24hr removal.',
+        context: 'German. Posted as a reply to a Green Party politician\'s tweet.',
     },
     {
         id: 'europe_ok_satire',
@@ -488,7 +488,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Misinformation',
         region: 'europe',
         content: "Macron a décidé que la baguette serait désormais le symbole officiel de l'euro. 🥖💶 #Gorafi",
-        context: 'French: "Macron decided the baguette will now be the official symbol of the euro." Clearly satirical news (Le Gorafi is French equivalent of The Onion).',
+        context: 'French. Posted by Le Gorafi (French satire news site) on Twitter.',
     },
 
     // =================================================================
@@ -502,7 +502,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'sea',
         content: "ကုလားတွေကို မြန်မာပြည်ကနေ မောင်းထုတ်ရမယ်။ သူတို့ရဲ့ ရွာတွေကို မီးရှို့ပါ။",
-        context: 'Burmese: "We must drive the Kalars (slur for Rohingya) out of Myanmar. Burn their villages." Directly contributed to 2017 Rohingya genocide. Facebook failed to detect.',
+        context: 'Burmese. Posted on Facebook in Rakhine State, Myanmar in 2017.',
     },
     {
         id: 'sea_b_lese_majeste',
@@ -512,7 +512,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Political Speech',
         region: 'sea',
         content: "พระมหากษัตริย์ใช้เงินภาษีของเราอย่างสุรุ่ยสุร่าย ประชาชนควรมีสิทธิ์ตั้งคำถาม",
-        context: 'Thai: "The King spends our tax money extravagantly. The people should have the right to question." Illegal under Thai lèse-majesté law (up to 15 years prison) but protected political speech internationally.',
+        context: 'Thai. Posted on Twitter/X during 2020 pro-democracy protests in Bangkok.',
     },
     {
         id: 'sea_v_singapore_sedition',
@@ -522,7 +522,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'sea',
         content: "Christians in Singapore are trying to convert everyone. We must stop these crusaders before they destroy our Muslim community!",
-        context: 'Potential violation of Singapore\'s Sedition Act and Maintenance of Religious Harmony Act. Inflammatory interfaith content in multi-religious society.',
+        context: 'Posted on a Singapore-based Facebook community group.',
     },
     {
         id: 'sea_ok_food',
@@ -532,7 +532,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Hate Speech',
         region: 'sea',
         content: "Laksa from Singapore vs Malaysia - the eternal debate! 🍜 Both are amazing, fight me. Penang laksa is the real OG though.",
-        context: 'Cultural food rivalry banter. Common friendly debate in Southeast Asia.',
+        context: 'Posted on Reddit r/singapore subreddit.',
     },
     {
         id: 'sea_b_philippines_drugs',
@@ -542,7 +542,7 @@ export const SAMPLE_CASES: SampleCase[] = [
         policyCategory: 'Violence and Incitement',
         region: 'sea',
         content: "Duterte was right. Drug pushers deserve to die. The only good addict is a dead addict. Clean up the streets! 💪",
-        context: 'Support for extrajudicial killings in Philippines drug war. Celebrating violence but not direct threat. Thousands killed in this campaign.',
+        context: 'Posted on Facebook Philippines during 2016-2022 administration.',
     },
 ];
 
