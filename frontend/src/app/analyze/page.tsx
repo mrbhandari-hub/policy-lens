@@ -122,7 +122,16 @@ function AnalyzeContent() {
           .eq('id', id)
           .single();
 
-        if (error) throw error;
+        // Handle "not found" gracefully - just clear the invalid ID from URL
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No rows found - invalid/expired share link
+            console.warn('Shared query not found, clearing URL parameter');
+            router.replace('/analyze', { scroll: false });
+            return;
+          }
+          throw error;
+        }
 
         if (data) {
           setContentText(data.query_text);
@@ -138,15 +147,16 @@ function AnalyzeContent() {
           }
         }
       } catch (err) {
+        // Only log actual errors, not "not found"
         console.error('Error loading shared query:', err);
-        setError('Failed to load shared query');
+        setError('Failed to load shared query. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchShared();
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
