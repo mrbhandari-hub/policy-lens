@@ -14,7 +14,7 @@ export { SampleSelector } from './SampleSelector';
 export {
     CounterfactualCard,
     RedTeamCard,
-    SelfConsistencyCard,
     TemporalCard,
     AppealCard,
+    SycophancyCard,
 } from './DeepDiveCards';

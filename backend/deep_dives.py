@@ -3,9 +3,9 @@
 Implements 5 cutting-edge AI analysis techniques:
 1. Counterfactual Analysis - What would change the verdict?
 2. Red Team Mode - Adversarial vulnerability analysis
-3. Self-Consistency Sampling - Multiple reasoning paths
-4. Temporal Sensitivity - How context timing affects verdict
-5. Appeal Anticipation - Predict creator appeals
+3. Temporal Sensitivity - How context timing affects verdict
+4. Appeal Anticipation - Predict creator appeals
+5. Sycophancy Detection - Check for framing bias
 """
 import asyncio
 import json
@@ -19,9 +19,9 @@ from google.genai import types
 from models import (
     CounterfactualResult, CounterfactualScenario,
     RedTeamResult, RedTeamVulnerability,
-    SelfConsistencyResult, ConsistencySample,
     TemporalResult, TemporalContext,
     AppealResult, AppealArgument,
+    SycophancyResult, SycophancyCheck,
     VerdictTier
 )
 
@@ -117,25 +117,6 @@ You MUST respond with valid JSON:
 }}
 
 Be thorough but responsible. Focus on realistic threats.
-"""
-
-CONSISTENCY_PROMPT = f"""{SAFETY_PREAMBLE}
-
-You are analyzing content for policy compliance. Provide your verdict and reasoning.
-
-VERDICT OPTIONS:
-- REMOVE: Content clearly violates policy and must be taken down
-- AGE_GATE: Content is adult in nature, restrict to 18+ audiences
-- REDUCE_REACH: Content is borderline, limit algorithmic amplification
-- LABEL: Content needs context labels but can stay up
-- ALLOW: Content is within policy, no action needed
-
-You MUST respond with valid JSON:
-{{
-  "verdict": "REMOVE" | "AGE_GATE" | "REDUCE_REACH" | "LABEL" | "ALLOW",
-  "confidence": <float 0.0-1.0>,
-  "key_reasoning": "<one sentence explaining the verdict>"
-}}
 """
 
 TEMPORAL_PROMPT = f"""{SAFETY_PREAMBLE}
@@ -284,87 +265,6 @@ class DeepDivesEngine:
             vulnerabilities=[RedTeamVulnerability(**v) for v in data.get("vulnerabilities", [])],
             overall_robustness=data["overall_robustness"],
             recommendations=data.get("recommendations", [])
-        )
-    
-    async def run_consistency(
-        self,
-        content_text: str,
-        context_hint: Optional[str] = None,
-        num_samples: int = 7
-    ) -> SelfConsistencyResult:
-        """Run self-consistency sampling with multiple reasoning paths"""
-        content_prompt = f"CONTENT TO ANALYZE:\n---\n{content_text}\n---"
-        if context_hint:
-            content_prompt += f"\n\nCONTEXT PROVIDED:\n{context_hint}"
-        
-        loop = asyncio.get_event_loop()
-        
-        # Run multiple samples in parallel with higher temperature for diversity
-        futures = [
-            loop.run_in_executor(
-                _executor,
-                self._run_sync,
-                CONSISTENCY_PROMPT,
-                content_prompt,
-                0.8  # Higher temperature for diversity
-            )
-            for _ in range(num_samples)
-        ]
-        
-        results = await asyncio.gather(*futures, return_exceptions=True)
-        
-        # Process samples
-        samples = []
-        verdict_counts: dict[str, int] = {}
-        
-        for result in results:
-            if isinstance(result, Exception):
-                continue
-            
-            try:
-                verdict = result["verdict"]
-                samples.append(ConsistencySample(
-                    verdict=VerdictTier(verdict),
-                    confidence=result["confidence"],
-                    key_reasoning=result["key_reasoning"]
-                ))
-                verdict_counts[verdict] = verdict_counts.get(verdict, 0) + 1
-            except Exception:
-                continue
-        
-        if not samples:
-            raise RuntimeError("All consistency samples failed")
-        
-        # Calculate majority and consistency
-        majority_verdict = max(verdict_counts.keys(), key=lambda k: verdict_counts[k])
-        majority_count = verdict_counts[majority_verdict]
-        consistency_score = majority_count / len(samples)
-        
-        # Identify variance factors
-        if len(set(s.verdict for s in samples)) > 1:
-            variance_factors = [
-                "Different interpretations of context",
-                "Varying weight given to harm vs expression",
-                "Uncertainty about creator intent"
-            ]
-        else:
-            variance_factors = []
-        
-        # Recommendation based on consistency
-        if consistency_score >= 0.85:
-            recommendation = "High confidence - automated decision appropriate"
-        elif consistency_score >= 0.6:
-            recommendation = "Moderate confidence - consider additional signals"
-        else:
-            recommendation = "Low confidence - recommend human escalation"
-        
-        return SelfConsistencyResult(
-            samples=samples,
-            verdict_distribution=verdict_counts,
-            majority_verdict=VerdictTier(majority_verdict),
-            consistency_score=consistency_score,
-            variance_factors=variance_factors,
-            recommendation=recommendation
         )
     
     async def run_temporal(

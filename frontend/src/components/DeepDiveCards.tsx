@@ -4,9 +4,9 @@ import { useState } from 'react';
 import {
     CounterfactualResult,
     RedTeamResult,
-    SelfConsistencyResult,
     TemporalResult,
     AppealResult,
+    SycophancyResult,
     VerdictTier,
 } from '@/types';
 
@@ -246,115 +246,6 @@ export function RedTeamCard({ data }: RedTeamCardProps) {
                             </li>
                         ))}
                     </ul>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// =============================================================================
-// SELF-CONSISTENCY CARD
-// =============================================================================
-
-interface SelfConsistencyCardProps {
-    data: SelfConsistencyResult;
-}
-
-export function SelfConsistencyCard({ data }: SelfConsistencyCardProps) {
-    const majorityConfig = tierConfig[data.majority_verdict];
-    const consistencyPercent = Math.round(data.consistency_score * 100);
-
-    const consistencyColor = data.consistency_score >= 0.85
-        ? 'text-emerald-400'
-        : data.consistency_score >= 0.6
-            ? 'text-amber-400'
-            : 'text-rose-400';
-
-    return (
-        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl overflow-hidden shadow-xl">
-            <div className="bg-gradient-to-r from-cyan-950/40 via-[#0f1629] to-blue-950/40 p-4 border-b border-[#1e293d]">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-white text-xl font-bold flex items-center gap-2">
-                            <span className="text-2xl">🎲</span> Self-Consistency Sampling
-                        </h3>
-                        <p className="text-slate-400 text-sm mt-1">
-                            {data.samples.length} independent reasoning paths
-                        </p>
-                    </div>
-                    <div className="text-right">
-                        <p className={`${consistencyColor} text-2xl font-mono font-bold`}>{consistencyPercent}%</p>
-                        <p className="text-slate-500 text-xs">Consistency</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="p-5">
-                {/* Verdict Distribution Bar */}
-                <div className="mb-6">
-                    <p className="text-slate-400 text-sm mb-2">Verdict Distribution</p>
-                    <div className="flex rounded-full overflow-hidden h-8">
-                        {Object.entries(data.verdict_distribution).map(([verdict, count]) => {
-                            if (count === 0) return null;
-                            const config = tierConfig[verdict as VerdictTier];
-                            const percent = (count / data.samples.length) * 100;
-                            return (
-                                <div
-                                    key={verdict}
-                                    className={`${config.bgColor} flex items-center justify-center text-white text-xs font-medium transition-all`}
-                                    style={{ width: `${percent}%` }}
-                                    title={`${config.label}: ${count}/${data.samples.length}`}
-                                >
-                                    {percent > 15 && `${config.emoji} ${count}`}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Majority Verdict */}
-                <div className="flex items-center gap-3 mb-6 bg-[#0a0f1a]/60 rounded-xl p-4 border border-[#1e293d]">
-                    <span className="text-slate-400 text-sm">Majority Verdict:</span>
-                    <span className={`${majorityConfig.bgColor} text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5`}>
-                        {majorityConfig.emoji} {majorityConfig.label}
-                    </span>
-                    <span className="text-slate-500 text-sm ml-auto">
-                        {data.verdict_distribution[data.majority_verdict]} of {data.samples.length} samples
-                    </span>
-                </div>
-
-                {/* Variance Factors */}
-                {data.variance_factors.length > 0 && (
-                    <div className="bg-amber-950/20 border border-amber-800/30 rounded-xl p-4 mb-6">
-                        <h4 className="text-amber-400 font-bold mb-2 text-sm">⚡ Sources of Variance</h4>
-                        <ul className="space-y-1">
-                            {data.variance_factors.map((factor, i) => (
-                                <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
-                                    <span className="text-amber-500 mt-0.5">•</span>
-                                    {factor}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Recommendation */}
-                <div className={`rounded-xl p-4 border ${
-                    data.consistency_score >= 0.85
-                        ? 'bg-emerald-950/20 border-emerald-800/30'
-                        : data.consistency_score >= 0.6
-                            ? 'bg-amber-950/20 border-amber-800/30'
-                            : 'bg-rose-950/20 border-rose-800/30'
-                }`}>
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">
-                            {data.consistency_score >= 0.85 ? '✅' : data.consistency_score >= 0.6 ? '⚠️' : '🚨'}
-                        </span>
-                        <div>
-                            <p className={`${consistencyColor} text-sm font-medium mb-1`}>Recommendation</p>
-                            <p className="text-slate-200 text-sm">{data.recommendation}</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

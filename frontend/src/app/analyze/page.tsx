@@ -14,9 +14,9 @@ import {
   // Advanced Deep Dive Cards
   CounterfactualCard,
   RedTeamCard,
-  SelfConsistencyCard,
   TemporalCard,
   AppealCard,
+  SycophancyCard,
 } from '@/components';
 import { SampleCase } from '@/data/samples';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
@@ -243,8 +243,7 @@ function AnalyzeContent() {
 
             {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
             {(response.debate || response.cross_model || response.counterfactual || 
-              response.red_team || response.consistency || response.temporal || 
-              response.appeal) && (
+              response.red_team || response.temporal || response.appeal || response.sycophancy) && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
@@ -267,16 +266,9 @@ function AnalyzeContent() {
                     </div>
                   )}
 
-                  {/* Boundary & Confidence Analysis */}
-                  {(response.counterfactual || response.consistency) && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {response.counterfactual && (
-                        <CounterfactualCard data={response.counterfactual} />
-                      )}
-                      {response.consistency && (
-                        <SelfConsistencyCard data={response.consistency} />
-                      )}
-                    </div>
+                  {/* Boundary Analysis */}
+                  {response.counterfactual && (
+                    <CounterfactualCard data={response.counterfactual} />
                   )}
 
                   {/* Security Analysis */}
@@ -294,6 +286,11 @@ function AnalyzeContent() {
                         <AppealCard data={response.appeal} />
                       )}
                     </div>
+                  )}
+
+                  {/* Bias Detection */}
+                  {response.sycophancy && (
+                    <SycophancyCard data={response.sycophancy} />
                   )}
                 </div>
               </div>

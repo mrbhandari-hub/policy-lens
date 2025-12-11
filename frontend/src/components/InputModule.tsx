@@ -227,7 +227,6 @@ export function InputModule({
     // New advanced deep dives
     const [runCounterfactual, setRunCounterfactual] = useState(false);
     const [runRedTeam, setRunRedTeam] = useState(false);
-    const [runConsistency, setRunConsistency] = useState(false);
     const [runTemporal, setRunTemporal] = useState(false);
     const [runAppeal, setRunAppeal] = useState(false);
 
@@ -472,7 +471,6 @@ export function InputModule({
             run_cross_model: runCrossModel,
             run_counterfactual: runCounterfactual,
             run_red_team: runRedTeam,
-            run_consistency: runConsistency,
             run_temporal: runTemporal,
             run_appeal: runAppeal,
         });
@@ -1018,24 +1016,6 @@ export function InputModule({
                                     className="accent-red-500"
                                 />
                                 <span className="text-sm">🎯 Red Team</span>
-                            </label>
-
-                            {/* Self-Consistency */}
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runConsistency
-                                        ? 'bg-cyan-950/50 border-cyan-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
-                                title="Multiple reasoning paths for confidence"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={runConsistency}
-                                    onChange={(e) => setRunConsistency(e.target.checked)}
-                                    className="accent-cyan-500"
-                                />
-                                <span className="text-sm">🎲 Consistency</span>
                             </label>
 
                             {/* Temporal */}

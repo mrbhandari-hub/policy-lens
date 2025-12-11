@@ -168,10 +168,6 @@ async def analyze_content(request: PolicyLensRequest):
             tasks.append(deep_engine.run_red_team(content_text, context_hint))
             task_names.append("red_team")
         
-        if request.run_consistency:
-            tasks.append(deep_engine.run_consistency(content_text, context_hint))
-            task_names.append("consistency")
-        
         if request.run_temporal:
             tasks.append(deep_engine.run_temporal(content_text, context_hint))
             task_names.append("temporal")
@@ -190,7 +186,6 @@ async def analyze_content(request: PolicyLensRequest):
         cross_model_result = None
         counterfactual_result = None
         red_team_result = None
-        consistency_result = None
         temporal_result = None
         appeal_result = None
         
@@ -214,8 +209,6 @@ async def analyze_content(request: PolicyLensRequest):
                 counterfactual_result = result
             elif name == "red_team":
                 red_team_result = result
-            elif name == "consistency":
-                consistency_result = result
             elif name == "temporal":
                 temporal_result = result
             elif name == "appeal":
@@ -229,7 +222,6 @@ async def analyze_content(request: PolicyLensRequest):
         response.cross_model = cross_model_result
         response.counterfactual = counterfactual_result
         response.red_team = red_team_result
-        response.consistency = consistency_result
         response.temporal = temporal_result
         response.appeal = appeal_result
         

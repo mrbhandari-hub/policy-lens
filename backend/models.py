@@ -167,23 +167,6 @@ class RedTeamResult(BaseModel):
     recommendations: list[str] = Field(..., description="How to improve detection")
 
 
-class ConsistencySample(BaseModel):
-    """A single sample from consistency sampling"""
-    verdict: VerdictTier
-    confidence: float
-    key_reasoning: str
-
-
-class SelfConsistencyResult(BaseModel):
-    """Self-consistency sampling results"""
-    samples: list[ConsistencySample] = Field(..., description="Individual sample results")
-    verdict_distribution: dict[str, int] = Field(..., description="Count of each verdict")
-    majority_verdict: VerdictTier = Field(..., description="Most common verdict")
-    consistency_score: float = Field(..., ge=0.0, le=1.0, description="How consistent the samples are (1.0 = unanimous)")
-    variance_factors: list[str] = Field(..., description="What caused variation between samples")
-    recommendation: str = Field(..., description="Human escalation recommendation based on consistency")
-
-
 class TemporalContext(BaseModel):
     """Verdict in a specific temporal context"""
     context_name: str = Field(..., description="Name of the temporal context")
@@ -240,7 +223,6 @@ class PolicyLensRequest(BaseModel):
     # New advanced deep dives
     run_counterfactual: bool = Field(default=False, description="Run counterfactual boundary analysis")
     run_red_team: bool = Field(default=False, description="Run red team adversarial analysis")
-    run_consistency: bool = Field(default=False, description="Run self-consistency sampling")
     run_temporal: bool = Field(default=False, description="Run temporal sensitivity analysis")
     run_appeal: bool = Field(default=False, description="Run appeal anticipation analysis")
 
@@ -257,6 +239,5 @@ class PolicyLensResponse(BaseModel):
     # New advanced deep dives
     counterfactual: Optional[CounterfactualResult] = Field(None, description="Counterfactual analysis (if requested)")
     red_team: Optional[RedTeamResult] = Field(None, description="Red team analysis (if requested)")
-    consistency: Optional[SelfConsistencyResult] = Field(None, description="Self-consistency sampling (if requested)")
     temporal: Optional[TemporalResult] = Field(None, description="Temporal sensitivity analysis (if requested)")
     appeal: Optional[AppealResult] = Field(None, description="Appeal anticipation analysis (if requested)")

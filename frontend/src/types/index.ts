@@ -111,22 +111,6 @@ export interface RedTeamResult {
     recommendations: string[];
 }
 
-// Self-Consistency Sampling
-export interface ConsistencySample {
-    verdict: VerdictTier;
-    confidence: number;
-    key_reasoning: string;
-}
-
-export interface SelfConsistencyResult {
-    samples: ConsistencySample[];
-    verdict_distribution: Record<string, number>;
-    majority_verdict: VerdictTier;
-    consistency_score: number;
-    variance_factors: string[];
-    recommendation: string;
-}
-
 // Temporal Sensitivity
 export interface TemporalContext {
     context_name: string;
@@ -174,7 +158,6 @@ export interface PolicyLensRequest {
     // New advanced deep dives
     run_counterfactual?: boolean;
     run_red_team?: boolean;
-    run_consistency?: boolean;
     run_temporal?: boolean;
     run_appeal?: boolean;
 }
@@ -190,7 +173,6 @@ export interface PolicyLensResponse {
     // New advanced deep dives
     counterfactual?: CounterfactualResult;
     red_team?: RedTeamResult;
-    consistency?: SelfConsistencyResult;
     temporal?: TemporalResult;
     appeal?: AppealResult;
 }
