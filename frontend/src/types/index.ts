@@ -127,38 +127,6 @@ export interface SelfConsistencyResult {
     recommendation: string;
 }
 
-// Moral Foundations
-export interface MoralFoundation {
-    foundation: string;
-    score: number;
-    direction: 'violated' | 'upheld' | 'neutral';
-    explanation: string;
-}
-
-export interface MoralFoundationsResult {
-    foundations: MoralFoundation[];
-    dominant_foundation: string;
-    moral_conflict: string | null;
-    explains_disagreement: string;
-}
-
-// Stakeholder Impact
-export interface StakeholderImpact {
-    stakeholder: string;
-    impact_type: 'positive' | 'negative' | 'mixed' | 'neutral';
-    severity: 'minimal' | 'moderate' | 'significant' | 'severe';
-    description: string;
-    consent_status: string | null;
-}
-
-export interface StakeholderResult {
-    stakeholders: StakeholderImpact[];
-    primary_beneficiary: string;
-    primary_harm_recipient: string;
-    net_impact: 'net_positive' | 'net_negative' | 'contested' | 'neutral';
-    power_dynamics: string;
-}
-
 // Temporal Sensitivity
 export interface TemporalContext {
     context_name: string;
@@ -224,8 +192,6 @@ export interface PolicyLensRequest {
     run_counterfactual?: boolean;
     run_red_team?: boolean;
     run_consistency?: boolean;
-    run_moral_foundations?: boolean;
-    run_stakeholder?: boolean;
     run_temporal?: boolean;
     run_appeal?: boolean;
     run_sycophancy?: boolean;
@@ -243,8 +209,6 @@ export interface PolicyLensResponse {
     counterfactual?: CounterfactualResult;
     red_team?: RedTeamResult;
     consistency?: SelfConsistencyResult;
-    moral_foundations?: MoralFoundationsResult;
-    stakeholder?: StakeholderResult;
     temporal?: TemporalResult;
     appeal?: AppealResult;
     sycophancy?: SycophancyResult;

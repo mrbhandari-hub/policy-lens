@@ -1,14 +1,12 @@
 """PolicyLens v2.0 - Advanced Deep Dive Analyses
 
-Implements 8 cutting-edge AI analysis techniques:
+Implements 6 cutting-edge AI analysis techniques:
 1. Counterfactual Analysis - What would change the verdict?
 2. Red Team Mode - Adversarial vulnerability analysis
 3. Self-Consistency Sampling - Multiple reasoning paths
-4. Moral Foundations - Haidt's moral psychology framework
-5. Stakeholder Impact - Who is affected and how?
-6. Temporal Sensitivity - How context timing affects verdict
-7. Appeal Anticipation - Predict creator appeals
-8. Sycophancy Detection - Check for framing bias
+4. Temporal Sensitivity - How context timing affects verdict
+5. Appeal Anticipation - Predict creator appeals
+6. Sycophancy Detection - Check for framing bias
 """
 import asyncio
 import json
@@ -23,8 +21,6 @@ from models import (
     CounterfactualResult, CounterfactualScenario,
     RedTeamResult, RedTeamVulnerability,
     SelfConsistencyResult, ConsistencySample,
-    MoralFoundationsResult, MoralFoundation,
-    StakeholderResult, StakeholderImpact,
     TemporalResult, TemporalContext,
     AppealResult, AppealArgument,
     SycophancyResult, SycophancyCheck,
@@ -142,101 +138,6 @@ You MUST respond with valid JSON:
   "confidence": <float 0.0-1.0>,
   "key_reasoning": "<one sentence explaining the verdict>"
 }}
-"""
-
-MORAL_FOUNDATIONS_PROMPT = f"""{SAFETY_PREAMBLE}
-
-You are an expert in Jonathan Haidt's Moral Foundations Theory. Analyze this content through the lens of the six moral foundations:
-
-1. **Care/Harm**: Compassion, protection from suffering
-2. **Fairness/Cheating**: Justice, rights, equality
-3. **Loyalty/Betrayal**: Group allegiance, patriotism, tribalism
-4. **Authority/Subversion**: Respect for hierarchy, tradition
-5. **Sanctity/Degradation**: Purity, disgust, sacredness
-6. **Liberty/Oppression**: Freedom from tyranny, autonomy
-
-For each foundation, assess:
-- How strongly it's triggered (0-1 scale)
-- Whether it's being violated or upheld
-- How it explains disagreements between different judges/perspectives
-
-You MUST respond with valid JSON:
-{{
-  "foundations": [
-    {{
-      "foundation": "Care/Harm",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }},
-    {{
-      "foundation": "Fairness/Cheating",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }},
-    {{
-      "foundation": "Loyalty/Betrayal",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }},
-    {{
-      "foundation": "Authority/Subversion",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }},
-    {{
-      "foundation": "Sanctity/Degradation",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }},
-    {{
-      "foundation": "Liberty/Oppression",
-      "score": <float 0.0-1.0>,
-      "direction": "violated" | "upheld" | "neutral",
-      "explanation": "<how content relates to this foundation>"
-    }}
-  ],
-  "dominant_foundation": "<the most strongly triggered foundation>",
-  "moral_conflict": "<if foundations conflict, explain the tension, or null>",
-  "explains_disagreement": "<how different moral weightings explain judge disagreements>"
-}}
-"""
-
-STAKEHOLDER_PROMPT = f"""{SAFETY_PREAMBLE}
-
-You are an expert in stakeholder analysis for content moderation. Identify all parties affected by this content and analyze the impact on each.
-
-Key stakeholder categories to consider:
-- **Content Creator**: The person who made/posted the content
-- **Subject/Target**: Anyone depicted or discussed in the content
-- **Audience/Viewers**: People who see the content
-- **Platform**: The hosting platform's interests
-- **Advertisers**: Brand safety concerns
-- **Society**: Broader social implications
-- **Vulnerable Groups**: Children, marginalized communities, etc.
-
-You MUST respond with valid JSON:
-{{
-  "stakeholders": [
-    {{
-      "stakeholder": "<who>",
-      "impact_type": "positive" | "negative" | "mixed" | "neutral",
-      "severity": "minimal" | "moderate" | "significant" | "severe",
-      "description": "<how they are affected>",
-      "consent_status": "<did they consent to involvement, if applicable>"
-    }}
-  ],
-  "primary_beneficiary": "<who benefits most>",
-  "primary_harm_recipient": "<who is most harmed>",
-  "net_impact": "net_positive" | "net_negative" | "contested" | "neutral",
-  "power_dynamics": "<analysis of power imbalances between stakeholders>"
-}}
-
-Be thorough - identify at least 4-6 stakeholder groups.
 """
 
 TEMPORAL_PROMPT = f"""{SAFETY_PREAMBLE}
@@ -526,57 +427,6 @@ class DeepDivesEngine:
             consistency_score=consistency_score,
             variance_factors=variance_factors,
             recommendation=recommendation
-        )
-    
-    async def run_moral_foundations(
-        self,
-        content_text: str,
-        context_hint: Optional[str] = None
-    ) -> MoralFoundationsResult:
-        """Analyze content through moral foundations theory"""
-        content_prompt = f"CONTENT TO ANALYZE:\n---\n{content_text}\n---"
-        if context_hint:
-            content_prompt += f"\n\nCONTEXT PROVIDED:\n{context_hint}"
-        
-        loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            _executor,
-            self._run_sync,
-            MORAL_FOUNDATIONS_PROMPT,
-            content_prompt
-        )
-        
-        return MoralFoundationsResult(
-            foundations=[MoralFoundation(**f) for f in data.get("foundations", [])],
-            dominant_foundation=data["dominant_foundation"],
-            moral_conflict=data.get("moral_conflict"),
-            explains_disagreement=data["explains_disagreement"]
-        )
-    
-    async def run_stakeholder(
-        self,
-        content_text: str,
-        context_hint: Optional[str] = None
-    ) -> StakeholderResult:
-        """Map stakeholder impacts"""
-        content_prompt = f"CONTENT TO ANALYZE:\n---\n{content_text}\n---"
-        if context_hint:
-            content_prompt += f"\n\nCONTEXT PROVIDED:\n{context_hint}"
-        
-        loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            _executor,
-            self._run_sync,
-            STAKEHOLDER_PROMPT,
-            content_prompt
-        )
-        
-        return StakeholderResult(
-            stakeholders=[StakeholderImpact(**s) for s in data.get("stakeholders", [])],
-            primary_beneficiary=data["primary_beneficiary"],
-            primary_harm_recipient=data["primary_harm_recipient"],
-            net_impact=data["net_impact"],
-            power_dynamics=data["power_dynamics"]
         )
     
     async def run_temporal(

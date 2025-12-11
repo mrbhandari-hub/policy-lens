@@ -228,8 +228,6 @@ export function InputModule({
     const [runCounterfactual, setRunCounterfactual] = useState(false);
     const [runRedTeam, setRunRedTeam] = useState(false);
     const [runConsistency, setRunConsistency] = useState(false);
-    const [runMoralFoundations, setRunMoralFoundations] = useState(false);
-    const [runStakeholder, setRunStakeholder] = useState(false);
     const [runTemporal, setRunTemporal] = useState(false);
     const [runAppeal, setRunAppeal] = useState(false);
     const [runSycophancy, setRunSycophancy] = useState(false);
@@ -476,8 +474,6 @@ export function InputModule({
             run_counterfactual: runCounterfactual,
             run_red_team: runRedTeam,
             run_consistency: runConsistency,
-            run_moral_foundations: runMoralFoundations,
-            run_stakeholder: runStakeholder,
             run_temporal: runTemporal,
             run_appeal: runAppeal,
             run_sycophancy: runSycophancy,
@@ -934,67 +930,64 @@ export function InputModule({
                 </div>
 
                 <div className="ml-11 space-y-4">
-                    {/* Original Deep Dives */}
-                    <div>
-                        <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">Core Analysis</p>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runDebate
-                                        ? 'bg-rose-950/50 border-rose-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
+                    {/* All Deep Dives in one grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {/* Debate */}
+                        <label
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                runDebate
+                                    ? 'bg-rose-950/50 border-rose-600/50 text-white'
+                                    : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                            }`}
+                            title="Pro/Con adversarial debate"
+                        >
+                            <input
+                                type="checkbox"
+                                checked={runDebate}
+                                onChange={(e) => setRunDebate(e.target.checked)}
+                                className="accent-rose-500"
+                            />
+                            <span className="text-sm">⚔️ Debate</span>
+                            <button
+                                onClick={(e) => openMethodologyModal('debate', e)}
+                                className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
+                                title="View methodology"
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={runDebate}
-                                    onChange={(e) => setRunDebate(e.target.checked)}
-                                    className="accent-rose-500"
-                                />
-                                <span className="text-sm">⚔️ Debate</span>
-                                <button
-                                    onClick={(e) => openMethodologyModal('debate', e)}
-                                    className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
-                                    title="View methodology"
-                                >
-                                    <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </button>
-                            </label>
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runCrossModel
-                                        ? 'bg-amber-950/50 border-amber-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={runCrossModel}
-                                    onChange={(e) => setRunCrossModel(e.target.checked)}
-                                    className="accent-amber-500"
-                                />
-                                <span className="text-sm">🤖 Cross-Model</span>
-                                <button
-                                    onClick={(e) => openMethodologyModal('crossmodel', e)}
-                                    className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
-                                    title="View methodology"
-                                >
-                                    <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </button>
-                            </label>
-                        </div>
-                    </div>
+                                <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                        </label>
 
-                    {/* Advanced Deep Dives - New */}
-                    <div>
-                        <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">Advanced Analysis</p>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            {/* Counterfactual */}
-                            <label
+                        {/* Cross-Model */}
+                        <label
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                runCrossModel
+                                    ? 'bg-amber-950/50 border-amber-600/50 text-white'
+                                    : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                            }`}
+                            title="Multi-model agreement check"
+                        >
+                            <input
+                                type="checkbox"
+                                checked={runCrossModel}
+                                onChange={(e) => setRunCrossModel(e.target.checked)}
+                                className="accent-amber-500"
+                            />
+                            <span className="text-sm">🤖 Cross-Model</span>
+                            <button
+                                onClick={(e) => openMethodologyModal('crossmodel', e)}
+                                className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
+                                title="View methodology"
+                            >
+                                <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                        </label>
+
+                        {/* Counterfactual */}
+                        <label
                                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
                                     runCounterfactual
                                         ? 'bg-violet-950/50 border-violet-600/50 text-white'
@@ -1045,42 +1038,6 @@ export function InputModule({
                                     className="accent-cyan-500"
                                 />
                                 <span className="text-sm">🎲 Consistency</span>
-                            </label>
-
-                            {/* Moral Foundations */}
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runMoralFoundations
-                                        ? 'bg-purple-950/50 border-purple-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
-                                title="Moral psychology analysis (Haidt)"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={runMoralFoundations}
-                                    onChange={(e) => setRunMoralFoundations(e.target.checked)}
-                                    className="accent-purple-500"
-                                />
-                                <span className="text-sm">⚖️ Moral</span>
-                            </label>
-
-                            {/* Stakeholder */}
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runStakeholder
-                                        ? 'bg-indigo-950/50 border-indigo-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
-                                title="Who is affected and how?"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={runStakeholder}
-                                    onChange={(e) => setRunStakeholder(e.target.checked)}
-                                    className="accent-indigo-500"
-                                />
-                                <span className="text-sm">👥 Stakeholder</span>
                             </label>
 
                             {/* Temporal */}
@@ -1136,7 +1093,6 @@ export function InputModule({
                                 />
                                 <span className="text-sm">🪞 Sycophancy</span>
                             </label>
-                        </div>
                     </div>
 
                     {/* Info text */}

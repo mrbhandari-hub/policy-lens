@@ -15,8 +15,6 @@ import {
   CounterfactualCard,
   RedTeamCard,
   SelfConsistencyCard,
-  MoralFoundationsCard,
-  StakeholderCard,
   TemporalCard,
   AppealCard,
   SycophancyCard,
@@ -27,7 +25,6 @@ import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-type ResultTab = 'jury' | 'debate' | 'crossmodel';
 
 // Inner component that uses useSearchParams
 function AnalyzeContent() {
@@ -37,7 +34,6 @@ function AnalyzeContent() {
   const [response, setResponse] = useState<PolicyLensResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<ResultTab>('jury');
 
   // Input State (Lifted from InputModule)
   const [contentText, setContentText] = useState('');
@@ -231,127 +227,82 @@ function AnalyzeContent() {
         {/* Results */}
         {response && (
           <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Tab Navigation */}
-            {(response.debate || response.cross_model) && (
-              <div className="flex items-center gap-2 bg-[#0f1629]/80 border border-[#1e293d] rounded-xl p-2 backdrop-blur-sm">
-                <button
-                  onClick={() => setActiveTab('jury')}
-                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                    activeTab === 'jury'
-                      ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-lg shadow-teal-500/20'
-                      : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
-                  }`}
-                >
-                  <span>⚖️</span> Jury Verdicts
-                </button>
-                {response.debate && (
-                  <button
-                    onClick={() => setActiveTab('debate')}
-                    className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                      activeTab === 'debate'
-                        ? 'bg-gradient-to-r from-rose-600 to-orange-500 text-white shadow-lg shadow-rose-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
-                    }`}
-                  >
-                    <span>⚔️</span> Pro/Con Debate
-                  </button>
-                )}
-                {response.cross_model && (
-                  <button
-                    onClick={() => setActiveTab('crossmodel')}
-                    className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                      activeTab === 'crossmodel'
-                        ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-lg shadow-amber-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
-                    }`}
-                  >
-                    <span>🤖</span> Cross-Model
-                  </button>
-                )}
-              </div>
-            )}
+            {/* At-a-Glance Verdict Summary */}
+            <VerdictSummary verdicts={response.judge_verdicts} />
 
-            {/* Tab Content */}
-            {activeTab === 'jury' && (
-              <>
-                {/* At-a-Glance Verdict Summary */}
-                <VerdictSummary verdicts={response.judge_verdicts} />
+            {/* Synthesis Card */}
+            <SynthesisCard synthesis={response.synthesis} />
 
-                {/* Synthesis Card */}
-                <SynthesisCard synthesis={response.synthesis} />
+            {/* Middle: Disagreement Matrix */}
+            <DisagreementMatrix
+              verdicts={response.judge_verdicts}
+              distribution={response.synthesis.verdict_distribution}
+            />
 
-                {/* Middle: Disagreement Matrix */}
-                <DisagreementMatrix
-                  verdicts={response.judge_verdicts}
-                  distribution={response.synthesis.verdict_distribution}
-                />
+            {/* Bottom: Detailed Rationale */}
+            <JudgeDetailCards verdicts={response.judge_verdicts} />
 
-                {/* Bottom: Detailed Rationale */}
-                <JudgeDetailCards verdicts={response.judge_verdicts} />
-              </>
-            )}
-
-            {activeTab === 'debate' && response.debate && (
-              <DebateCard debate={response.debate} />
-            )}
-
-            {activeTab === 'crossmodel' && response.cross_model && (
-              <CrossModelCard crossModel={response.cross_model} />
-            )}
-
-            {/* Advanced Deep Dives Section */}
-            {(response.counterfactual || response.red_team || response.consistency || 
-              response.moral_foundations || response.stakeholder || response.temporal || 
+            {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
+            {(response.debate || response.cross_model || response.counterfactual || 
+              response.red_team || response.consistency || response.temporal || 
               response.appeal || response.sycophancy) && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
                   <h2 className="text-white text-lg font-semibold flex items-center gap-2">
-                    <span>🔬</span> Advanced Deep Dives
+                    <span>🔬</span> Deep Dives
                   </h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-[#2d3a52] via-[#2d3a52] to-transparent" />
                 </div>
 
                 <div className="grid gap-6">
-                  {/* Row 1: Boundary & Confidence Analysis */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {response.counterfactual && (
-                      <CounterfactualCard data={response.counterfactual} />
-                    )}
-                    {response.consistency && (
-                      <SelfConsistencyCard data={response.consistency} />
-                    )}
-                  </div>
+                  {/* Debate & Cross-Model */}
+                  {(response.debate || response.cross_model) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {response.debate && (
+                        <DebateCard debate={response.debate} />
+                      )}
+                      {response.cross_model && (
+                        <CrossModelCard crossModel={response.cross_model} />
+                      )}
+                    </div>
+                  )}
 
-                  {/* Row 2: Security & Bias */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {response.red_team && (
-                      <RedTeamCard data={response.red_team} />
-                    )}
-                    {response.sycophancy && (
-                      <SycophancyCard data={response.sycophancy} />
-                    )}
-                  </div>
+                  {/* Boundary & Confidence Analysis */}
+                  {(response.counterfactual || response.consistency) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {response.counterfactual && (
+                        <CounterfactualCard data={response.counterfactual} />
+                      )}
+                      {response.consistency && (
+                        <SelfConsistencyCard data={response.consistency} />
+                      )}
+                    </div>
+                  )}
 
-                  {/* Row 3: Psychology & Stakeholders */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {response.moral_foundations && (
-                      <MoralFoundationsCard data={response.moral_foundations} />
-                    )}
-                    {response.stakeholder && (
-                      <StakeholderCard data={response.stakeholder} />
-                    )}
-                  </div>
+                  {/* Security & Bias */}
+                  {(response.red_team || response.sycophancy) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {response.red_team && (
+                        <RedTeamCard data={response.red_team} />
+                      )}
+                      {response.sycophancy && (
+                        <SycophancyCard data={response.sycophancy} />
+                      )}
+                    </div>
+                  )}
 
-                  {/* Row 4: Context & Appeals */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {response.temporal && (
-                      <TemporalCard data={response.temporal} />
-                    )}
-                    {response.appeal && (
-                      <AppealCard data={response.appeal} />
-                    )}
-                  </div>
+                  {/* Context & Appeals */}
+                  {(response.temporal || response.appeal) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {response.temporal && (
+                        <TemporalCard data={response.temporal} />
+                      )}
+                      {response.appeal && (
+                        <AppealCard data={response.appeal} />
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

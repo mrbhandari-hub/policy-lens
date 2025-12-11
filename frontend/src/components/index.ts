@@ -15,8 +15,6 @@ export {
     CounterfactualCard,
     RedTeamCard,
     SelfConsistencyCard,
-    MoralFoundationsCard,
-    StakeholderCard,
     TemporalCard,
     AppealCard,
     SycophancyCard,

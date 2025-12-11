@@ -184,40 +184,6 @@ class SelfConsistencyResult(BaseModel):
     recommendation: str = Field(..., description="Human escalation recommendation based on consistency")
 
 
-class MoralFoundation(BaseModel):
-    """Analysis of a single moral foundation"""
-    foundation: str = Field(..., description="Name of the moral foundation")
-    score: float = Field(..., ge=0.0, le=1.0, description="How strongly this foundation is triggered (0-1)")
-    direction: str = Field(..., description="'violated' | 'upheld' | 'neutral'")
-    explanation: str = Field(..., description="How this content relates to this foundation")
-
-
-class MoralFoundationsResult(BaseModel):
-    """Moral Foundations Theory analysis"""
-    foundations: list[MoralFoundation] = Field(..., description="Analysis of each moral foundation")
-    dominant_foundation: str = Field(..., description="The most strongly triggered foundation")
-    moral_conflict: Optional[str] = Field(None, description="If foundations conflict, explain the tension")
-    explains_disagreement: str = Field(..., description="How moral foundations explain judge disagreements")
-
-
-class StakeholderImpact(BaseModel):
-    """Impact analysis for a single stakeholder group"""
-    stakeholder: str = Field(..., description="Who is affected")
-    impact_type: str = Field(..., description="'positive' | 'negative' | 'mixed' | 'neutral'")
-    severity: str = Field(..., description="'minimal' | 'moderate' | 'significant' | 'severe'")
-    description: str = Field(..., description="How they are affected")
-    consent_status: Optional[str] = Field(None, description="Whether they consented to involvement")
-
-
-class StakeholderResult(BaseModel):
-    """Stakeholder impact mapping"""
-    stakeholders: list[StakeholderImpact] = Field(..., description="All affected stakeholders")
-    primary_beneficiary: str = Field(..., description="Who benefits most from the content")
-    primary_harm_recipient: str = Field(..., description="Who is most harmed by the content")
-    net_impact: str = Field(..., description="'net_positive' | 'net_negative' | 'contested' | 'neutral'")
-    power_dynamics: str = Field(..., description="Analysis of power imbalances between stakeholders")
-
-
 class TemporalContext(BaseModel):
     """Verdict in a specific temporal context"""
     context_name: str = Field(..., description="Name of the temporal context")
@@ -293,8 +259,6 @@ class PolicyLensRequest(BaseModel):
     run_counterfactual: bool = Field(default=False, description="Run counterfactual boundary analysis")
     run_red_team: bool = Field(default=False, description="Run red team adversarial analysis")
     run_consistency: bool = Field(default=False, description="Run self-consistency sampling")
-    run_moral_foundations: bool = Field(default=False, description="Run moral foundations theory analysis")
-    run_stakeholder: bool = Field(default=False, description="Run stakeholder impact mapping")
     run_temporal: bool = Field(default=False, description="Run temporal sensitivity analysis")
     run_appeal: bool = Field(default=False, description="Run appeal anticipation analysis")
     run_sycophancy: bool = Field(default=False, description="Run sycophancy bias detection")
@@ -313,8 +277,6 @@ class PolicyLensResponse(BaseModel):
     counterfactual: Optional[CounterfactualResult] = Field(None, description="Counterfactual analysis (if requested)")
     red_team: Optional[RedTeamResult] = Field(None, description="Red team analysis (if requested)")
     consistency: Optional[SelfConsistencyResult] = Field(None, description="Self-consistency sampling (if requested)")
-    moral_foundations: Optional[MoralFoundationsResult] = Field(None, description="Moral foundations analysis (if requested)")
-    stakeholder: Optional[StakeholderResult] = Field(None, description="Stakeholder impact mapping (if requested)")
     temporal: Optional[TemporalResult] = Field(None, description="Temporal sensitivity analysis (if requested)")
     appeal: Optional[AppealResult] = Field(None, description="Appeal anticipation analysis (if requested)")
     sycophancy: Optional[SycophancyResult] = Field(None, description="Sycophancy detection (if requested)")

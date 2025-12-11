@@ -172,14 +172,6 @@ async def analyze_content(request: PolicyLensRequest):
             tasks.append(deep_engine.run_consistency(content_text, context_hint))
             task_names.append("consistency")
         
-        if request.run_moral_foundations:
-            tasks.append(deep_engine.run_moral_foundations(content_text, context_hint))
-            task_names.append("moral_foundations")
-        
-        if request.run_stakeholder:
-            tasks.append(deep_engine.run_stakeholder(content_text, context_hint))
-            task_names.append("stakeholder")
-        
         if request.run_temporal:
             tasks.append(deep_engine.run_temporal(content_text, context_hint))
             task_names.append("temporal")
@@ -203,8 +195,6 @@ async def analyze_content(request: PolicyLensRequest):
         counterfactual_result = None
         red_team_result = None
         consistency_result = None
-        moral_foundations_result = None
-        stakeholder_result = None
         temporal_result = None
         appeal_result = None
         sycophancy_result = None
@@ -231,10 +221,6 @@ async def analyze_content(request: PolicyLensRequest):
                 red_team_result = result
             elif name == "consistency":
                 consistency_result = result
-            elif name == "moral_foundations":
-                moral_foundations_result = result
-            elif name == "stakeholder":
-                stakeholder_result = result
             elif name == "temporal":
                 temporal_result = result
             elif name == "appeal":
@@ -251,8 +237,6 @@ async def analyze_content(request: PolicyLensRequest):
         response.counterfactual = counterfactual_result
         response.red_team = red_team_result
         response.consistency = consistency_result
-        response.moral_foundations = moral_foundations_result
-        response.stakeholder = stakeholder_result
         response.temporal = temporal_result
         response.appeal = appeal_result
         response.sycophancy = sycophancy_result
