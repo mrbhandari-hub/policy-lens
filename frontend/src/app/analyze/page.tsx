@@ -10,7 +10,16 @@ import {
   DebateCard, 
   CrossModelCard,
   ShareButton,
-  VerdictSummary
+  VerdictSummary,
+  // Advanced Deep Dive Cards
+  CounterfactualCard,
+  RedTeamCard,
+  SelfConsistencyCard,
+  MoralFoundationsCard,
+  StakeholderCard,
+  TemporalCard,
+  AppealCard,
+  SycophancyCard,
 } from '@/components';
 import { SampleCase } from '@/data/samples';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
@@ -170,21 +179,26 @@ function AnalyzeContent() {
   }, [searchParams, router]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Decorative background elements */}
+    <main className="min-h-screen bg-[#0a0f1a]">
+      {/* Sophisticated mesh gradient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 gradient-mesh" />
+        <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-teal-500/[0.07] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-amber-500/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-teal-400/[0.04] rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <header className="text-center mb-8 flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold text-white hover:text-purple-300 transition-colors">
-            PolicyLens <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">v2.0</span>
+          <a href="/" className="text-2xl font-bold text-white hover:text-teal-300 transition-colors">
+            PolicyLens <span className="bg-gradient-to-r from-teal-400 to-amber-400 bg-clip-text text-transparent">v2.0</span>
           </a>
-          <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors">
-            ← Back to Home
+          <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
           </a>
         </header>
 
@@ -205,10 +219,10 @@ function AnalyzeContent() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-900/40 border border-red-500/50 rounded-xl p-4 mt-6 text-red-200 flex items-center gap-3">
+          <div className="bg-red-950/60 border border-red-500/40 rounded-xl p-4 mt-6 text-red-200 flex items-center gap-3 backdrop-blur-sm">
             <span className="text-2xl">⚠️</span>
             <div>
-              <div className="font-medium">Analysis Error</div>
+              <div className="font-medium text-red-100">Analysis Error</div>
               <div className="text-red-300/80 text-sm">{error}</div>
             </div>
           </div>
@@ -219,13 +233,13 @@ function AnalyzeContent() {
           <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Tab Navigation */}
             {(response.debate || response.cross_model) && (
-              <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl p-2">
+              <div className="flex items-center gap-2 bg-[#0f1629]/80 border border-[#1e293d] rounded-xl p-2 backdrop-blur-sm">
                 <button
                   onClick={() => setActiveTab('jury')}
                   className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                     activeTab === 'jury'
-                      ? 'bg-purple-600 text-white shadow-lg'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                      ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-lg shadow-teal-500/20'
+                      : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
                   }`}
                 >
                   <span>⚖️</span> Jury Verdicts
@@ -235,8 +249,8 @@ function AnalyzeContent() {
                     onClick={() => setActiveTab('debate')}
                     className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                       activeTab === 'debate'
-                        ? 'bg-red-600 text-white shadow-lg'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                        ? 'bg-gradient-to-r from-rose-600 to-orange-500 text-white shadow-lg shadow-rose-500/20'
+                        : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
                     }`}
                   >
                     <span>⚔️</span> Pro/Con Debate
@@ -247,8 +261,8 @@ function AnalyzeContent() {
                     onClick={() => setActiveTab('crossmodel')}
                     className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                       activeTab === 'crossmodel'
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-lg shadow-amber-500/20'
+                        : 'text-slate-400 hover:text-white hover:bg-[#1e293d]/60'
                     }`}
                   >
                     <span>🤖</span> Cross-Model
@@ -285,15 +299,72 @@ function AnalyzeContent() {
               <CrossModelCard crossModel={response.cross_model} />
             )}
 
+            {/* Advanced Deep Dives Section */}
+            {(response.counterfactual || response.red_team || response.consistency || 
+              response.moral_foundations || response.stakeholder || response.temporal || 
+              response.appeal || response.sycophancy) && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
+                  <h2 className="text-white text-lg font-semibold flex items-center gap-2">
+                    <span>🔬</span> Advanced Deep Dives
+                  </h2>
+                  <div className="h-px flex-1 bg-gradient-to-r from-[#2d3a52] via-[#2d3a52] to-transparent" />
+                </div>
+
+                <div className="grid gap-6">
+                  {/* Row 1: Boundary & Confidence Analysis */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {response.counterfactual && (
+                      <CounterfactualCard data={response.counterfactual} />
+                    )}
+                    {response.consistency && (
+                      <SelfConsistencyCard data={response.consistency} />
+                    )}
+                  </div>
+
+                  {/* Row 2: Security & Bias */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {response.red_team && (
+                      <RedTeamCard data={response.red_team} />
+                    )}
+                    {response.sycophancy && (
+                      <SycophancyCard data={response.sycophancy} />
+                    )}
+                  </div>
+
+                  {/* Row 3: Psychology & Stakeholders */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {response.moral_foundations && (
+                      <MoralFoundationsCard data={response.moral_foundations} />
+                    )}
+                    {response.stakeholder && (
+                      <StakeholderCard data={response.stakeholder} />
+                    )}
+                  </div>
+
+                  {/* Row 4: Context & Appeals */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {response.temporal && (
+                      <TemporalCard data={response.temporal} />
+                    )}
+                    {response.appeal && (
+                      <AppealCard data={response.appeal} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Results Footer with Export and Share */}
-            <div className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+            <div className="flex items-center justify-between bg-[#0f1629]/80 border border-[#1e293d] rounded-xl p-4 backdrop-blur-sm">
               <div className="text-slate-500 text-sm">
-                Request ID: <code className="bg-slate-900 px-2 py-1 rounded text-slate-400">{response.request_id}</code>
+                Request ID: <code className="bg-[#0a0f1a] px-2 py-1 rounded text-teal-400/70 font-mono text-xs">{response.request_id}</code>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={exportJSON}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-600/50 hover:text-white transition-all text-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/60 hover:text-white hover:border-teal-500/30 transition-all text-sm font-medium"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -309,10 +380,10 @@ function AnalyzeContent() {
         )}
 
         {/* Footer */}
-        <footer className="text-center mt-16 py-8 border-t border-slate-800">
+        <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
           <p className="text-slate-500 text-sm">
             PolicyLens v2.0 — Powered by{' '}
-            <span className="text-purple-400">Gemini 3 Pro Preview</span>
+            <span className="text-teal-400">Gemini 3 Pro Preview</span>
           </p>
           <p className="text-slate-600 text-xs mt-2">
             ⚠️ This is a diagnostic tool, not an enforcement tool. All verdicts are simulated.
@@ -326,9 +397,9 @@ function AnalyzeContent() {
 // Loading fallback for Suspense
 function LoadingFallback() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+    <main className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <div className="animate-spin h-12 w-12 border-4 border-teal-500 border-t-transparent rounded-full mx-auto mb-4"></div>
         <p className="text-slate-400">Loading Analysis Engine...</p>
       </div>
     </main>

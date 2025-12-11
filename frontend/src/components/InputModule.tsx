@@ -223,6 +223,16 @@ export function InputModule({
     // Advanced analysis modes
     const [runDebate, setRunDebate] = useState(false);
     const [runCrossModel, setRunCrossModel] = useState(false);
+    
+    // New advanced deep dives
+    const [runCounterfactual, setRunCounterfactual] = useState(false);
+    const [runRedTeam, setRunRedTeam] = useState(false);
+    const [runConsistency, setRunConsistency] = useState(false);
+    const [runMoralFoundations, setRunMoralFoundations] = useState(false);
+    const [runStakeholder, setRunStakeholder] = useState(false);
+    const [runTemporal, setRunTemporal] = useState(false);
+    const [runAppeal, setRunAppeal] = useState(false);
+    const [runSycophancy, setRunSycophancy] = useState(false);
 
     const openMethodologyModal = (mode: 'debate' | 'crossmodel', e: React.MouseEvent) => {
         e.preventDefault();
@@ -279,14 +289,14 @@ export function InputModule({
             .catch((err) => console.error('Failed to fetch judges:', err));
     }, []);
 
-    // Category color schemes
+    // Category color schemes - refined palette
     const categoryColors: Record<string, { bg: string; border: string; selected: string; header: string }> = {
-        platform: { bg: 'bg-blue-900/20', border: 'border-blue-700/50', selected: 'bg-blue-600/40 border-blue-500', header: 'bg-blue-900/40' },
-        ideological: { bg: 'bg-amber-900/20', border: 'border-amber-700/50', selected: 'bg-amber-600/40 border-amber-500', header: 'bg-amber-900/40' },
-        expert: { bg: 'bg-emerald-900/20', border: 'border-emerald-700/50', selected: 'bg-emerald-600/40 border-emerald-500', header: 'bg-emerald-900/40' },
-        parent: { bg: 'bg-pink-900/20', border: 'border-pink-700/50', selected: 'bg-pink-600/40 border-pink-500', header: 'bg-pink-900/40' },
-        rating: { bg: 'bg-violet-900/20', border: 'border-violet-700/50', selected: 'bg-violet-600/40 border-violet-500', header: 'bg-violet-900/40' },
-        oversight: { bg: 'bg-cyan-900/20', border: 'border-cyan-700/50', selected: 'bg-cyan-600/40 border-cyan-500', header: 'bg-cyan-900/40' },
+        platform: { bg: 'bg-sky-950/30', border: 'border-sky-700/40', selected: 'bg-sky-600/40 border-sky-500', header: 'bg-sky-950/50' },
+        ideological: { bg: 'bg-amber-950/30', border: 'border-amber-700/40', selected: 'bg-amber-600/40 border-amber-500', header: 'bg-amber-950/50' },
+        expert: { bg: 'bg-teal-950/30', border: 'border-teal-700/40', selected: 'bg-teal-600/40 border-teal-500', header: 'bg-teal-950/50' },
+        parent: { bg: 'bg-rose-950/30', border: 'border-rose-700/40', selected: 'bg-rose-600/40 border-rose-500', header: 'bg-rose-950/50' },
+        rating: { bg: 'bg-violet-950/30', border: 'border-violet-700/40', selected: 'bg-violet-600/40 border-violet-500', header: 'bg-violet-950/50' },
+        oversight: { bg: 'bg-cyan-950/30', border: 'border-cyan-700/40', selected: 'bg-cyan-600/40 border-cyan-500', header: 'bg-cyan-950/50' },
     };
 
     // Filter judges by search query
@@ -463,18 +473,26 @@ export function InputModule({
             selected_judges: selectedJudges,
             run_debate: runDebate,
             run_cross_model: runCrossModel,
+            run_counterfactual: runCounterfactual,
+            run_red_team: runRedTeam,
+            run_consistency: runConsistency,
+            run_moral_foundations: runMoralFoundations,
+            run_stakeholder: runStakeholder,
+            run_temporal: runTemporal,
+            run_appeal: runAppeal,
+            run_sycophancy: runSycophancy,
         });
     };
 
     return (
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-6 shadow-xl">
+        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-2xl shadow-black/20">
             
             {/* ═══════════════════════════════════════════════════════════════
                 STEP 1: CONTENT UNDER REVIEW
             ═══════════════════════════════════════════════════════════════ */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-white text-sm font-bold shadow-lg shadow-teal-500/20">
                         1
                     </div>
                     <div>
@@ -486,7 +504,7 @@ export function InputModule({
                         <button
                             type="button"
                             onClick={() => setShowSamples(!showSamples)}
-                            className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                            className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 transition-colors"
                         >
                             <span>✨</span>
                             {showSamples ? 'Hide samples' : 'Try a sample case'}
@@ -496,7 +514,7 @@ export function InputModule({
 
                 {/* Sample picker dropdown */}
                 {showSamples && onSampleSelect && (
-                    <div className="ml-11 mb-4 p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
+                    <div className="ml-11 mb-4 p-3 bg-[#0a0f1a]/80 border border-[#1e293d] rounded-lg">
                         <div className="text-xs text-slate-400 mb-2">Quick samples:</div>
                         <div className="flex flex-wrap gap-2">
                             {SAMPLE_CASES.slice(0, 8).map(sample => (
@@ -509,10 +527,10 @@ export function InputModule({
                                     }}
                                     className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
                                         sample.category === 'violating' 
-                                            ? 'bg-red-900/20 border-red-700/50 text-red-300 hover:bg-red-900/40'
+                                            ? 'bg-rose-950/40 border-rose-700/40 text-rose-300 hover:bg-rose-900/50'
                                             : sample.category === 'borderline'
-                                                ? 'bg-yellow-900/20 border-yellow-700/50 text-yellow-300 hover:bg-yellow-900/40'
-                                                : 'bg-green-900/20 border-green-700/50 text-green-300 hover:bg-green-900/40'
+                                                ? 'bg-amber-950/40 border-amber-700/40 text-amber-300 hover:bg-amber-900/50'
+                                                : 'bg-emerald-950/40 border-emerald-700/40 text-emerald-300 hover:bg-emerald-900/50'
                                     }`}
                                     title={sample.content.substring(0, 100) + '...'}
                                 >
@@ -541,7 +559,7 @@ export function InputModule({
                             value={contentText}
                             onChange={(e) => onContentTextChange(e.target.value)}
                             placeholder="Paste the content you want to analyze..."
-                            className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                            className="w-full bg-[#0a0f1a]/80 border border-[#2d3a52] rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 transition-all resize-none"
                             rows={5}
                             maxLength={10000}
                         />
@@ -561,11 +579,11 @@ export function InputModule({
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onPaste={handlePaste}
-                    className={`relative border-2 border-dashed rounded-lg p-4 transition-all ${isDragging
-                        ? 'border-purple-500 bg-purple-500/10'
+                    className={`relative border-2 border-dashed rounded-xl p-4 transition-all ${isDragging
+                        ? 'border-teal-500 bg-teal-500/10'
                         : imagePreview
-                            ? 'border-green-500/50 bg-green-500/5'
-                            : 'border-slate-600 hover:border-slate-500'
+                            ? 'border-emerald-500/50 bg-emerald-500/5'
+                            : 'border-[#2d3a52] hover:border-[#3d4a66]'
                         }`}
                 >
                     {imagePreview ? (
@@ -573,10 +591,10 @@ export function InputModule({
                             <img
                                 src={imagePreview}
                                 alt="Preview"
-                                className="h-24 w-24 object-cover rounded-lg border border-slate-600"
+                                className="h-24 w-24 object-cover rounded-lg border border-[#2d3a52]"
                             />
                             <div className="flex-1">
-                                <p className="text-green-400 text-sm font-medium">✓ Image attached</p>
+                                <p className="text-emerald-400 text-sm font-medium">✓ Image attached</p>
                                 <p className="text-slate-500 text-xs mt-1">Click × to remove</p>
                             </div>
                             <button
@@ -584,7 +602,7 @@ export function InputModule({
                                     onImageBase64Change(undefined);
                                     onImagePreviewChange(null);
                                 }}
-                                className="bg-red-500 hover:bg-red-400 text-white rounded-full w-8 h-8 text-lg flex items-center justify-center transition-colors"
+                                className="bg-rose-500 hover:bg-rose-400 text-white rounded-full w-8 h-8 text-lg flex items-center justify-center transition-colors"
                             >
                                 ×
                             </button>
@@ -593,9 +611,9 @@ export function InputModule({
                         <div className="text-center py-4">
                             <div className="text-3xl mb-2">📷</div>
                             <p className="text-slate-400 text-sm">
-                                <span className="text-purple-400 font-medium">Paste (⌘V)</span>,{' '}
-                                <span className="text-purple-400 font-medium">drag & drop</span>, or{' '}
-                                <label className="text-purple-400 font-medium cursor-pointer hover:underline">
+                                <span className="text-teal-400 font-medium">Paste (⌘V)</span>,{' '}
+                                <span className="text-teal-400 font-medium">drag & drop</span>, or{' '}
+                                <label className="text-teal-400 font-medium cursor-pointer hover:underline">
                                     browse
                                     <input
                                         type="file"
@@ -621,21 +639,21 @@ export function InputModule({
                             value={contextHint}
                             onChange={(e) => onContextHintChange(e.target.value)}
                             placeholder="e.g., 'Verified journalist reporting from conflict zone'"
-                            className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full bg-[#0a0f1a]/80 border border-[#2d3a52] rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 transition-all"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Divider */}
-            <div className="border-t border-slate-700/50 my-6" />
+            <div className="border-t border-[#1e293d] my-6" />
 
             {/* ═══════════════════════════════════════════════════════════════
                 STEP 2: ASSEMBLE YOUR PANEL
             ═══════════════════════════════════════════════════════════════ */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-white text-sm font-bold shadow-lg shadow-teal-500/20">
                         2
                     </div>
                     <div className="flex-1">
@@ -643,12 +661,12 @@ export function InputModule({
                         <p className="text-slate-500 text-xs">Who should weigh in on this decision?</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                             selectedJudges.length >= MAX_JUDGES 
-                                ? 'bg-purple-600/40 text-purple-300' 
+                                ? 'bg-teal-500/30 text-teal-300' 
                                 : selectedJudges.length < 2 
-                                    ? 'bg-amber-600/40 text-amber-300' 
-                                    : 'bg-green-600/40 text-green-300'
+                                    ? 'bg-amber-500/30 text-amber-300' 
+                                    : 'bg-emerald-500/30 text-emerald-300'
                         }`}>
                             {selectedJudges.length}/{MAX_JUDGES}
                         </span>
@@ -656,7 +674,7 @@ export function InputModule({
                             <button
                                 type="button"
                                 onClick={() => setCompactMode(!compactMode)}
-                                className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+                                className="text-xs px-2 py-1 rounded bg-[#1e293d]/60 text-slate-400 hover:text-white hover:bg-[#2d3a52]/60 transition-colors"
                                 title={compactMode ? 'Show detailed view' : 'Show compact view'}
                             >
                                 {compactMode ? '▤' : '☰'}
@@ -664,7 +682,7 @@ export function InputModule({
                             <button
                                 type="button"
                                 onClick={() => setSelectedJudges([])}
-                                className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+                                className="text-xs px-2 py-1 rounded bg-[#1e293d]/60 text-slate-400 hover:text-white hover:bg-[#2d3a52]/60 transition-colors"
                                 title="Clear all"
                             >
                                 ✕
@@ -684,7 +702,7 @@ export function InputModule({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search judges..."
-                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-8 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full bg-[#0a0f1a]/80 border border-[#2d3a52] rounded-xl pl-10 pr-8 py-2 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 transition-all"
                         />
                         {searchQuery && (
                             <button
@@ -710,7 +728,7 @@ export function InputModule({
                                         setSelectedJudges(preset.judges);
                                     }
                                 }}
-                                className="text-xs px-2.5 py-1 rounded-full bg-slate-700/60 text-slate-300 border border-slate-600 hover:bg-slate-600/60 hover:text-white transition-all"
+                                className="text-xs px-2.5 py-1 rounded-full bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/80 hover:text-white hover:border-teal-500/30 transition-all"
                                 title={`${preset.description} (⇧+click to add)`}
                             >
                                 {preset.label}
@@ -720,11 +738,11 @@ export function InputModule({
                 
                     {/* Expand/Collapse controls */}
                     <div className="flex justify-end gap-2 mb-2 text-xs">
-                        <button onClick={() => setExpandedCategories(new Set(sortedCategories))} className="text-slate-400 hover:text-purple-400">
+                        <button onClick={() => setExpandedCategories(new Set(sortedCategories))} className="text-slate-400 hover:text-teal-400 transition-colors">
                             Expand all
                         </button>
                         <span className="text-slate-600">|</span>
-                        <button onClick={() => setExpandedCategories(new Set())} className="text-slate-400 hover:text-purple-400">
+                        <button onClick={() => setExpandedCategories(new Set())} className="text-slate-400 hover:text-teal-400 transition-colors">
                             Collapse all
                         </button>
                     </div>
@@ -739,14 +757,14 @@ export function InputModule({
                         const allSelected = selectedInCategory === categoryJudges.length && categoryJudges.length > 0;
                         const someSelected = selectedInCategory > 0;
                         
-                        // Category-specific colors
+                        // Category-specific colors - refined palette
                         const colorMap: Record<string, { header: string; border: string; selected: string }> = {
-                            platform: { header: 'bg-blue-900/40', border: 'border-blue-700/40', selected: 'bg-blue-600/40 border-blue-500' },
-                            ideological: { header: 'bg-amber-900/40', border: 'border-amber-700/40', selected: 'bg-amber-600/40 border-amber-500' },
-                            expert: { header: 'bg-emerald-900/40', border: 'border-emerald-700/40', selected: 'bg-emerald-600/40 border-emerald-500' },
-                            parent: { header: 'bg-pink-900/40', border: 'border-pink-700/40', selected: 'bg-pink-600/40 border-pink-500' },
-                            rating: { header: 'bg-violet-900/40', border: 'border-violet-700/40', selected: 'bg-violet-600/40 border-violet-500' },
-                            oversight: { header: 'bg-cyan-900/40', border: 'border-cyan-700/40', selected: 'bg-cyan-600/40 border-cyan-500' },
+                            platform: { header: 'bg-sky-950/60', border: 'border-sky-700/40', selected: 'bg-sky-600/40 border-sky-500' },
+                            ideological: { header: 'bg-amber-950/60', border: 'border-amber-700/40', selected: 'bg-amber-600/40 border-amber-500' },
+                            expert: { header: 'bg-teal-950/60', border: 'border-teal-700/40', selected: 'bg-teal-600/40 border-teal-500' },
+                            parent: { header: 'bg-rose-950/60', border: 'border-rose-700/40', selected: 'bg-rose-600/40 border-rose-500' },
+                            rating: { header: 'bg-violet-950/60', border: 'border-violet-700/40', selected: 'bg-violet-600/40 border-violet-500' },
+                            oversight: { header: 'bg-cyan-950/60', border: 'border-cyan-700/40', selected: 'bg-cyan-600/40 border-cyan-500' },
                         };
                         const colors = colorMap[categoryId] || colorMap.platform;
                         
@@ -797,7 +815,7 @@ export function InputModule({
 
                                 {/* Category Judges */}
                                 {isExpanded && (
-                                    <div className={`p-2 bg-slate-900/20 ${compactMode ? 'flex flex-wrap gap-1.5' : 'grid grid-cols-1 md:grid-cols-2 gap-2'}`}>
+                                    <div className={`p-2 bg-[#0a0f1a]/40 ${compactMode ? 'flex flex-wrap gap-1.5' : 'grid grid-cols-1 md:grid-cols-2 gap-2'}`}>
                                         {categoryJudges.map((judge) => {
                                             const isSelected = selectedJudges.includes(judge.id);
                                             
@@ -810,14 +828,14 @@ export function InputModule({
                                                         className={`group px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
                                                             isSelected
                                                                 ? `${colors.selected} text-white`
-                                                                : 'bg-slate-800/80 border border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                                                                : 'bg-[#151d2e] border border-[#2d3a52] text-slate-400 hover:border-[#3d4a66] hover:text-white'
                                                         }`}
                                                         title={judge.description}
                                                     >
                                                         <span className="truncate max-w-[140px]">{judge.name}</span>
                                                         <span
                                                             onClick={(e) => { e.stopPropagation(); viewJudgePrompt(judge.id, judge.name, e); }}
-                                                            className="opacity-40 group-hover:opacity-100 hover:text-purple-300 cursor-pointer"
+                                                            className="opacity-40 group-hover:opacity-100 hover:text-teal-300 cursor-pointer"
                                                         >
                                                             ⓘ
                                                         </span>
@@ -832,7 +850,7 @@ export function InputModule({
                                                     className={`p-3 rounded-lg border text-left transition-all ${
                                                         isSelected
                                                             ? `${colors.selected} text-white`
-                                                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-600'
+                                                            : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
                                                     }`}
                                                 >
                                                     <div className="flex items-start justify-between gap-2">
@@ -849,14 +867,14 @@ export function InputModule({
                                                                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                                                                     isSelected 
                                                                         ? 'bg-white/20 border-white/50' 
-                                                                        : 'border-slate-600 hover:border-slate-500'
+                                                                        : 'border-[#2d3a52] hover:border-[#3d4a66]'
                                                                 }`}
                                                             >
                                                                 {isSelected && <span className="text-white text-xs">✓</span>}
                                                             </button>
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); viewJudgePrompt(judge.id, judge.name, e); }}
-                                                                className="px-1.5 py-0.5 rounded text-[10px] bg-purple-600/30 text-purple-300 hover:bg-purple-600/50 transition-all"
+                                                                className="px-1.5 py-0.5 rounded text-[10px] bg-teal-600/30 text-teal-300 hover:bg-teal-600/50 transition-all"
                                                                 title="View full system prompt"
                                                             >
                                                                 View
@@ -878,7 +896,7 @@ export function InputModule({
                         <div className="text-center py-6 text-slate-500">
                             <div className="text-2xl mb-2">🔍</div>
                             <p>No judges found for &quot;{searchQuery}&quot;</p>
-                            <button onClick={() => setSearchQuery('')} className="text-purple-400 hover:text-purple-300 text-sm mt-2">
+                            <button onClick={() => setSearchQuery('')} className="text-teal-400 hover:text-teal-300 text-sm mt-2 transition-colors">
                                 Clear search
                             </button>
                         </div>
@@ -888,8 +906,8 @@ export function InputModule({
                     <div className="mt-3 flex items-center justify-between text-xs">
                         <div className="text-slate-500">
                             {selectedJudges.length < 2 && <span className="text-amber-400">⚠ Need {2 - selectedJudges.length} more</span>}
-                            {selectedJudges.length >= 2 && selectedJudges.length < MAX_JUDGES && <span className="text-green-400">✓ Ready to analyze</span>}
-                            {selectedJudges.length >= MAX_JUDGES && <span className="text-purple-400">✓ Max capacity</span>}
+                            {selectedJudges.length >= 2 && selectedJudges.length < MAX_JUDGES && <span className="text-emerald-400">✓ Ready to analyze</span>}
+                            {selectedJudges.length >= MAX_JUDGES && <span className="text-teal-400">✓ Max capacity</span>}
                         </div>
                         <div className="text-slate-600 hidden sm:block">
                             💡 ⇧+click presets to combine
@@ -899,71 +917,232 @@ export function InputModule({
             </div>
 
             {/* Divider */}
-            <div className="border-t border-slate-700/50 my-6" />
+            <div className="border-t border-[#1e293d] my-6" />
 
             {/* ═══════════════════════════════════════════════════════════════
                 STEP 3: DEEP DIVE OPTIONS (OPTIONAL)
             ═══════════════════════════════════════════════════════════════ */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-600 text-white text-sm font-bold">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2d3a52] text-white text-sm font-bold">
                         3
                     </div>
                     <div>
                         <h2 className="text-white text-lg font-semibold">Deep Dive <span className="text-slate-500 text-sm font-normal">(optional)</span></h2>
-                        <p className="text-slate-500 text-xs">Additional analysis modes for complex cases</p>
+                        <p className="text-slate-500 text-xs">Advanced analysis modes based on cutting-edge AI research</p>
                     </div>
                 </div>
 
-                <div className="ml-11 flex flex-wrap items-center gap-3">
-                <label
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                        runDebate
-                            ? 'bg-red-900/30 border-red-600/50 text-white'
-                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'
-                    }`}
-                >
-                    <input
-                        type="checkbox"
-                        checked={runDebate}
-                        onChange={(e) => setRunDebate(e.target.checked)}
-                        className="accent-red-500"
-                    />
-                    <span className="text-sm">⚔️ Debate</span>
-                    <button
-                        onClick={(e) => openMethodologyModal('debate', e)}
-                        className="p-1 rounded-full hover:bg-slate-700/50 transition-all"
-                        title="View methodology"
-                    >
-                        <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </button>
-                </label>
-                <label
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                        runCrossModel
-                            ? 'bg-blue-900/30 border-blue-600/50 text-white'
-                            : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'
-                    }`}
-                >
-                    <input
-                        type="checkbox"
-                        checked={runCrossModel}
-                        onChange={(e) => setRunCrossModel(e.target.checked)}
-                        className="accent-blue-500"
-                    />
-                    <span className="text-sm">🤖 Cross-Model</span>
-                    <button
-                        onClick={(e) => openMethodologyModal('crossmodel', e)}
-                        className="p-1 rounded-full hover:bg-slate-700/50 transition-all"
-                        title="View methodology"
-                    >
-                        <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </button>
-                </label>
+                <div className="ml-11 space-y-4">
+                    {/* Original Deep Dives */}
+                    <div>
+                        <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">Core Analysis</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runDebate
+                                        ? 'bg-rose-950/50 border-rose-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runDebate}
+                                    onChange={(e) => setRunDebate(e.target.checked)}
+                                    className="accent-rose-500"
+                                />
+                                <span className="text-sm">⚔️ Debate</span>
+                                <button
+                                    onClick={(e) => openMethodologyModal('debate', e)}
+                                    className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
+                                    title="View methodology"
+                                >
+                                    <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </label>
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runCrossModel
+                                        ? 'bg-amber-950/50 border-amber-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runCrossModel}
+                                    onChange={(e) => setRunCrossModel(e.target.checked)}
+                                    className="accent-amber-500"
+                                />
+                                <span className="text-sm">🤖 Cross-Model</span>
+                                <button
+                                    onClick={(e) => openMethodologyModal('crossmodel', e)}
+                                    className="p-1 rounded-full hover:bg-[#2d3a52]/50 transition-all"
+                                    title="View methodology"
+                                >
+                                    <svg className="w-3.5 h-3.5 text-slate-500 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Advanced Deep Dives - New */}
+                    <div>
+                        <p className="text-slate-500 text-xs uppercase tracking-wide mb-2">Advanced Analysis</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {/* Counterfactual */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runCounterfactual
+                                        ? 'bg-violet-950/50 border-violet-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="What would change the verdict?"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runCounterfactual}
+                                    onChange={(e) => setRunCounterfactual(e.target.checked)}
+                                    className="accent-violet-500"
+                                />
+                                <span className="text-sm">🔀 Counterfactual</span>
+                            </label>
+
+                            {/* Red Team */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runRedTeam
+                                        ? 'bg-red-950/50 border-red-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Adversarial vulnerability analysis"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runRedTeam}
+                                    onChange={(e) => setRunRedTeam(e.target.checked)}
+                                    className="accent-red-500"
+                                />
+                                <span className="text-sm">🎯 Red Team</span>
+                            </label>
+
+                            {/* Self-Consistency */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runConsistency
+                                        ? 'bg-cyan-950/50 border-cyan-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Multiple reasoning paths for confidence"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runConsistency}
+                                    onChange={(e) => setRunConsistency(e.target.checked)}
+                                    className="accent-cyan-500"
+                                />
+                                <span className="text-sm">🎲 Consistency</span>
+                            </label>
+
+                            {/* Moral Foundations */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runMoralFoundations
+                                        ? 'bg-purple-950/50 border-purple-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Moral psychology analysis (Haidt)"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runMoralFoundations}
+                                    onChange={(e) => setRunMoralFoundations(e.target.checked)}
+                                    className="accent-purple-500"
+                                />
+                                <span className="text-sm">⚖️ Moral</span>
+                            </label>
+
+                            {/* Stakeholder */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runStakeholder
+                                        ? 'bg-indigo-950/50 border-indigo-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Who is affected and how?"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runStakeholder}
+                                    onChange={(e) => setRunStakeholder(e.target.checked)}
+                                    className="accent-indigo-500"
+                                />
+                                <span className="text-sm">👥 Stakeholder</span>
+                            </label>
+
+                            {/* Temporal */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runTemporal
+                                        ? 'bg-sky-950/50 border-sky-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="How timing/context affects verdict"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runTemporal}
+                                    onChange={(e) => setRunTemporal(e.target.checked)}
+                                    className="accent-sky-500"
+                                />
+                                <span className="text-sm">⏰ Temporal</span>
+                            </label>
+
+                            {/* Appeal */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runAppeal
+                                        ? 'bg-yellow-950/50 border-yellow-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Predict creator appeal arguments"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runAppeal}
+                                    onChange={(e) => setRunAppeal(e.target.checked)}
+                                    className="accent-yellow-500"
+                                />
+                                <span className="text-sm">📝 Appeal</span>
+                            </label>
+
+                            {/* Sycophancy */}
+                            <label
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                                    runSycophancy
+                                        ? 'bg-pink-950/50 border-pink-600/50 text-white'
+                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
+                                }`}
+                                title="Check for framing bias"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={runSycophancy}
+                                    onChange={(e) => setRunSycophancy(e.target.checked)}
+                                    className="accent-pink-500"
+                                />
+                                <span className="text-sm">🪞 Sycophancy</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Info text */}
+                    <p className="text-slate-600 text-xs">
+                        💡 Each deep dive adds ~3-5 seconds to analysis time. Select only what you need.
+                    </p>
                 </div>
             </div>
 
@@ -973,9 +1152,9 @@ export function InputModule({
             <button
                 onClick={handleSubmit}
                 disabled={loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1}
-                className={`w-full py-4 rounded-lg font-semibold text-lg transition-all ${loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1
-                    ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 shadow-lg hover:shadow-purple-500/25'
+                className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1
+                    ? 'bg-[#2d3a52] text-slate-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-500 hover:to-teal-400 shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40'
                     }`}
             >
                 {loading ? (
@@ -1006,20 +1185,20 @@ export function InputModule({
             {/* Prompt Modal */}
             {promptModal.isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                     onClick={() => setPromptModal({ ...promptModal, isOpen: false })}
                 >
                     <div
-                        className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl border border-slate-600"
+                        className="bg-[#0f1629] rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl border border-[#1e293d]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                        <div className="flex items-center justify-between p-4 border-b border-[#1e293d]">
                             <h3 className="text-lg font-semibold text-white">
                                 🧠 System Prompt: {promptModal.judgeName}
                             </h3>
                             <button
                                 onClick={() => setPromptModal({ ...promptModal, isOpen: false })}
-                                className="text-slate-400 hover:text-white p-1"
+                                className="text-slate-400 hover:text-white p-1 transition-colors"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1027,7 +1206,7 @@ export function InputModule({
                             </button>
                         </div>
                         <div className="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
-                            <pre className="text-sm text-slate-300 whitespace-pre-wrap font-mono bg-slate-900/50 p-4 rounded-lg overflow-x-auto">
+                            <pre className="text-sm text-slate-300 whitespace-pre-wrap font-mono bg-[#0a0f1a]/80 p-4 rounded-lg overflow-x-auto border border-[#1e293d]">
                                 {promptModal.prompt}
                             </pre>
                         </div>
@@ -1038,14 +1217,14 @@ export function InputModule({
             {/* Methodology Modal */}
             {methodologyModal.isOpen && methodologyModal.methodology && (
                 <div
-                    className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                     onClick={() => setMethodologyModal({ ...methodologyModal, isOpen: false })}
                 >
                     <div
-                        className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[85vh] overflow-hidden shadow-2xl border border-slate-600"
+                        className="bg-[#0f1629] rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden shadow-2xl border border-[#1e293d]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                        <div className="flex items-center justify-between p-4 border-b border-[#1e293d]">
                             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                                 <span className="text-xl">
                                     {methodologyModal.title === 'Pro/Con Debate' ? '⚔️' : '🤖'}
@@ -1054,7 +1233,7 @@ export function InputModule({
                             </h3>
                             <button
                                 onClick={() => setMethodologyModal({ ...methodologyModal, isOpen: false })}
-                                className="text-slate-400 hover:text-white p-1"
+                                className="text-slate-400 hover:text-white p-1 transition-colors"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1064,16 +1243,16 @@ export function InputModule({
                         <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)]">
                             {/* Methodology Description */}
                             <div className="mb-6">
-                                <h4 className="text-purple-400 font-medium text-sm uppercase tracking-wide mb-2">
+                                <h4 className="text-teal-400 font-medium text-sm uppercase tracking-wide mb-2">
                                     How it Works
                                 </h4>
                                 <div 
-                                    className="text-slate-300 text-sm leading-relaxed bg-slate-900/50 p-4 rounded-lg border border-slate-700 methodology-description"
+                                    className="text-slate-300 text-sm leading-relaxed bg-[#0a0f1a]/80 p-4 rounded-lg border border-[#1e293d] methodology-description"
                                     dangerouslySetInnerHTML={{
                                         __html: methodologyModal.methodology.description
                                             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
                                             .replace(/\n\n/g, '</p><p class="mt-3">')
-                                            .replace(/\n•/g, '</p><p class="mt-2 flex gap-2"><span class="text-purple-400">•</span><span>')
+                                            .replace(/\n•/g, '</p><p class="mt-2 flex gap-2"><span class="text-teal-400">•</span><span>')
                                             .replace(/^/, '<p>')
                                             .replace(/$/, '</p>')
                                             .replace(/<span>([^<]+)$/gm, '<span>$1</span>')
@@ -1083,13 +1262,13 @@ export function InputModule({
 
                             {/* Prompts */}
                             <div>
-                                <h4 className="text-purple-400 font-medium text-sm uppercase tracking-wide mb-3">
+                                <h4 className="text-teal-400 font-medium text-sm uppercase tracking-wide mb-3">
                                     System Prompts
                                 </h4>
                                 <div className="space-y-4">
                                     {methodologyModal.methodology.prompts.map((prompt, index) => (
-                                        <div key={index} className="bg-slate-900/50 rounded-lg border border-slate-700 overflow-hidden">
-                                            <div className="bg-slate-700/50 px-4 py-2 border-b border-slate-600">
+                                        <div key={index} className="bg-[#0a0f1a]/80 rounded-lg border border-[#1e293d] overflow-hidden">
+                                            <div className="bg-[#1e293d]/60 px-4 py-2 border-b border-[#2d3a52]">
                                                 <div className="flex items-center justify-between">
                                                     <div>
                                                         <span className="text-white font-medium text-sm">
@@ -1103,8 +1282,8 @@ export function InputModule({
                                                         onClick={() => copyPromptToClipboard(prompt.prompt, index)}
                                                         className={`text-xs px-2 py-1 rounded transition-all flex items-center gap-1 ${
                                                             copiedPromptIndex === index
-                                                                ? 'bg-green-600 text-white'
-                                                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                                                ? 'bg-emerald-600 text-white'
+                                                                : 'bg-[#2d3a52] text-slate-300 hover:bg-[#3d4a66]'
                                                         }`}
                                                     >
                                                         {copiedPromptIndex === index ? (

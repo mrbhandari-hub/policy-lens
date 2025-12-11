@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f172a;
-  --foreground: #e2e8f0;
+  --background: #0a0f1a;
+  --foreground: #e8edf5;
+  
+  /* Rich color palette */
+  --midnight: #0a0f1a;
+  --deep-navy: #0f1629;
+  --charcoal: #151d2e;
+  --slate-blue: #1e293d;
+  --steel: #2d3a52;
+  
+  /* Accent colors */
+  --teal-primary: #14b8a6;
+  --teal-glow: #2dd4bf;
+  --amber-accent: #f59e0b;
+  --amber-glow: #fbbf24;
+  --coral: #f97316;
+  
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 }
 
 @theme inline {
@@ -15,7 +34,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
 }
 
 /* Custom animations */
@@ -60,14 +79,47 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: var(--deep-navy);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: var(--steel);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #3d4a66;
+}
+
+/* Custom utility classes for new color scheme */
+.bg-midnight { background-color: var(--midnight); }
+.bg-deep-navy { background-color: var(--deep-navy); }
+.bg-charcoal { background-color: var(--charcoal); }
+.bg-slate-blue { background-color: var(--slate-blue); }
+.bg-steel { background-color: var(--steel); }
+
+.text-teal-primary { color: var(--teal-primary); }
+.text-teal-glow { color: var(--teal-glow); }
+.text-amber-accent { color: var(--amber-accent); }
+
+.border-steel { border-color: var(--steel); }
+.border-charcoal { border-color: var(--charcoal); }
+
+/* Gradient overlays */
+.gradient-mesh {
+  background-image: 
+    radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(20, 184, 166, 0.04) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(249, 115, 22, 0.03) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(45, 212, 191, 0.06) 0px, transparent 50%);
+}
+
+/* Glow effects */
+.glow-teal {
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.15), 0 0 40px rgba(20, 184, 166, 0.05);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15), 0 0 40px rgba(245, 158, 11, 0.05);
 }

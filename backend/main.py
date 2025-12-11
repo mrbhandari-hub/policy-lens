@@ -13,16 +13,18 @@ from models import PolicyLensRequest, PolicyLensResponse, DebateResult, CrossMod
 from judges import get_available_judges, get_judge_prompt, get_judge_categories
 from engine import JudgeEngine
 from multi_model import get_multi_model_engine, MultiModelEngine
+from deep_dives import get_deep_dives_engine, DeepDivesEngine
 
 
 # Initialize engines on startup
 engine: JudgeEngine = None
 multi_engine: MultiModelEngine = None
+deep_engine: DeepDivesEngine = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global engine, multi_engine
+    global engine, multi_engine, deep_engine
     
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key or api_key == "your-google-api-key-here":
@@ -38,6 +40,11 @@ async def lifespan(app: FastAPI):
     print("Initializing multi-model engine...")
     multi_engine = get_multi_model_engine()
     print("✓ Multi-model engine ready")
+    
+    # Initialize deep dives engine
+    print("Initializing deep dives engine...")
+    deep_engine = get_deep_dives_engine()
+    print("✓ Deep dives engine ready")
     
     yield
 
@@ -100,6 +107,7 @@ async def analyze_content(request: PolicyLensRequest):
     - Synthesis with consensus badge and disagreement analysis
     - Optional: Pro/Con debate result (if run_debate=True)
     - Optional: Cross-model agreement result (if run_cross_model=True)
+    - Optional: Advanced deep dive analyses (counterfactual, red_team, etc.)
     """
     if not engine:
         raise HTTPException(
@@ -117,6 +125,9 @@ async def analyze_content(request: PolicyLensRequest):
     tasks = []
     task_names = []
     
+    content_text = request.content_text or ""
+    context_hint = request.context_hint
+    
     # Always run the jury analysis
     tasks.append(engine.evaluate_content(request))
     task_names.append("jury")
@@ -124,8 +135,8 @@ async def analyze_content(request: PolicyLensRequest):
     # Optionally run debate
     if request.run_debate and multi_engine:
         tasks.append(multi_engine.run_debate(
-            content_text=request.content_text or "",
-            context_hint=request.context_hint
+            content_text=content_text,
+            context_hint=context_hint
         ))
         task_names.append("debate")
     
@@ -138,11 +149,48 @@ async def analyze_content(request: PolicyLensRequest):
             image_bytes = base64.b64decode(request.content_image_base64)
         
         tasks.append(multi_engine.run_cross_model(
-            content_text=request.content_text or "",
-            context_hint=request.context_hint,
+            content_text=content_text,
+            context_hint=context_hint,
             image_bytes=image_bytes
         ))
         task_names.append("cross_model")
+    
+    # =========================================================================
+    # NEW ADVANCED DEEP DIVES
+    # =========================================================================
+    
+    if deep_engine:
+        if request.run_counterfactual:
+            tasks.append(deep_engine.run_counterfactual(content_text, context_hint))
+            task_names.append("counterfactual")
+        
+        if request.run_red_team:
+            tasks.append(deep_engine.run_red_team(content_text, context_hint))
+            task_names.append("red_team")
+        
+        if request.run_consistency:
+            tasks.append(deep_engine.run_consistency(content_text, context_hint))
+            task_names.append("consistency")
+        
+        if request.run_moral_foundations:
+            tasks.append(deep_engine.run_moral_foundations(content_text, context_hint))
+            task_names.append("moral_foundations")
+        
+        if request.run_stakeholder:
+            tasks.append(deep_engine.run_stakeholder(content_text, context_hint))
+            task_names.append("stakeholder")
+        
+        if request.run_temporal:
+            tasks.append(deep_engine.run_temporal(content_text, context_hint))
+            task_names.append("temporal")
+        
+        if request.run_appeal:
+            tasks.append(deep_engine.run_appeal(content_text, context_hint))
+            task_names.append("appeal")
+        
+        if request.run_sycophancy:
+            tasks.append(deep_engine.run_sycophancy(content_text, context_hint))
+            task_names.append("sycophancy")
     
     try:
         # Run all analyses in parallel
@@ -152,6 +200,14 @@ async def analyze_content(request: PolicyLensRequest):
         response = None
         debate_result = None
         cross_model_result = None
+        counterfactual_result = None
+        red_team_result = None
+        consistency_result = None
+        moral_foundations_result = None
+        stakeholder_result = None
+        temporal_result = None
+        appeal_result = None
+        sycophancy_result = None
         
         for i, result in enumerate(results):
             name = task_names[i]
@@ -169,6 +225,22 @@ async def analyze_content(request: PolicyLensRequest):
                 debate_result = result
             elif name == "cross_model":
                 cross_model_result = result
+            elif name == "counterfactual":
+                counterfactual_result = result
+            elif name == "red_team":
+                red_team_result = result
+            elif name == "consistency":
+                consistency_result = result
+            elif name == "moral_foundations":
+                moral_foundations_result = result
+            elif name == "stakeholder":
+                stakeholder_result = result
+            elif name == "temporal":
+                temporal_result = result
+            elif name == "appeal":
+                appeal_result = result
+            elif name == "sycophancy":
+                sycophancy_result = result
         
         if response is None:
             raise HTTPException(status_code=500, detail="Jury analysis failed")
@@ -176,6 +248,14 @@ async def analyze_content(request: PolicyLensRequest):
         # Add optional results to response
         response.debate = debate_result
         response.cross_model = cross_model_result
+        response.counterfactual = counterfactual_result
+        response.red_team = red_team_result
+        response.consistency = consistency_result
+        response.moral_foundations = moral_foundations_result
+        response.stakeholder = stakeholder_result
+        response.temporal = temporal_result
+        response.appeal = appeal_result
+        response.sycophancy = sycophancy_result
         
         return response
         

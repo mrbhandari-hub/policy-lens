@@ -1,11 +1,11 @@
 import { JudgeVerdict, VerdictTier } from '@/types';
 
 const tierConfig: Record<VerdictTier, { color: string; bgColor: string; label: string; emoji: string }> = {
-    REMOVE: { color: 'text-red-400', bgColor: 'bg-red-600', label: 'Remove', emoji: '🚫' },
+    REMOVE: { color: 'text-rose-400', bgColor: 'bg-rose-600', label: 'Remove', emoji: '🚫' },
     AGE_GATE: { color: 'text-orange-400', bgColor: 'bg-orange-500', label: 'Age-Gate', emoji: '🔞' },
-    REDUCE_REACH: { color: 'text-yellow-400', bgColor: 'bg-yellow-500', label: 'Reduce Reach', emoji: '📉' },
-    LABEL: { color: 'text-blue-400', bgColor: 'bg-blue-500', label: 'Label', emoji: '🏷️' },
-    ALLOW: { color: 'text-green-400', bgColor: 'bg-green-500', label: 'Allow', emoji: '✅' },
+    REDUCE_REACH: { color: 'text-amber-400', bgColor: 'bg-amber-500', label: 'Reduce Reach', emoji: '📉' },
+    LABEL: { color: 'text-sky-400', bgColor: 'bg-sky-500', label: 'Label', emoji: '🏷️' },
+    ALLOW: { color: 'text-emerald-400', bgColor: 'bg-emerald-500', label: 'Allow', emoji: '✅' },
 };
 
 const tierOrder: VerdictTier[] = ['REMOVE', 'AGE_GATE', 'REDUCE_REACH', 'LABEL', 'ALLOW'];
@@ -27,7 +27,7 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
     };
 
     return (
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-6 shadow-xl">
+        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
             <h3 className="text-white text-xl font-bold mb-6 flex items-center gap-2">
                 <span className="text-2xl">📊</span> Verdict Distribution
             </h3>
@@ -45,7 +45,7 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
                                 <span className="text-lg">{config.emoji}</span>
                                 <span className="text-slate-300 text-sm font-medium">{config.label}</span>
                             </div>
-                            <div className="flex-1 bg-slate-700/50 rounded-full h-8 overflow-hidden relative">
+                            <div className="flex-1 bg-[#1e293d]/60 rounded-full h-8 overflow-hidden relative">
                                 <div
                                     className={`${config.bgColor} h-full rounded-full transition-all duration-700 ease-out flex items-center justify-end pr-3`}
                                     style={{ width: `${width}%` }}
@@ -64,7 +64,7 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
             </div>
 
             {/* Judge Verdict Grid */}
-            <div className="border-t border-slate-700 pt-6">
+            <div className="border-t border-[#1e293d] pt-6">
                 <h4 className="text-slate-400 text-sm font-medium mb-4 uppercase tracking-wide">
                     Individual Judge Verdicts
                 </h4>
@@ -74,14 +74,14 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
                         return (
                             <div
                                 key={v.judge_id}
-                                className="bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/50 rounded-lg p-4 transition-all"
+                                className="bg-[#151d2e]/80 hover:bg-[#1e293d]/80 border border-[#2d3a52] rounded-xl p-4 transition-all"
                             >
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-white font-semibold">
                                         {formatJudgeName(v.judge_id)}
                                     </span>
                                     <span
-                                        className={`${config.bgColor} text-white text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1`}
+                                        className={`${config.bgColor} text-white text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1 shadow-md`}
                                     >
                                         {config.emoji} {config.label}
                                     </span>
@@ -90,9 +90,9 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
                                 {/* Confidence bar */}
                                 <div className="flex items-center gap-3">
                                     <span className="text-slate-400 text-xs">Confidence</span>
-                                    <div className="flex-1 bg-slate-600 rounded-full h-2 overflow-hidden">
+                                    <div className="flex-1 bg-[#2d3a52] rounded-full h-2 overflow-hidden">
                                         <div
-                                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500"
+                                            className="bg-gradient-to-r from-teal-500 to-teal-400 h-full rounded-full transition-all duration-500"
                                             style={{ width: `${v.confidence_score * 100}%` }}
                                         />
                                     </div>
@@ -104,7 +104,7 @@ export function DisagreementMatrix({ verdicts, distribution }: DisagreementMatri
                                 {/* Policy axis */}
                                 <div className="mt-3">
                                     <span className="text-slate-500 text-xs">Policy: </span>
-                                    <span className="text-purple-300 text-xs">{v.primary_policy_axis}</span>
+                                    <span className="text-teal-300 text-xs">{v.primary_policy_axis}</span>
                                 </div>
                             </div>
                         );
