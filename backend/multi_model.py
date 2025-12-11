@@ -90,6 +90,12 @@ Your job is to render a fair verdict based on the strength of the arguments, NOT
 - Did either side fail to address critical weaknesses?
 - What would a reasonable, balanced policy decision be?
 
+CRITICAL: BE HONEST ABOUT AMBIGUITY
+- If this is genuinely a close call, SAY SO. Don't force confidence you don't have.
+- Some content is genuinely ambiguous - that's valuable signal for human review.
+- A low confidence score + "highly_ambiguous" difficulty is a USEFUL output, not a failure.
+- "tie" is a valid winning_side when both arguments are equally compelling.
+
 VERDICT OPTIONS:
 - REMOVE: Content clearly violates policy
 - AGE_GATE: Content is adult-oriented, restrict to 18+
@@ -97,14 +103,24 @@ VERDICT OPTIONS:
 - LABEL: Add context labels but keep up
 - ALLOW: Content is within policy
 
+DECISION DIFFICULTY (be honest!):
+- clear: One side clearly won, easy call
+- moderate: Some tension but a defensible decision  
+- difficult: Close call, reasonable people could disagree
+- highly_ambiguous: Genuinely too close to call with confidence
+
 You MUST respond with valid JSON:
 {{
   "winning_side": "advocate" | "defender" | "tie",
   "verdict_tier": "REMOVE" | "AGE_GATE" | "REDUCE_REACH" | "LABEL" | "ALLOW",
   "confidence_score": <float 0.0-1.0>,
   "reasoning": "<explanation of your decision>",
-  "key_factor": "<the decisive factor that tipped the balance>"
+  "key_factor": "<the decisive factor that tipped the balance, or 'No clear decisive factor' if tie>",
+  "decision_difficulty": "clear" | "moderate" | "difficult" | "highly_ambiguous",
+  "ambiguity_factors": ["<what made this hard to decide>", "<competing values at play>"]
 }}
+
+NOTE: For "highly_ambiguous" decisions, confidence_score should typically be 0.4-0.6, and ambiguity_factors MUST explain why.
 """
 
 NEUTRAL_ANALYST_PROMPT = f"""{SAFETY_PREAMBLE}
@@ -323,7 +339,7 @@ Now render your verdict.
                 content_prompt,
                 image_bytes
             ))
-            model_info.append(("anthropic", "claude-sonnet-4-5"))
+            model_info.append(("anthropic", "claude-sonnet-4-20250514"))
         
         if not futures:
             raise RuntimeError("At least one API key required for cross-model analysis")
@@ -484,7 +500,7 @@ Now render your verdict.
             user_content = text_prompt
         
         response = self.anthropic_client.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-4-20250514",
             max_tokens=1024,
             system=NEUTRAL_ANALYST_PROMPT,
             messages=[
