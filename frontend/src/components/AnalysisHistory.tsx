@@ -36,13 +36,24 @@ export function AnalysisHistory({ onLoadAnalysis, currentResponse }: AnalysisHis
     useEffect(() => {
         // Save current response to history
         if (currentResponse) {
+            // Handle both array and object formats of verdict_distribution
+            const dist = currentResponse.synthesis.verdict_distribution;
+            let majorityTier = 'REMOVE';
+            
+            if (Array.isArray(dist) && dist.length > 0) {
+                majorityTier = dist.reduce((a, b) => (a.count > b.count) ? a : b).tier;
+            } else if (!Array.isArray(dist)) {
+                const entries = Object.entries(dist as Record<string, number>);
+                if (entries.length > 0) {
+                    [majorityTier] = entries.sort((a, b) => b[1] - a[1])[0];
+                }
+            }
+
             const entry: HistoryEntry = {
                 id: currentResponse.request_id,
                 timestamp: Date.now(),
                 contentPreview: currentResponse.judge_verdicts[0]?.primary_policy_axis || 'Analysis',
-                verdict: currentResponse.synthesis.verdict_distribution.reduce((a, b) => 
-                    (a.count > b.count) ? a : b
-                ).tier,
+                verdict: majorityTier,
                 response: currentResponse,
             };
 

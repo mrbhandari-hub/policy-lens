@@ -14,9 +14,14 @@ export interface JudgeVerdict {
     refusal_to_instruct: boolean;
 }
 
+export interface VerdictDistributionItem {
+    tier: VerdictTier;
+    count: number;
+}
+
 export interface SynthesisResult {
     consensus_badge: ConsensusBadge;
-    verdict_distribution: Record<string, number>;
+    verdict_distribution: VerdictDistributionItem[] | Record<string, number>;
     crux_narrative: string;
     primary_tension: string;
     watermark: string;
@@ -143,6 +148,20 @@ export interface AppealResult {
     recommended_clarifications: string[];
 }
 
+// Sycophancy/Consistency Detection
+export interface SycophancyResult {
+    baseline_verdict: VerdictTier;
+    manipulated_verdicts: {
+        manipulation_type: string;
+        verdict: VerdictTier;
+        confidence: number;
+        changed: boolean;
+    }[];
+    consistency_score: number;
+    bias_indicators: string[];
+    recommendation: string;
+}
+
 // =============================================================================
 // REQUEST/RESPONSE TYPES
 // =============================================================================
@@ -160,6 +179,7 @@ export interface PolicyLensRequest {
     run_red_team?: boolean;
     run_temporal?: boolean;
     run_appeal?: boolean;
+    run_sycophancy?: boolean;
 }
 
 export interface PolicyLensResponse {
@@ -175,6 +195,7 @@ export interface PolicyLensResponse {
     red_team?: RedTeamResult;
     temporal?: TemporalResult;
     appeal?: AppealResult;
+    sycophancy?: SycophancyResult;
 }
 
 export interface JudgeInfo {

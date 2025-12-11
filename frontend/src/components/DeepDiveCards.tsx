@@ -10,6 +10,9 @@ import {
     VerdictTier,
 } from '@/types';
 
+// Re-export SycophancyResult for convenience
+export type { SycophancyResult } from '@/types';
+
 // Shared tier config
 const tierConfig: Record<VerdictTier, { color: string; bgColor: string; label: string; emoji: string }> = {
     REMOVE: { color: 'text-rose-400', bgColor: 'bg-rose-600', label: 'Remove', emoji: '🚫' },
@@ -346,7 +349,7 @@ export function TemporalCard({ data }: TemporalCardProps) {
 }
 
 // =============================================================================
-// APPEAL CARD
+// APPEAL CARD (Enhanced with Draft Appeal Letter)
 // =============================================================================
 
 interface AppealCardProps {
@@ -354,6 +357,8 @@ interface AppealCardProps {
 }
 
 export function AppealCard({ data }: AppealCardProps) {
+    const [showDraftLetter, setShowDraftLetter] = useState(false);
+    const [copied, setCopied] = useState(false);
     const successPercent = Math.round(data.overall_appeal_success_rate * 100);
 
     const strengthColors = {
@@ -361,6 +366,40 @@ export function AppealCard({ data }: AppealCardProps) {
         moderate: 'text-amber-400 bg-amber-900/30',
         strong: 'text-orange-400 bg-orange-900/30',
         compelling: 'text-emerald-400 bg-emerald-900/30',
+    };
+
+    // Generate a draft appeal letter based on the strongest arguments
+    const generateDraftAppeal = () => {
+        const strongAppeals = data.predicted_appeals.filter(a => a.strength === 'strong' || a.strength === 'compelling');
+        const topAppeals = strongAppeals.length > 0 ? strongAppeals : data.predicted_appeals.slice(0, 2);
+        
+        const letter = `Dear Trust & Safety Team,
+
+I am writing to appeal the moderation decision on my content. I believe this decision may warrant reconsideration for the following reasons:
+
+${topAppeals.map((a, i) => `${i + 1}. ${a.argument}`).join('\n\n')}
+
+Additional context that may be relevant:
+${data.missing_context.map(ctx => `• ${ctx}`).join('\n')}
+
+I respectfully request that you reconsider this decision in light of the above points. I am happy to provide any additional information or clarification that would be helpful.
+
+Thank you for your time and consideration.
+
+Sincerely,
+[Your Name]`;
+        
+        return letter;
+    };
+
+    const handleCopyLetter = async () => {
+        try {
+            await navigator.clipboard.writeText(generateDraftAppeal());
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
     };
 
     return (
@@ -417,6 +456,45 @@ export function AppealCard({ data }: AppealCardProps) {
                     </div>
                 </div>
 
+                {/* Draft Appeal Letter - NEW */}
+                <div className="bg-gradient-to-br from-purple-950/30 to-violet-950/20 border border-purple-800/40 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-purple-300 font-bold text-sm flex items-center gap-2">
+                            <span>✉️</span> Draft Appeal Letter
+                        </h4>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowDraftLetter(!showDraftLetter)}
+                                className="text-purple-400 text-xs hover:text-purple-300 transition-colors"
+                            >
+                                {showDraftLetter ? 'Hide' : 'Show'} Letter
+                            </button>
+                            {showDraftLetter && (
+                                <button
+                                    onClick={handleCopyLetter}
+                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                        copied
+                                            ? 'bg-emerald-600/30 text-emerald-300'
+                                            : 'bg-purple-900/40 text-purple-300 hover:bg-purple-900/60'
+                                    }`}
+                                >
+                                    {copied ? '✓ Copied!' : 'Copy'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <p className="text-slate-400 text-xs mb-3">
+                        Auto-generated appeal template based on the strongest arguments. Edit before sending.
+                    </p>
+                    {showDraftLetter && (
+                        <div className="bg-[#0a0f1a]/80 rounded-lg p-4 border border-purple-900/30">
+                            <pre className="text-slate-300 text-xs whitespace-pre-wrap font-mono leading-relaxed">
+                                {generateDraftAppeal()}
+                            </pre>
+                        </div>
+                    )}
+                </div>
+
                 {/* Missing Context & Clarifications */}
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl p-4">
@@ -440,6 +518,114 @@ export function AppealCard({ data }: AppealCardProps) {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// =============================================================================
+// SYCOPHANCY CARD (Consistency/Bias Detection)
+// =============================================================================
+
+interface SycophancyCardProps {
+    data: SycophancyResult;
+}
+
+export function SycophancyCard({ data }: SycophancyCardProps) {
+    const consistencyPercent = Math.round(data.consistency_score * 100);
+    const baselineConfig = tierConfig[data.baseline_verdict];
+    
+    const consistencyLevel = consistencyPercent >= 80 ? 'high' : consistencyPercent >= 50 ? 'moderate' : 'low';
+    const consistencyColors = {
+        high: { color: 'text-emerald-400', bg: 'bg-emerald-900/40', label: 'Highly Consistent' },
+        moderate: { color: 'text-amber-400', bg: 'bg-amber-900/40', label: 'Moderately Consistent' },
+        low: { color: 'text-rose-400', bg: 'bg-rose-900/40', label: 'Low Consistency' },
+    };
+    const config = consistencyColors[consistencyLevel];
+
+    return (
+        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-gradient-to-r from-pink-950/40 via-[#0f1629] to-rose-950/40 p-4 border-b border-[#1e293d]">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-white text-xl font-bold flex items-center gap-2">
+                            <span className="text-2xl">🎭</span> Sycophancy Detection
+                        </h3>
+                        <p className="text-slate-400 text-sm mt-1">
+                            Testing for consistency under manipulation
+                        </p>
+                    </div>
+                    <span className={`${config.bg} ${config.color} px-3 py-1.5 rounded-full text-sm font-medium`}>
+                        {consistencyPercent}% Consistent
+                    </span>
+                </div>
+            </div>
+
+            <div className="p-5">
+                {/* Baseline */}
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="text-slate-400 text-sm">Baseline Verdict:</span>
+                    <span className={`${baselineConfig.bgColor} text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5`}>
+                        {baselineConfig.emoji} {baselineConfig.label}
+                    </span>
+                </div>
+
+                {/* Manipulation Tests */}
+                <div className="space-y-3 mb-6">
+                    <h4 className="text-slate-400 text-sm font-medium">Manipulation Tests</h4>
+                    {data.manipulated_verdicts.map((test, i) => {
+                        const testConfig = tierConfig[test.verdict];
+                        return (
+                            <div 
+                                key={i}
+                                className={`bg-[#0a0f1a]/60 border ${test.changed ? 'border-rose-500/30' : 'border-emerald-500/30'} rounded-xl p-4`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className={test.changed ? 'text-rose-400' : 'text-emerald-400'}>
+                                            {test.changed ? '⚠️' : '✓'}
+                                        </span>
+                                        <span className="text-slate-200 text-sm">{test.manipulation_type}</span>
+                                    </div>
+                                    <span className={`${testConfig.bgColor} text-white px-2 py-1 rounded text-xs font-medium`}>
+                                        {testConfig.emoji} {testConfig.label}
+                                    </span>
+                                </div>
+                                {test.changed && (
+                                    <p className="text-rose-400/80 text-xs mt-2">
+                                        ⚠️ Verdict changed under this manipulation
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Bias Indicators */}
+                {data.bias_indicators.length > 0 && (
+                    <div className="bg-rose-950/20 border border-rose-800/30 rounded-xl p-4 mb-6">
+                        <h4 className="text-rose-400 font-bold mb-2 text-sm">🚨 Potential Bias Indicators</h4>
+                        <ul className="space-y-1">
+                            {data.bias_indicators.map((indicator, i) => (
+                                <li key={i} className="text-slate-300 text-xs flex items-start gap-2">
+                                    <span className="text-rose-500 mt-0.5">•</span>
+                                    {indicator}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* Recommendation */}
+                <div className="bg-teal-950/30 border border-teal-800/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                        <span className="text-xl">💡</span>
+                        <div>
+                            <p className="text-teal-300 text-sm font-medium mb-1">Recommendation</p>
+                            <p className="text-slate-200 text-sm">{data.recommendation}</p>
+                        </div>
                     </div>
                 </div>
             </div>

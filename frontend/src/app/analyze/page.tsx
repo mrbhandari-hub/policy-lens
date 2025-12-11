@@ -131,14 +131,29 @@ function AnalyzeContent() {
     if (loading) {
       document.title = 'Analyzing... | PolicyLens';
     } else if (response) {
-      const majorityVerdict = response.synthesis.verdict_distribution.reduce((a, b) => 
-        (a.count > b.count) ? a : b
-      );
-      const verdictLabel = majorityVerdict.tier === 'REMOVE' ? 'REMOVE' :
-                          majorityVerdict.tier === 'ALLOW' ? 'ALLOW' :
-                          majorityVerdict.tier === 'REDUCE_REACH' ? 'REDUCE' :
-                          majorityVerdict.tier === 'AGE_GATE' ? 'AGE-GATE' :
-                          majorityVerdict.tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+      // Handle both array and object formats of verdict_distribution
+      let verdictLabel = 'ANALYSIS';
+      const dist = response.synthesis.verdict_distribution;
+      
+      if (Array.isArray(dist) && dist.length > 0) {
+        const majorityVerdict = dist.reduce((a, b) => (a.count > b.count) ? a : b);
+        verdictLabel = majorityVerdict.tier === 'REMOVE' ? 'REMOVE' :
+                      majorityVerdict.tier === 'ALLOW' ? 'ALLOW' :
+                      majorityVerdict.tier === 'REDUCE_REACH' ? 'REDUCE' :
+                      majorityVerdict.tier === 'AGE_GATE' ? 'AGE-GATE' :
+                      majorityVerdict.tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+      } else if (!Array.isArray(dist)) {
+        const entries = Object.entries(dist as Record<string, number>);
+        if (entries.length > 0) {
+          const [tier] = entries.sort((a, b) => b[1] - a[1])[0];
+          verdictLabel = tier === 'REMOVE' ? 'REMOVE' :
+                        tier === 'ALLOW' ? 'ALLOW' :
+                        tier === 'REDUCE_REACH' ? 'REDUCE' :
+                        tier === 'AGE_GATE' ? 'AGE-GATE' :
+                        tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+        }
+      }
+      
       document.title = `${verdictLabel} | PolicyLens Analysis`;
     } else {
       document.title = 'PolicyLens - Content Moderation Analysis';
