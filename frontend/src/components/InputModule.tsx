@@ -919,10 +919,41 @@ export function InputModule({
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2d3a52] text-white text-sm font-bold">
                         3
                     </div>
-                    <div>
+                    <div className="flex-1">
                         <h2 className="text-white text-lg font-semibold">Deep Dive <span className="text-slate-500 text-sm font-normal">(optional)</span></h2>
                         <p className="text-slate-500 text-xs">Advanced analysis modes based on cutting-edge AI research</p>
                     </div>
+                    {/* Select All / Clear All toggle */}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const allSelected = runDebate && runCrossModel && runCounterfactual && runRedTeam && runTemporal && runAppeal;
+                            if (allSelected) {
+                                // Clear all
+                                setRunDebate(false);
+                                setRunCrossModel(false);
+                                setRunCounterfactual(false);
+                                setRunRedTeam(false);
+                                setRunTemporal(false);
+                                setRunAppeal(false);
+                            } else {
+                                // Select all
+                                setRunDebate(true);
+                                setRunCrossModel(true);
+                                setRunCounterfactual(true);
+                                setRunRedTeam(true);
+                                setRunTemporal(true);
+                                setRunAppeal(true);
+                            }
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+                            runDebate && runCrossModel && runCounterfactual && runRedTeam && runTemporal && runAppeal
+                                ? 'bg-teal-600/30 border-teal-500/50 text-teal-300 hover:bg-teal-600/40'
+                                : 'bg-[#1e293d]/60 border-[#2d3a52] text-slate-400 hover:text-white hover:bg-[#2d3a52]/60'
+                        }`}
+                    >
+                        {runDebate && runCrossModel && runCounterfactual && runRedTeam && runTemporal && runAppeal ? '✓ All Selected' : 'Select All'}
+                    </button>
                 </div>
 
                 <div className="ml-11 space-y-4">
