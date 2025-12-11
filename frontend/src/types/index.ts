@@ -159,23 +159,6 @@ export interface AppealResult {
     recommended_clarifications: string[];
 }
 
-// Sycophancy Detection
-export interface SycophancyCheck {
-    framing: string;
-    verdict: VerdictTier;
-    confidence: number;
-    key_difference: string | null;
-}
-
-export interface SycophancyResult {
-    baseline_verdict: VerdictTier;
-    variations: SycophancyCheck[];
-    bias_detected: boolean;
-    bias_direction: string | null;
-    robustness_score: number;
-    recommendation: string;
-}
-
 // =============================================================================
 // REQUEST/RESPONSE TYPES
 // =============================================================================
@@ -194,7 +177,6 @@ export interface PolicyLensRequest {
     run_consistency?: boolean;
     run_temporal?: boolean;
     run_appeal?: boolean;
-    run_sycophancy?: boolean;
 }
 
 export interface PolicyLensResponse {
@@ -211,7 +193,6 @@ export interface PolicyLensResponse {
     consistency?: SelfConsistencyResult;
     temporal?: TemporalResult;
     appeal?: AppealResult;
-    sycophancy?: SycophancyResult;
 }
 
 export interface JudgeInfo {

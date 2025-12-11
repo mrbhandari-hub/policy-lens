@@ -17,7 +17,6 @@ import {
   SelfConsistencyCard,
   TemporalCard,
   AppealCard,
-  SycophancyCard,
 } from '@/components';
 import { SampleCase } from '@/data/samples';
 import { PolicyLensResponse, PolicyLensRequest } from '@/types';
@@ -245,7 +244,7 @@ function AnalyzeContent() {
             {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
             {(response.debate || response.cross_model || response.counterfactual || 
               response.red_team || response.consistency || response.temporal || 
-              response.appeal || response.sycophancy) && (
+              response.appeal) && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
@@ -280,16 +279,9 @@ function AnalyzeContent() {
                     </div>
                   )}
 
-                  {/* Security & Bias */}
-                  {(response.red_team || response.sycophancy) && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {response.red_team && (
-                        <RedTeamCard data={response.red_team} />
-                      )}
-                      {response.sycophancy && (
-                        <SycophancyCard data={response.sycophancy} />
-                      )}
-                    </div>
+                  {/* Security Analysis */}
+                  {response.red_team && (
+                    <RedTeamCard data={response.red_team} />
                   )}
 
                   {/* Context & Appeals */}

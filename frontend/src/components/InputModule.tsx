@@ -230,7 +230,6 @@ export function InputModule({
     const [runConsistency, setRunConsistency] = useState(false);
     const [runTemporal, setRunTemporal] = useState(false);
     const [runAppeal, setRunAppeal] = useState(false);
-    const [runSycophancy, setRunSycophancy] = useState(false);
 
     const openMethodologyModal = (mode: 'debate' | 'crossmodel', e: React.MouseEvent) => {
         e.preventDefault();
@@ -476,7 +475,6 @@ export function InputModule({
             run_consistency: runConsistency,
             run_temporal: runTemporal,
             run_appeal: runAppeal,
-            run_sycophancy: runSycophancy,
         });
     };
 
@@ -1074,24 +1072,6 @@ export function InputModule({
                                     className="accent-yellow-500"
                                 />
                                 <span className="text-sm">📝 Appeal</span>
-                            </label>
-
-                            {/* Sycophancy */}
-                            <label
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                                    runSycophancy
-                                        ? 'bg-pink-950/50 border-pink-600/50 text-white'
-                                        : 'bg-[#151d2e]/80 border-[#2d3a52] text-slate-400 hover:border-[#3d4a66]'
-                                }`}
-                                title="Check for framing bias"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={runSycophancy}
-                                    onChange={(e) => setRunSycophancy(e.target.checked)}
-                                    className="accent-pink-500"
-                                />
-                                <span className="text-sm">🪞 Sycophancy</span>
                             </label>
                     </div>
 

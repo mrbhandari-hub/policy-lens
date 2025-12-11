@@ -218,24 +218,6 @@ class AppealResult(BaseModel):
     recommended_clarifications: list[str] = Field(..., description="Questions to ask the content creator")
 
 
-class SycophancyCheck(BaseModel):
-    """Result of a sycophancy test variation"""
-    framing: str = Field(..., description="How the content was framed")
-    verdict: VerdictTier = Field(..., description="Verdict with this framing")
-    confidence: float = Field(..., ge=0.0, le=1.0)
-    key_difference: Optional[str] = Field(None, description="What changed vs baseline")
-
-
-class SycophancyResult(BaseModel):
-    """Sycophancy detection analysis"""
-    baseline_verdict: VerdictTier = Field(..., description="Verdict with neutral framing")
-    variations: list[SycophancyCheck] = Field(..., description="Results with different framings")
-    bias_detected: bool = Field(..., description="Whether framing changed the verdict")
-    bias_direction: Optional[str] = Field(None, description="Which framing direction showed bias")
-    robustness_score: float = Field(..., ge=0.0, le=1.0, description="How robust the verdict is to framing (1.0 = no bias)")
-    recommendation: str = Field(..., description="What this means for the verdict's reliability")
-
-
 # =============================================================================
 # REQUEST/RESPONSE MODELS
 # =============================================================================
@@ -261,7 +243,6 @@ class PolicyLensRequest(BaseModel):
     run_consistency: bool = Field(default=False, description="Run self-consistency sampling")
     run_temporal: bool = Field(default=False, description="Run temporal sensitivity analysis")
     run_appeal: bool = Field(default=False, description="Run appeal anticipation analysis")
-    run_sycophancy: bool = Field(default=False, description="Run sycophancy bias detection")
 
 
 class PolicyLensResponse(BaseModel):
@@ -279,4 +260,3 @@ class PolicyLensResponse(BaseModel):
     consistency: Optional[SelfConsistencyResult] = Field(None, description="Self-consistency sampling (if requested)")
     temporal: Optional[TemporalResult] = Field(None, description="Temporal sensitivity analysis (if requested)")
     appeal: Optional[AppealResult] = Field(None, description="Appeal anticipation analysis (if requested)")
-    sycophancy: Optional[SycophancyResult] = Field(None, description="Sycophancy detection (if requested)")

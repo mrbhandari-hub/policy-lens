@@ -179,10 +179,6 @@ async def analyze_content(request: PolicyLensRequest):
         if request.run_appeal:
             tasks.append(deep_engine.run_appeal(content_text, context_hint))
             task_names.append("appeal")
-        
-        if request.run_sycophancy:
-            tasks.append(deep_engine.run_sycophancy(content_text, context_hint))
-            task_names.append("sycophancy")
     
     try:
         # Run all analyses in parallel
@@ -197,7 +193,6 @@ async def analyze_content(request: PolicyLensRequest):
         consistency_result = None
         temporal_result = None
         appeal_result = None
-        sycophancy_result = None
         
         for i, result in enumerate(results):
             name = task_names[i]
@@ -225,8 +220,6 @@ async def analyze_content(request: PolicyLensRequest):
                 temporal_result = result
             elif name == "appeal":
                 appeal_result = result
-            elif name == "sycophancy":
-                sycophancy_result = result
         
         if response is None:
             raise HTTPException(status_code=500, detail="Jury analysis failed")
@@ -239,7 +232,6 @@ async def analyze_content(request: PolicyLensRequest):
         response.consistency = consistency_result
         response.temporal = temporal_result
         response.appeal = appeal_result
-        response.sycophancy = sycophancy_result
         
         return response
         

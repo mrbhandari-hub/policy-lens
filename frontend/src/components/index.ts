@@ -17,5 +17,4 @@ export {
     SelfConsistencyCard,
     TemporalCard,
     AppealCard,
-    SycophancyCard,
 } from './DeepDiveCards';
