@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LandingHero, LandingFeatures } from '@/components';
+import { LandingHero, LandingFeatures, LandingHeader, LandingUseCases } from '@/components';
 
 function LandingContent() {
   const searchParams = useSearchParams();
@@ -24,14 +24,31 @@ function LandingContent() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl" />
       </div>
 
+      <LandingHeader />
       <LandingHero />
       <LandingFeatures />
+      <LandingUseCases />
 
       <footer className="text-center py-8 border-t border-slate-800/50 relative z-10">
-        <p className="text-slate-500 text-sm">
-          PolicyLens v2.0 — Powered by{' '}
-          <span className="text-purple-400">Gemini 3 Pro Preview</span>
-        </p>
+        <div className="container mx-auto px-4 max-w-6xl">
+          <p className="text-slate-500 text-sm mb-4">
+            PolicyLens v2.0 — Powered by{' '}
+            <span className="text-purple-400">Gemini 3 Pro Preview</span>
+          </p>
+          <div className="flex items-center justify-center gap-6 text-sm text-slate-600">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">
+              GitHub
+            </a>
+            <span>•</span>
+            <a href="/analyze" className="hover:text-slate-400 transition-colors">
+              Documentation
+            </a>
+            <span>•</span>
+            <a href="mailto:contact@policylens.xyz" className="hover:text-slate-400 transition-colors">
+              Contact
+            </a>
+          </div>
+        </div>
       </footer>
     </main>
   );

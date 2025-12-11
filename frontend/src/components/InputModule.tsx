@@ -491,12 +491,12 @@ export function InputModule({
                         <h2 className="text-white text-lg font-semibold">Content Under Review</h2>
                         <p className="text-slate-500 text-xs">What needs a policy decision?</p>
                     </div>
-                    {/* Try a Sample - lightweight link */}
+                    {/* Try a Sample - more prominent */}
                     {onSampleSelect && (
                         <button
                             type="button"
                             onClick={() => setShowSamples(!showSamples)}
-                            className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 transition-colors"
+                            className="ml-auto px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-500/40 text-teal-300 hover:bg-teal-500/30 hover:border-teal-500/60 text-xs font-medium flex items-center gap-1.5 transition-all"
                         >
                             <span>✨</span>
                             {showSamples ? 'Hide samples' : 'Try a sample case'}
@@ -504,12 +504,24 @@ export function InputModule({
                     )}
                 </div>
 
-                {/* Sample picker dropdown */}
+                {/* Sample picker dropdown - more prominent */}
                 {showSamples && onSampleSelect && (
-                    <div className="ml-11 mb-4 p-3 bg-[#0a0f1a]/80 border border-[#1e293d] rounded-lg">
-                        <div className="text-xs text-slate-400 mb-2">Quick samples:</div>
-                        <div className="flex flex-wrap gap-2">
-                            {SAMPLE_CASES.slice(0, 8).map(sample => (
+                    <div className="ml-11 mb-4 p-4 bg-[#0a0f1a]/90 border border-teal-500/30 rounded-xl shadow-lg">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-sm text-teal-300 font-medium flex items-center gap-2">
+                                <span>✨</span>
+                                Quick Sample Cases
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowSamples(false)}
+                                className="text-xs text-slate-400 hover:text-white transition-colors"
+                            >
+                                ✕ Close
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                            {SAMPLE_CASES.slice(0, 12).map(sample => (
                                 <button
                                     key={sample.id}
                                     type="button"
@@ -517,26 +529,31 @@ export function InputModule({
                                         onSampleSelect(sample);
                                         setShowSamples(false);
                                     }}
-                                    className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
+                                    className={`text-left text-xs px-3 py-2 rounded-lg border transition-all hover:scale-[1.02] ${
                                         sample.category === 'violating' 
-                                            ? 'bg-rose-950/40 border-rose-700/40 text-rose-300 hover:bg-rose-900/50'
+                                            ? 'bg-rose-950/50 border-rose-700/50 text-rose-200 hover:bg-rose-900/60 hover:border-rose-600/70'
                                             : sample.category === 'borderline'
-                                                ? 'bg-amber-950/40 border-amber-700/40 text-amber-300 hover:bg-amber-900/50'
-                                                : 'bg-emerald-950/40 border-emerald-700/40 text-emerald-300 hover:bg-emerald-900/50'
+                                                ? 'bg-amber-950/50 border-amber-700/50 text-amber-200 hover:bg-amber-900/60 hover:border-amber-600/70'
+                                                : 'bg-emerald-950/50 border-emerald-700/50 text-emerald-200 hover:bg-emerald-900/60 hover:border-emerald-600/70'
                                     }`}
-                                    title={sample.content.substring(0, 100) + '...'}
+                                    title={sample.content.substring(0, 150) + (sample.content.length > 150 ? '...' : '')}
                                 >
-                                    {sample.category === 'violating' ? '🔴' : sample.category === 'borderline' ? '🟡' : '🟢'} {sample.label.replace(/^[🔴🟡🟢⚖️✅]\s*/, '').substring(0, 25)}
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-base flex-shrink-0">
+                                            {sample.category === 'violating' ? '🔴' : sample.category === 'borderline' ? '🟡' : '🟢'}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">
+                                                {sample.label.replace(/^[🔴🟡🟢⚖️✅]\s*/, '')}
+                                            </div>
+                                            <div className="text-[10px] opacity-70 mt-0.5 line-clamp-1">
+                                                {sample.content.substring(0, 50)}...
+                                            </div>
+                                        </div>
+                                    </div>
                                 </button>
                             ))}
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setShowSamples(false)}
-                            className="text-xs text-slate-500 hover:text-slate-300 mt-2"
-                        >
-                            ← Close
-                        </button>
                     </div>
                 )}
 
@@ -544,13 +561,25 @@ export function InputModule({
                 <div className="ml-11 space-y-4">
                     {/* Text Input */}
                     <div>
-                        <label className="block text-slate-400 text-sm mb-2">
-                            Text or post content
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-slate-400 text-sm">
+                                Text or post content
+                            </label>
+                            {!contentText.trim() && onSampleSelect && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSamples(!showSamples)}
+                                    className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 transition-colors"
+                                >
+                                    <span>✨</span>
+                                    {showSamples ? 'Hide' : 'Browse samples'}
+                                </button>
+                            )}
+                        </div>
                         <textarea
                             value={contentText}
                             onChange={(e) => onContentTextChange(e.target.value)}
-                            placeholder="Paste the content you want to analyze..."
+                            placeholder="Paste the content you want to analyze... or try a sample case above ✨"
                             className="w-full bg-[#0a0f1a]/80 border border-[#2d3a52] rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 transition-all resize-none"
                             rows={5}
                             maxLength={10000}
@@ -958,7 +987,7 @@ export function InputModule({
 
                 <div className="ml-11 space-y-4">
                     {/* All Deep Dives in one grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                         {/* Debate */}
                         <label
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
@@ -1096,12 +1125,30 @@ export function InputModule({
             {/* ═══════════════════════════════════════════════════════════════
                 SUBMIT
             ═══════════════════════════════════════════════════════════════ */}
+            {/* Time Estimation */}
+            {!loading && (contentText.trim() || imageBase64) && selectedJudges.length >= 1 && (() => {
+                const deepDiveCount = [runDebate, runCrossModel, runCounterfactual, runRedTeam, runTemporal, runAppeal].filter(Boolean).length;
+                const estimatedSeconds = Math.max(2, Math.round(2 + selectedJudges.length * 0.5 + deepDiveCount * 4));
+                return (
+                    <div className="flex items-center justify-center gap-2 text-sm text-slate-400 mb-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>
+                            Estimated time: ~{estimatedSeconds} seconds
+                            {deepDiveCount > 0 && (
+                                <span className="text-slate-500"> ({selectedJudges.length} judges + {deepDiveCount} deep dive{deepDiveCount > 1 ? 's' : ''})</span>
+                            )}
+                        </span>
+                    </div>
+                );
+            })()}
             <button
                 onClick={handleSubmit}
                 disabled={loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1}
-                className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1
+                className={`w-full py-4 rounded-xl font-semibold text-lg transition-all min-h-[56px] ${loading || (!contentText.trim() && !imageBase64) || selectedJudges.length < 1
                     ? 'bg-[#2d3a52] text-slate-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-500 hover:to-teal-400 shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40'
+                    : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-500 hover:to-teal-400 shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 active:scale-[0.98]'
                     }`}
             >
                 {loading ? (

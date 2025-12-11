@@ -11,6 +11,10 @@ import {
   CrossModelCard,
   ShareButton,
   VerdictSummary,
+  ResultsNavigation,
+  CollapsibleSection,
+  AnalysisHistory,
+  MobileResultsNav,
   // Advanced Deep Dive Cards
   CounterfactualCard,
   RedTeamCard,
@@ -122,6 +126,25 @@ function AnalyzeContent() {
     }
   };
 
+  // Update page title based on state
+  useEffect(() => {
+    if (loading) {
+      document.title = 'Analyzing... | PolicyLens';
+    } else if (response) {
+      const majorityVerdict = response.synthesis.verdict_distribution.reduce((a, b) => 
+        (a.count > b.count) ? a : b
+      );
+      const verdictLabel = majorityVerdict.tier === 'REMOVE' ? 'REMOVE' :
+                          majorityVerdict.tier === 'ALLOW' ? 'ALLOW' :
+                          majorityVerdict.tier === 'REDUCE_REACH' ? 'REDUCE' :
+                          majorityVerdict.tier === 'AGE_GATE' ? 'AGE-GATE' :
+                          majorityVerdict.tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+      document.title = `${verdictLabel} | PolicyLens Analysis`;
+    } else {
+      document.title = 'PolicyLens - Content Moderation Analysis';
+    }
+  }, [loading, response]);
+
   // Load from Supabase if ID is present
   useEffect(() => {
     const id = searchParams.get('id');
@@ -197,6 +220,16 @@ function AnalyzeContent() {
           </a>
         </header>
 
+        {/* Analysis History */}
+        <AnalysisHistory 
+          onLoadAnalysis={(loadedResponse) => {
+            setResponse(loadedResponse);
+            // Try to extract content from response if available
+            // This is a simplified approach - in production you might want to store input data too
+          }}
+          currentResponse={response}
+        />
+
         {/* Input Module */}
         <InputModule
           onAnalyze={handleAnalyze}
@@ -225,21 +258,68 @@ function AnalyzeContent() {
 
         {/* Results */}
         {response && (
-          <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <>
+            <ResultsNavigation response={response} />
+            <MobileResultsNav response={response} />
+            <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 lg:pb-0">
+              {/* Results Header with Share/Export and Summary */}
+              <div id="section-summary" className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-4 md:p-6 shadow-xl scroll-mt-24">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
+                <div>
+                  <h2 className="text-white text-xl font-bold mb-2">Analysis Results</h2>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                    <span>{response.judge_verdicts.length} judges</span>
+                    {response.debate && <span>• Debate</span>}
+                    {response.cross_model && <span>• Cross-Model</span>}
+                    {response.counterfactual && <span>• Counterfactual</span>}
+                    {response.red_team && <span>• Red Team</span>}
+                    {response.temporal && <span>• Temporal</span>}
+                    {response.appeal && <span>• Appeal</span>}
+                    {response.sycophancy && <span>• Sycophancy</span>}
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                  <button
+                    onClick={exportJSON}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/60 hover:text-white hover:border-teal-500/30 transition-all text-sm font-medium min-h-[44px]"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export JSON
+                  </button>
+                  {shareId && (
+                    <div className="min-h-[44px]">
+                      <ShareButton shareId={shareId} />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="text-slate-500 text-xs">
+                Request ID: <code className="bg-[#0a0f1a] px-2 py-1 rounded text-teal-400/70 font-mono">{response.request_id}</code>
+              </div>
+            </div>
+
             {/* At-a-Glance Verdict Summary */}
             <VerdictSummary verdicts={response.judge_verdicts} />
 
             {/* Synthesis Card */}
-            <SynthesisCard synthesis={response.synthesis} />
+            <div id="section-synthesis" className="scroll-mt-24">
+              <SynthesisCard synthesis={response.synthesis} />
+            </div>
 
             {/* Middle: Disagreement Matrix */}
-            <DisagreementMatrix
-              verdicts={response.judge_verdicts}
-              distribution={response.synthesis.verdict_distribution}
-            />
+            <div id="section-distribution" className="scroll-mt-24">
+              <DisagreementMatrix
+                verdicts={response.judge_verdicts}
+                distribution={response.synthesis.verdict_distribution}
+              />
+            </div>
 
             {/* Bottom: Detailed Rationale */}
-            <JudgeDetailCards verdicts={response.judge_verdicts} />
+            <div id="section-rationale" className="scroll-mt-24">
+              <JudgeDetailCards verdicts={response.judge_verdicts} />
+            </div>
 
             {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
             {(response.debate || response.cross_model || response.counterfactual || 
@@ -258,65 +338,73 @@ function AnalyzeContent() {
                   {(response.debate || response.cross_model) && (
                     <div className="grid md:grid-cols-2 gap-6">
                       {response.debate && (
-                        <DebateCard debate={response.debate} />
+                        <div id="section-debate" className="scroll-mt-24">
+                          <CollapsibleSection id="debate" title="Pro/Con Debate" icon="⚔️">
+                            <DebateCard debate={response.debate} />
+                          </CollapsibleSection>
+                        </div>
                       )}
                       {response.cross_model && (
-                        <CrossModelCard crossModel={response.cross_model} />
+                        <div id="section-crossmodel" className="scroll-mt-24">
+                          <CollapsibleSection id="crossmodel" title="Cross-Model Agreement" icon="🤖">
+                            <CrossModelCard crossModel={response.cross_model} />
+                          </CollapsibleSection>
+                        </div>
                       )}
                     </div>
                   )}
 
                   {/* Boundary Analysis */}
                   {response.counterfactual && (
-                    <CounterfactualCard data={response.counterfactual} />
+                    <div id="section-counterfactual" className="scroll-mt-24">
+                      <CollapsibleSection id="counterfactual" title="Counterfactual Analysis" icon="🔀">
+                        <CounterfactualCard data={response.counterfactual} />
+                      </CollapsibleSection>
+                    </div>
                   )}
 
                   {/* Security Analysis */}
                   {response.red_team && (
-                    <RedTeamCard data={response.red_team} />
+                    <div id="section-redteam" className="scroll-mt-24">
+                      <CollapsibleSection id="redteam" title="Red Team Analysis" icon="🎯">
+                        <RedTeamCard data={response.red_team} />
+                      </CollapsibleSection>
+                    </div>
                   )}
 
                   {/* Context & Appeals */}
                   {(response.temporal || response.appeal) && (
                     <div className="grid md:grid-cols-2 gap-6">
                       {response.temporal && (
-                        <TemporalCard data={response.temporal} />
+                        <div id="section-temporal" className="scroll-mt-24">
+                          <CollapsibleSection id="temporal" title="Temporal Sensitivity" icon="⏰">
+                            <TemporalCard data={response.temporal} />
+                          </CollapsibleSection>
+                        </div>
                       )}
                       {response.appeal && (
-                        <AppealCard data={response.appeal} />
+                        <div id="section-appeal" className="scroll-mt-24">
+                          <CollapsibleSection id="appeal" title="Appeal Anticipation" icon="📝">
+                            <AppealCard data={response.appeal} />
+                          </CollapsibleSection>
+                        </div>
                       )}
                     </div>
                   )}
 
                   {/* Bias Detection */}
                   {response.sycophancy && (
-                    <SycophancyCard data={response.sycophancy} />
+                    <div id="section-sycophancy" className="scroll-mt-24">
+                      <CollapsibleSection id="sycophancy" title="Sycophancy Detection" icon="🎭">
+                        <SycophancyCard data={response.sycophancy} />
+                      </CollapsibleSection>
+                    </div>
                   )}
                 </div>
               </div>
             )}
-
-            {/* Results Footer with Export and Share */}
-            <div className="flex items-center justify-between bg-[#0f1629]/80 border border-[#1e293d] rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-slate-500 text-sm">
-                Request ID: <code className="bg-[#0a0f1a] px-2 py-1 rounded text-teal-400/70 font-mono text-xs">{response.request_id}</code>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={exportJSON}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/60 hover:text-white hover:border-teal-500/30 transition-all text-sm font-medium"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Export JSON
-                </button>
-                {shareId && (
-                  <ShareButton shareId={shareId} />
-                )}
-              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Footer */}
