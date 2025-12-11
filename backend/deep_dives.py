@@ -1,11 +1,10 @@
 """PolicyLens v2.0 - Advanced Deep Dive Analyses
 
-Implements 5 cutting-edge AI analysis techniques:
+Implements 4 cutting-edge AI analysis techniques:
 1. Counterfactual Analysis - What would change the verdict?
 2. Red Team Mode - Adversarial vulnerability analysis
 3. Temporal Sensitivity - How context timing affects verdict
 4. Appeal Anticipation - Predict creator appeals
-5. Sycophancy Detection - Check for framing bias
 """
 import asyncio
 import json
@@ -21,7 +20,6 @@ from models import (
     RedTeamResult, RedTeamVulnerability,
     TemporalResult, TemporalContext,
     AppealResult, AppealArgument,
-    SycophancyResult, SycophancyCheck,
     VerdictTier
 )
 
