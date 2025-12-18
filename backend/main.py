@@ -381,13 +381,24 @@ async def scan_ads(request: AdScanRequest):
                     # Cache the raw ads
                     cache_ads(request.keyword, ads_to_analyze)
                 else:
-                    print(f"No real ads found for '{request.keyword}', falling back to samples")
-                    ads_to_analyze = get_sample_ads_by_keyword(request.keyword, request.max_ads)
+                    # No fallback - fail if no real ads found
+                    raise HTTPException(
+                        status_code=404, 
+                        detail=f"No ads found for '{request.keyword}'. Make sure APIFY_API_TOKEN is configured."
+                    )
+            except HTTPException:
+                raise  # Re-raise our own HTTPException
             except Exception as e:
-                print(f"Error fetching real ads: {e}, falling back to samples")
-                ads_to_analyze = get_sample_ads_by_keyword(request.keyword, request.max_ads)
+                # No fallback - fail if fetching fails
+                raise HTTPException(
+                    status_code=503, 
+                    detail=f"Failed to fetch ads: {str(e)}. Check APIFY_API_TOKEN configuration."
+                )
     else:
-        ads_to_analyze = get_sample_ads_by_keyword(request.keyword, request.max_ads)
+        raise HTTPException(
+            status_code=400, 
+            detail="use_real_ads must be true. Sample/simulated ads are disabled."
+        )
     
     if not ads_to_analyze:
         raise HTTPException(status_code=400, detail="No ads to analyze")

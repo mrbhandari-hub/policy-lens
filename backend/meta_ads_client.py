@@ -231,52 +231,20 @@ class MetaAdsClient:
                         ))
                     
                     if not ads:
-                        print("Playwright found no ads, triggering fallback")
-                        return await self._simulate_ads(keyword, limit)
+                        print("Playwright found no ads")
+                        return []
                         
                     return ads[:limit]
                     
                 except Exception as e:
                     print(f"Playwright selector timeout or error: {e}")
-                    return await self._simulate_ads(keyword, limit)
+                    return []
                     
                 finally:
                     await browser.close()
                     
         except Exception as e:
             print(f"Playwright critical error: {e}")
-            return await self._simulate_ads(keyword, limit)
-            
-    async def _simulate_ads(self, keyword: str, limit: int) -> list[MetaAd]:
-        """Fallback method using LLM simulation"""
-        print(f"Generating simulated ads fallback for: {keyword}")
-        import google.generativeai as genai
-        
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            return []
-            
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        
-        prompt = f"""
-        Generate {limit} realistic text advertisements that might appear in the Meta Ads Library for the keyword "{keyword}".
-        Include a mix of potentially problematic and benign ads.
-        Return raw JSON list with fields: ad_id, text, advertiser_name, is_active.
-        """
-        
-        try:
-            response = await model.generate_content_async(prompt)
-            text = response.text
-             # Clean up potential markdown code blocks
-            if "```json" in text:
-                text = text.split("```json")[1].split("```")[0]
-            elif "```" in text:
-                text = text.split("```")[1].split("```")[0]
-            
-            data = json.loads(text.strip())
-            return [MetaAd(**item) for item in data]
-        except:
             return []
     
     async def close(self):
