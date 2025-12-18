@@ -45,15 +45,42 @@ function BatchScannerContent() {
         const maxAdsParam = searchParams.get('max_ads');
         
         if (queriesParam && !hasInitialRun) {
-            const queries = queriesParam.split(',').map(q => decodeURIComponent(q.trim())).filter(q => q);
-            if (queries.length > 0) {
-                setCustomQueries(queries.join('\n'));
-                if (maxAdsParam) {
-                    setMaxAdsPerQuery(parseInt(maxAdsParam) || 20);
+            try {
+                // Decode the base64-encoded query list
+                const decodedQueries = atob(queriesParam);
+                const queries = decodedQueries.split('|').filter(q => q.trim());
+                
+                if (queries.length > 0) {
+                    setCustomQueries(queries.join('\n'));
+                    if (maxAdsParam) {
+                        setMaxAdsPerQuery(parseInt(maxAdsParam) || 20);
+                    }
+                    setHasInitialRun(true);
+                    // Auto-run with these queries
+                    runBatchScanWithQueries(queries, parseInt(maxAdsParam || '20'));
                 }
-                setHasInitialRun(true);
-                // Auto-run with these queries
-                runBatchScanWithQueries(queries, parseInt(maxAdsParam || '20'));
+            } catch (e) {
+                // Fallback: try comma-separated (legacy URLs)
+                try {
+                    const queries = queriesParam.split(',').map(q => {
+                        try {
+                            return decodeURIComponent(q.trim());
+                        } catch {
+                            return q.trim();
+                        }
+                    }).filter(q => q);
+                    
+                    if (queries.length > 0) {
+                        setCustomQueries(queries.join('\n'));
+                        if (maxAdsParam) {
+                            setMaxAdsPerQuery(parseInt(maxAdsParam) || 20);
+                        }
+                        setHasInitialRun(true);
+                        runBatchScanWithQueries(queries, parseInt(maxAdsParam || '20'));
+                    }
+                } catch (e2) {
+                    console.error('Failed to parse queries from URL:', e2);
+                }
             }
         }
     }, [searchParams, hasInitialRun]);
@@ -70,8 +97,8 @@ function BatchScannerContent() {
         setStartTime(Date.now());
         setShareUrl(null);
 
-        // Update URL with queries for sharing
-        const queryString = queries.map(q => encodeURIComponent(q)).join(',');
+        // Update URL with queries for sharing (use base64 to avoid encoding issues)
+        const queryString = btoa(queries.join('|'));
         router.replace(`?queries=${queryString}&max_ads=${maxAds}`, { scroll: false });
 
         // Run scans in parallel with controlled concurrency
@@ -185,9 +212,10 @@ function BatchScannerContent() {
         await processQueue();
         setIsRunning(false);
         
-        // Generate share URL after completion
+        // Generate share URL after completion (use same base64 encoding)
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-        setShareUrl(`${baseUrl}/ad-scanner/batch?queries=${queryString}&max_ads=${maxAds}`);
+        const shareQueryString = btoa(queries.join('|'));
+        setShareUrl(`${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`);
     };
 
     const runBatchScan = useCallback(async () => {
