@@ -34,6 +34,8 @@ const scamTypeLabels: Record<string, { label: string; emoji: string; color: stri
 export function BatchScanResults({ queryStatuses }: BatchScanResultsProps) {
     const [activeTab, setActiveTab] = useState<'aggregated' | 'by-query' | 'top-violating'>('aggregated');
     const [expandedQuery, setExpandedQuery] = useState<string | null>(null);
+    const [copiedViolating, setCopiedViolating] = useState(false);
+    const [copiedMixed, setCopiedMixed] = useState(false);
 
     // Aggregate all results
     const aggregatedData = useMemo(() => {
@@ -101,6 +103,21 @@ export function BatchScanResults({ queryStatuses }: BatchScanResultsProps) {
     const sortedScamTypes = Object.entries(scamTypeCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
+
+    // Copy ad IDs to clipboard
+    const copyViolatingIds = async () => {
+        const ids = allViolating.map(ad => ad.ad.ad_id).join(',');
+        await navigator.clipboard.writeText(ids);
+        setCopiedViolating(true);
+        setTimeout(() => setCopiedViolating(false), 2000);
+    };
+
+    const copyMixedIds = async () => {
+        const ids = allMixed.map(ad => ad.ad.ad_id).join(',');
+        await navigator.clipboard.writeText(ids);
+        setCopiedMixed(true);
+        setTimeout(() => setCopiedMixed(false), 2000);
+    };
 
     // Export batch results
     const handleExport = () => {
@@ -180,6 +197,69 @@ export function BatchScanResults({ queryStatuses }: BatchScanResultsProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Quick Copy Ad IDs */}
+                {(allViolating.length > 0 || allMixed.length > 0) && (
+                    <div className="mt-6 pt-5 border-t border-white/[0.04]">
+                        <h3 className="text-white/50 text-[12px] font-semibold uppercase tracking-wider mb-3">
+                            Copy Ad IDs (comma-separated)
+                        </h3>
+                        <div className="flex flex-wrap gap-3">
+                            {allViolating.length > 0 && (
+                                <button
+                                    onClick={copyViolatingIds}
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                                        copiedViolating 
+                                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                            : 'bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/20 hover:border-red-500/30'
+                                    }`}
+                                >
+                                    {copiedViolating ? (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Copied {allViolating.length} IDs!</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>Violating IDs ({allViolating.length})</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                            {allMixed.length > 0 && (
+                                <button
+                                    onClick={copyMixedIds}
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                                        copiedMixed 
+                                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                            : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 hover:border-amber-500/30'
+                                    }`}
+                                >
+                                    {copiedMixed ? (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Copied {allMixed.length} IDs!</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>Mixed IDs ({allMixed.length})</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Visual Breakdown Bar */}
                 {totalAds > 0 && (
