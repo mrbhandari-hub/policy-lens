@@ -18,6 +18,12 @@ export function LandingHeader() {
                             Analyze
                         </Link>
                         <Link
+                            href="/ad-scanner"
+                            className="text-slate-300 hover:text-white transition-colors text-sm font-medium flex items-center gap-1"
+                        >
+                            <span>📢</span> Ad Scanner
+                        </Link>
+                        <Link
                             href="/analyze"
                             className="px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-sm hover:bg-slate-100 transition-all shadow-lg shadow-white/20"
                         >

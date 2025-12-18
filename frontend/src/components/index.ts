@@ -16,6 +16,11 @@ export { CollapsibleSection } from './CollapsibleSection';
 export { AnalysisHistory } from './AnalysisHistory';
 export { MobileResultsNav } from './MobileResultsNav';
 
+// Ad Scanner Components
+export { AdScannerInput } from './AdScannerInput';
+export { AdCard } from './AdCard';
+export { AdScanResults } from './AdScanResults';
+
 // Advanced Deep Dive Cards
 export {
     CounterfactualCard,
@@ -24,3 +29,4 @@ export {
     AppealCard,
     SycophancyCard,
 } from './DeepDiveCards';
+
