@@ -46,7 +46,7 @@ function AdScannerContent() {
             handleScan({
                 keyword: initialQuery,
                 use_real_ads: true,
-                max_ads: 50,
+                max_ads: 100,  // Default to 100 ads (matches AdScannerInput default)
                 refresh: true  // Always bypass cache for URL-based searches
             }, false);
         }
