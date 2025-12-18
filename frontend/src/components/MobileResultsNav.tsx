@@ -88,3 +88,4 @@ export function MobileResultsNav({ response }: MobileResultsNavProps) {
     );
 }
 
+
