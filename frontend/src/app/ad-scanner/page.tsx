@@ -39,14 +39,15 @@ function AdScannerContent() {
     const [minHarmScore, setMinHarmScore] = useState<number>(0);
     const [showFilters, setShowFilters] = useState(false);
 
-    // Handle initial search from URL
+    // Handle initial search from URL - always fetch fresh data for shared links
     useEffect(() => {
         if (initialQuery && !hasInitialSearchRun) {
             setHasInitialSearchRun(true);
             handleScan({
                 keyword: initialQuery,
                 use_real_ads: true,
-                max_ads: 50
+                max_ads: 50,
+                refresh: true  // Always bypass cache for URL-based searches
             }, false);
         }
     }, [initialQuery, hasInitialSearchRun]);
@@ -305,7 +306,7 @@ function AdScannerContent() {
                 <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
                     <p className="text-slate-500 text-sm">
                         PolicyLens Ad Scanner — Powered by{' '}
-                        <span className="text-pink-400">Gemini 2.5 Flash</span>
+                        <span className="text-pink-400">Gemini 2.0 Flash</span>
                     </p>
                     <p className="text-slate-600 text-xs mt-2">
                         Built for investigative journalism and consumer protection
