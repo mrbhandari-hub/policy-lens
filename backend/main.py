@@ -128,15 +128,28 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration - Allow ALL origins to handle Vercel previews and production
-# Security Note: in a strict production environment, we would list specific domains,
-# but for this demo/diagnostic tool, allowing * ensures seamless preview deployments.
+# CORS configuration - List all allowed frontend origins
+# Note: Cannot use allow_origins=["*"] with allow_credentials=True
+ALLOWED_ORIGINS = [
+    "https://policylens.xyz",
+    "https://www.policylens.xyz",
+    "https://policy-pearl.vercel.app",
+    "https://policy-rahuls-projects-4361375b.vercel.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Also allow any Vercel preview deployments
+def get_allowed_origins():
+    return ALLOWED_ORIGINS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    allow_origin_regex=r"https://policy.*\.vercel\.app",  # Allow all Vercel preview URLs
 )
 
 
