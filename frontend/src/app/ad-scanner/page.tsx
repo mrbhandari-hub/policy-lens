@@ -68,11 +68,18 @@ function AdScannerContent() {
         }
 
         try {
+            // Use AbortController for a 3-minute timeout (large scans can take a while)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minutes
+
             const res = await fetch(`${API_URL}/scan-ads`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(request),
+                signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
 
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
@@ -82,7 +89,11 @@ function AdScannerContent() {
             const data = await res.json();
             setResults(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error occurred');
+            if (err instanceof Error && err.name === 'AbortError') {
+                setError('Scan timed out. Try reducing the number of ads or using a more specific keyword.');
+            } else {
+                setError(err instanceof Error ? err.message : 'Unknown error occurred');
+            }
         } finally {
             setLoading(false);
             setCurrentScanRequest(null);
