@@ -317,7 +317,7 @@ function AdScannerContent() {
                 <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
                     <p className="text-slate-500 text-sm">
                         PolicyLens Ad Scanner — Powered by{' '}
-                        <span className="text-pink-400">Gemini 2.0 Flash</span>
+                        <span className="text-pink-400">Gemini</span>
                     </p>
                     <p className="text-slate-600 text-xs mt-2">
                         Built for investigative journalism and consumer protection

@@ -20,7 +20,7 @@ const DEFAULT_JUDGES = [
 
 export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScannerInputProps) {
     const [keyword, setKeyword] = useState(initialKeyword);
-    const [maxAds, setMaxAds] = useState(50);
+    const [maxAds, setMaxAds] = useState(100);
 
     const handleSubmit = (e: React.FormEvent, refresh = false) => {
         e.preventDefault();
@@ -124,29 +124,36 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
                 </span>
             </div>
 
-            {/* Max Ads Slider */}
+            {/* Max Ads Dropdown */}
             <div className="mt-6 p-4 bg-[#1e293d]/40 border border-[#2d3a52] rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="text-lg">📊</span>
                         <span className="text-white text-sm font-medium">Ads to Analyze</span>
                     </div>
-                    <span className="text-pink-400 font-bold text-lg">{maxAds}</span>
-                </div>
-                <input
-                    type="range"
-                    min="10"
-                    max="100"
-                    step="10"
-                    value={maxAds}
-                    onChange={(e) => setMaxAds(Number(e.target.value))}
-                    disabled={loading}
-                    className="w-full h-2 bg-[#2d3a52] rounded-lg appearance-none cursor-pointer accent-pink-500 disabled:opacity-50"
-                />
-                <div className="flex justify-between text-slate-500 text-xs mt-1">
-                    <span>10</span>
-                    <span>50</span>
-                    <span>100</span>
+                    <select
+                        value={maxAds}
+                        onChange={(e) => setMaxAds(Number(e.target.value))}
+                        disabled={loading}
+                        className="bg-[#0a0f1a] border border-[#2d3a52] rounded-lg px-4 py-2 text-pink-400 font-bold focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed appearance-none pr-8"
+                        style={{
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ec4899' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundPosition: 'right 0.5rem center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '1.5em 1.5em'
+                        }}
+                    >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={30}>30</option>
+                        <option value={40}>40</option>
+                        <option value={50}>50</option>
+                        <option value={60}>60</option>
+                        <option value={70}>70</option>
+                        <option value={80}>80</option>
+                        <option value={90}>90</option>
+                        <option value={100}>100</option>
+                    </select>
                 </div>
             </div>
         </div>
