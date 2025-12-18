@@ -39,7 +39,7 @@ function AdScannerContent() {
     const [minHarmScore, setMinHarmScore] = useState<number>(0);
     const [showFilters, setShowFilters] = useState(false);
 
-    // Handle initial search from URL - always fetch fresh data for shared links
+    // Handle initial search from URL - use cache for fast loading of shared links
     useEffect(() => {
         if (initialQuery && !hasInitialSearchRun) {
             setHasInitialSearchRun(true);
@@ -47,7 +47,7 @@ function AdScannerContent() {
                 keyword: initialQuery,
                 use_real_ads: true,
                 max_ads: 100,  // Default to 100 ads (matches AdScannerInput default)
-                refresh: true  // Always bypass cache for URL-based searches
+                refresh: false  // Use cache for shared links (fast loading)
             }, false);
         }
     }, [initialQuery, hasInitialSearchRun]);
