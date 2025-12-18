@@ -10,17 +10,17 @@ import { AdScanRequest, AdScanResponse, ScamType } from '@/types/adScanner';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 const scamTypeLabels: Record<string, { label: string; emoji: string }> = {
-    crypto_scam: { label: 'Crypto Scam', emoji: '🪙' },
-    fake_celebrity: { label: 'Fake Celebrity', emoji: '🎭' },
-    phishing: { label: 'Phishing', emoji: '🎣' },
-    mlm_scheme: { label: 'MLM Scheme', emoji: '📊' },
-    fake_weight_loss: { label: 'Fake Weight Loss', emoji: '⚖️' },
-    romance_scam: { label: 'Romance Scam', emoji: '💔' },
-    fake_job: { label: 'Fake Job', emoji: '💼' },
-    urgency_scam: { label: 'Urgency Tactics', emoji: '⏰' },
-    fake_giveaway: { label: 'Fake Giveaway', emoji: '🎁' },
-    health_miracle: { label: 'Health Miracle', emoji: '💊' },
-    get_rich_quick: { label: 'Get Rich Quick', emoji: '💰' },
+    crypto_scam: { label: 'Crypto', emoji: '' },
+    fake_celebrity: { label: 'Fake Celebrity', emoji: '' },
+    phishing: { label: 'Phishing', emoji: '' },
+    mlm_scheme: { label: 'MLM', emoji: '' },
+    fake_weight_loss: { label: 'Weight Loss', emoji: '' },
+    romance_scam: { label: 'Romance', emoji: '' },
+    fake_job: { label: 'Fake Job', emoji: '' },
+    urgency_scam: { label: 'Urgency', emoji: '' },
+    fake_giveaway: { label: 'Giveaway', emoji: '' },
+    health_miracle: { label: 'Health', emoji: '' },
+    get_rich_quick: { label: 'Get Rich Quick', emoji: '' },
 };
 
 function AdScannerContent() {
@@ -153,32 +153,41 @@ function AdScannerContent() {
     }, [results]);
 
     return (
-        <main className="min-h-screen bg-[#0a0f1a]">
-            {/* Background effects */}
+        <main className="min-h-screen bg-[#000000]">
+            {/* Subtle background gradient - Apple style */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 gradient-mesh" />
-                <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-pink-500/[0.07] rounded-full blur-[120px]" />
-                <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-500/[0.05] rounded-full blur-[100px]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#000000] to-[#0a0a0a]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-blue-500/[0.03] via-purple-500/[0.02] to-transparent rounded-full blur-[100px]" />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
-                {/* Header */}
-                <header className="flex items-center justify-between mb-8">
-                    <a href="/" className="text-2xl font-bold text-white hover:text-pink-300 transition-colors">
-                        PolicyLens <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Ad Scanner</span>
+            <div className="relative z-10 container mx-auto px-6 py-6 max-w-6xl">
+                {/* Header - Clean Apple Navigation */}
+                <header className="flex items-center justify-between mb-12">
+                    <a href="/" className="group flex items-center gap-3">
+                        <span className="text-[22px] font-semibold tracking-tight text-white/90 group-hover:text-white transition-colors">
+                            PolicyLens
+                        </span>
+                        <span className="text-[22px] font-medium tracking-tight text-white/50">
+                            Ad Scanner
+                        </span>
                     </a>
-                    <div className="flex items-center gap-4">
-                        <a href="/analyze" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                            <span>⚖️</span>
+                    <nav className="flex items-center gap-6">
+                        <a 
+                            href="/analyze" 
+                            className="text-[13px] font-medium text-white/50 hover:text-white/90 transition-colors"
+                        >
                             Content Analyzer
                         </a>
-                        <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a 
+                            href="/" 
+                            className="text-[13px] font-medium text-white/50 hover:text-white/90 transition-colors flex items-center gap-1.5"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                             Home
                         </a>
-                    </div>
+                    </nav>
                 </header>
 
                 {/* Input */}
@@ -188,13 +197,17 @@ function AdScannerContent() {
                     initialKeyword={initialQuery}
                 />
 
-                {/* Error Display */}
+                {/* Error Display - Apple style alert */}
                 {error && (
-                    <div className="mt-6 bg-red-950/60 border border-red-500/40 rounded-xl p-4 text-red-200 flex items-center gap-3 backdrop-blur-sm">
-                        <span className="text-2xl">⚠️</span>
+                    <div className="mt-8 bg-red-500/10 backdrop-blur-xl border border-red-500/20 rounded-2xl p-5 flex items-start gap-4">
+                        <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
                         <div>
-                            <div className="font-medium text-red-100">Scan Error</div>
-                            <div className="text-red-300/80 text-sm">{error}</div>
+                            <div className="font-medium text-red-300 text-[15px]">Scan Error</div>
+                            <div className="text-red-400/70 text-[13px] mt-1 leading-relaxed">{error}</div>
                         </div>
                     </div>
                 )}
@@ -207,43 +220,46 @@ function AdScannerContent() {
                     />
                 )}
 
-                {/* Filter Panel - Show when results available */}
+                {/* Filter Panel - Apple style collapsible */}
                 {results && !loading && availableScamTypes.length > 0 && (
-                    <div className="mt-6">
+                    <div className="mt-8">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
+                            className="group flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors text-[13px] font-medium"
                         >
-                            <span>🔧</span>
-                            <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
-                            <span className={`transition-transform ${showFilters ? 'rotate-180' : ''}`}>▼</span>
+                            <svg 
+                                className={`w-3 h-3 transition-transform duration-200 ${showFilters ? 'rotate-90' : ''}`} 
+                                fill="currentColor" 
+                                viewBox="0 0 20 20"
+                            >
+                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                            <span>Filters</span>
                         </button>
 
                         {showFilters && (
-                            <div className="mt-4 bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-xl p-4 animate-in slide-in-from-top-2 duration-200">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="mt-4 bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 animate-in slide-in-from-top-2 duration-200">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     {/* Scam Type Filter */}
                                     <div>
-                                        <h4 className="text-white text-sm font-medium mb-3 flex items-center gap-2">
-                                            <span>🎯</span>
-                                            Filter by Scam Type
+                                        <h4 className="text-white/70 text-[12px] font-semibold uppercase tracking-wider mb-4">
+                                            Scam Type
                                         </h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableScamTypes.map(({ type, count }) => {
-                                                const info = scamTypeLabels[type] || { label: type, emoji: '•' };
+                                                const info = scamTypeLabels[type] || { label: type, emoji: '' };
                                                 const isSelected = selectedScamTypes.has(type);
                                                 return (
                                                     <button
                                                         key={type}
                                                         onClick={() => toggleScamTypeFilter(type)}
-                                                        className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 transition-all ${isSelected
-                                                            ? 'bg-pink-600 text-white ring-2 ring-pink-400'
-                                                            : 'bg-slate-700/60 text-slate-300 hover:bg-slate-600'
+                                                        className={`text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all duration-200 ${isSelected
+                                                            ? 'bg-white text-black font-medium'
+                                                            : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.1] hover:text-white/80'
                                                             }`}
                                                     >
-                                                        <span>{info.emoji}</span>
                                                         <span>{info.label}</span>
-                                                        <span className="bg-black/20 px-1.5 rounded-full">{count}</span>
+                                                        <span className={`${isSelected ? 'text-black/50' : 'text-white/30'}`}>{count}</span>
                                                     </button>
                                                 );
                                             })}
@@ -251,17 +267,16 @@ function AdScannerContent() {
                                         {selectedScamTypes.size > 0 && (
                                             <button
                                                 onClick={() => setSelectedScamTypes(new Set())}
-                                                className="mt-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                                                className="mt-3 text-[12px] text-white/30 hover:text-white/60 transition-colors"
                                             >
-                                                Clear scam type filters
+                                                Clear selection
                                             </button>
                                         )}
                                     </div>
 
                                     {/* Harm Score Filter */}
                                     <div>
-                                        <h4 className="text-white text-sm font-medium mb-3 flex items-center gap-2">
-                                            <span>⚡</span>
+                                        <h4 className="text-white/70 text-[12px] font-semibold uppercase tracking-wider mb-4">
                                             Minimum Harm Score
                                         </h4>
                                         <div className="flex items-center gap-4">
@@ -271,23 +286,23 @@ function AdScannerContent() {
                                                 max="100"
                                                 value={minHarmScore}
                                                 onChange={(e) => setMinHarmScore(parseInt(e.target.value))}
-                                                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                                                className="flex-1 h-1 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg"
                                             />
-                                            <span className="text-white font-mono w-12 text-center">
-                                                {minHarmScore}+
+                                            <span className="text-white/80 font-medium text-[14px] tabular-nums w-10 text-right">
+                                                {minHarmScore}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between text-xs text-slate-500 mt-1">
+                                        <div className="flex justify-between text-[11px] text-white/30 mt-2">
                                             <span>All</span>
-                                            <span>High risk only</span>
+                                            <span>High risk</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Active Filters Summary */}
                                 {(selectedScamTypes.size > 0 || minHarmScore > 0) && (
-                                    <div className="mt-4 pt-4 border-t border-[#1e293d] flex items-center justify-between">
-                                        <div className="text-slate-400 text-sm">
+                                    <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-center justify-between">
+                                        <div className="text-white/40 text-[13px]">
                                             Showing {(filteredResults?.violating.length || 0) + (filteredResults?.mixed.length || 0) + (filteredResults?.benign.length || 0)} of {results.total_ads} ads
                                         </div>
                                         <button
@@ -295,9 +310,9 @@ function AdScannerContent() {
                                                 setSelectedScamTypes(new Set());
                                                 setMinHarmScore(0);
                                             }}
-                                            className="text-sm text-pink-400 hover:text-pink-300 transition-colors"
+                                            className="text-[13px] text-blue-400 hover:text-blue-300 transition-colors"
                                         >
-                                            Reset all filters
+                                            Reset All
                                         </button>
                                     </div>
                                 )}
@@ -308,18 +323,19 @@ function AdScannerContent() {
 
                 {/* Results */}
                 {filteredResults && !loading && (
-                    <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <AdScanResults results={filteredResults} />
                     </div>
                 )}
 
-                {/* Footer */}
-                <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
-                    <p className="text-slate-500 text-sm">
-                        PolicyLens Ad Scanner — Powered by{' '}
-                        <span className="text-pink-400">Gemini</span>
+                {/* Footer - Apple style minimal */}
+                <footer className="text-center mt-20 py-8 border-t border-white/[0.04]">
+                    <p className="text-white/30 text-[13px] font-medium">
+                        PolicyLens Ad Scanner
+                        <span className="mx-2 text-white/10">·</span>
+                        <span className="text-white/50">Powered by Gemini</span>
                     </p>
-                    <p className="text-slate-600 text-xs mt-2">
+                    <p className="text-white/20 text-[12px] mt-2">
                         Built for investigative journalism and consumer protection
                     </p>
                 </footer>
@@ -328,13 +344,16 @@ function AdScannerContent() {
     );
 }
 
-// Loading fallback
+// Loading fallback - Apple style
 function LoadingFallback() {
     return (
-        <main className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
+        <main className="min-h-screen bg-black flex items-center justify-center">
             <div className="text-center">
-                <div className="animate-spin h-12 w-12 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4" />
-                <p className="text-slate-400">Loading Ad Scanner...</p>
+                <div className="relative w-10 h-10 mx-auto mb-5">
+                    <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+                    <div className="absolute inset-0 rounded-full border-2 border-white/60 border-t-transparent animate-spin" />
+                </div>
+                <p className="text-white/40 text-[14px] font-medium">Loading...</p>
             </div>
         </main>
     );

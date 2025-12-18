@@ -59,7 +59,10 @@ export function ImageLightbox({ src, alt, className = '' }: ImageLightboxProps) 
             {isOpen && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
-                    onClick={() => setIsOpen(false)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(false);
+                    }}
                 >
                     <div
                         className="relative max-w-4xl max-h-[90vh] animate-in zoom-in-95 duration-200"
@@ -67,7 +70,10 @@ export function ImageLightbox({ src, alt, className = '' }: ImageLightboxProps) 
                     >
                         {/* Close button */}
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsOpen(false);
+                            }}
                             className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors flex items-center gap-2"
                         >
                             <span>Press ESC or click to close</span>
@@ -89,13 +95,15 @@ export function ImageLightbox({ src, alt, className = '' }: ImageLightboxProps) 
                                     href={src}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
                                     className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded flex items-center gap-1 transition-colors"
                                 >
                                     <span>🔗</span>
                                     <span>Open Original</span>
                                 </a>
                                 <button
-                                    onClick={async () => {
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
                                         try {
                                             const response = await fetch(src);
                                             const blob = await response.blob();

@@ -48,50 +48,51 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
     };
 
     return (
-        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-2xl shadow-lg">
-                    📢
-                </div>
-                <div>
-                    <h2 className="text-white text-xl font-bold">Meta Ads Library Scanner</h2>
-                    <p className="text-slate-400 text-sm">
-                        Scan ads for policy violations using AI judge panel
-                    </p>
-                </div>
+        <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/20">
+            {/* Header - Apple minimal */}
+            <div className="mb-8">
+                <h1 className="text-white text-[28px] font-semibold tracking-tight">
+                    Meta Ads Library Scanner
+                </h1>
+                <p className="text-white/40 text-[15px] mt-2">
+                    Scan ads for policy violations using AI judge panel
+                </p>
             </div>
 
-            {/* Search Form */}
+            {/* Search Form - Apple style */}
             <form onSubmit={handleSubmit} className="mb-6">
                 <div className="flex gap-3">
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative group">
                         <input
                             type="text"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            placeholder="Enter keyword to search ads (e.g., 'free', 'weight loss', 'crypto')..."
-                            className="w-full bg-[#0a0f1a] border border-[#2d3a52] rounded-xl px-4 py-3.5 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                            placeholder="Search ads by keyword..."
+                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl px-5 py-4 text-white text-[15px] placeholder:text-white/25 focus:outline-none focus:bg-white/[0.06] focus:border-white/[0.15] transition-all duration-200"
                             disabled={loading}
                         />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                            🔍
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                         </div>
                     </div>
                     <button
                         type="submit"
                         disabled={loading || !keyword.trim()}
-                        className="px-6 py-3.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-semibold rounded-xl hover:from-pink-600 hover:to-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-pink-500/25 flex items-center gap-2"
+                        className="px-7 py-4 bg-white text-black text-[15px] font-semibold rounded-2xl hover:bg-white/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2.5 min-w-[140px] justify-center"
                     >
                         {loading ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Scanning...
+                                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                <span>Scanning</span>
                             </>
                         ) : (
                             <>
-                                <span>🎯</span>
-                                Scan Ads
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                                <span>Scan Ads</span>
                             </>
                         )}
                     </button>
@@ -99,48 +100,48 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
                         type="button"
                         disabled={loading || !keyword.trim()}
                         onClick={(e) => handleSubmit(e as any, true)}
-                        className="px-4 py-3.5 bg-[#1e293d] hover:bg-[#2d3a52] border border-[#2d3a52] text-slate-300 hover:text-white font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                        title="Refresh: Bypass cache and fetch fresh ads"
+                        className="px-5 py-4 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/70 hover:text-white text-[15px] font-medium rounded-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+                        title="Bypass cache and fetch fresh ads"
                     >
-                        <span>🔄</span>
-                        Refresh
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Refresh</span>
                     </button>
                 </div>
             </form>
 
-            {/* Random Query Generator */}
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={handleRandomQuery}
-                    disabled={loading}
-                    className="group px-4 py-2.5 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 hover:from-violet-600/30 hover:to-fuchsia-600/30 border border-violet-500/30 hover:border-violet-400/50 rounded-xl text-violet-300 hover:text-violet-200 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    title={`Generate a random scam investigation query from ${TOTAL_QUERY_COUNT}+ options`}
-                >
-                    <span className="text-lg group-hover:animate-spin">🎲</span>
-                    <span>Random Query</span>
-                </button>
-                <span className="text-slate-500 text-xs">
-                    from {TOTAL_QUERY_COUNT} scam investigation terms
-                </span>
-            </div>
+            {/* Random Query & Settings Row */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={handleRandomQuery}
+                        disabled={loading}
+                        className="group px-4 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.1] rounded-xl text-white/50 hover:text-white/80 transition-all duration-200 text-[13px] font-medium disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                        <svg className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        <span>Random Query</span>
+                    </button>
+                    <span className="text-white/20 text-[12px]">
+                        {TOTAL_QUERY_COUNT.toLocaleString()} investigation terms
+                    </span>
+                </div>
 
-            {/* Max Ads Dropdown */}
-            <div className="mt-6 p-4 bg-[#1e293d]/40 border border-[#2d3a52] rounded-lg">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg">📊</span>
-                        <span className="text-white text-sm font-medium">Ads to Analyze</span>
-                    </div>
+                {/* Max Ads Selector - Apple segmented style */}
+                <div className="flex items-center gap-3">
+                    <span className="text-white/40 text-[13px]">Analyze</span>
                     <select
                         value={maxAds}
                         onChange={(e) => setMaxAds(Number(e.target.value))}
                         disabled={loading}
-                        className="bg-[#0a0f1a] border border-[#2d3a52] rounded-lg px-4 py-2 text-pink-400 font-bold focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed appearance-none pr-8"
+                        className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-white/80 text-[14px] font-medium focus:outline-none focus:bg-white/[0.08] transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed appearance-none pr-8"
                         style={{
-                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ec4899' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff50' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                             backgroundPosition: 'right 0.5rem center',
                             backgroundRepeat: 'no-repeat',
-                            backgroundSize: '1.5em 1.5em'
+                            backgroundSize: '1.25em 1.25em'
                         }}
                     >
                         <option value={10}>10</option>
@@ -154,6 +155,7 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
                         <option value={90}>90</option>
                         <option value={100}>100</option>
                     </select>
+                    <span className="text-white/40 text-[13px]">ads</span>
                 </div>
             </div>
         </div>

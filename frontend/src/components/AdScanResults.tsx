@@ -9,17 +9,17 @@ interface AdScanResultsProps {
 }
 
 const scamTypeLabels: Record<string, { label: string; emoji: string; color: string }> = {
-    crypto_scam: { label: 'Crypto Scam', emoji: '🪙', color: 'bg-orange-500' },
-    fake_celebrity: { label: 'Fake Celebrity', emoji: '🎭', color: 'bg-purple-500' },
-    phishing: { label: 'Phishing', emoji: '🎣', color: 'bg-red-600' },
-    mlm_scheme: { label: 'MLM Scheme', emoji: '📊', color: 'bg-pink-500' },
-    fake_weight_loss: { label: 'Fake Weight Loss', emoji: '⚖️', color: 'bg-lime-500' },
-    romance_scam: { label: 'Romance Scam', emoji: '💔', color: 'bg-rose-400' },
-    fake_job: { label: 'Fake Job', emoji: '💼', color: 'bg-blue-500' },
-    urgency_scam: { label: 'Urgency Tactics', emoji: '⏰', color: 'bg-amber-500' },
-    fake_giveaway: { label: 'Fake Giveaway', emoji: '🎁', color: 'bg-cyan-500' },
-    health_miracle: { label: 'Health Miracle', emoji: '💊', color: 'bg-green-600' },
-    get_rich_quick: { label: 'Get Rich Quick', emoji: '💰', color: 'bg-yellow-500' },
+    crypto_scam: { label: 'Crypto', emoji: '', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
+    fake_celebrity: { label: 'Celebrity', emoji: '', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+    phishing: { label: 'Phishing', emoji: '', color: 'bg-red-500/20 text-red-300 border-red-500/30' },
+    mlm_scheme: { label: 'MLM', emoji: '', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30' },
+    fake_weight_loss: { label: 'Weight Loss', emoji: '', color: 'bg-lime-500/20 text-lime-300 border-lime-500/30' },
+    romance_scam: { label: 'Romance', emoji: '', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
+    fake_job: { label: 'Fake Job', emoji: '', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
+    urgency_scam: { label: 'Urgency', emoji: '', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+    fake_giveaway: { label: 'Giveaway', emoji: '', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
+    health_miracle: { label: 'Health', emoji: '', color: 'bg-green-500/20 text-green-300 border-green-500/30' },
+    get_rich_quick: { label: 'Get Rich Quick', emoji: '', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
 };
 
 function ExportButton({ results }: { results: AdScanResponse }) {
@@ -154,26 +154,32 @@ function ExportButton({ results }: { results: AdScanResponse }) {
             <button
                 onClick={() => handleExport('summary')}
                 disabled={isExporting}
-                className="bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] disabled:opacity-30 text-white/70 hover:text-white text-[13px] px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-200"
             >
-                <span>📄</span>
-                <span>Export Report</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Report</span>
             </button>
             <button
                 onClick={() => handleExport('csv')}
                 disabled={isExporting}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] disabled:opacity-30 text-white/70 hover:text-white text-[13px] px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-200"
             >
-                <span>📊</span>
-                <span>Export CSV</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>CSV</span>
             </button>
             <button
                 onClick={() => handleExport('json')}
                 disabled={isExporting}
-                className="bg-slate-600 hover:bg-slate-500 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] disabled:opacity-30 text-white/70 hover:text-white text-[13px] px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-200"
             >
-                <span>{ }</span>
-                <span>Export JSON</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <span>JSON</span>
             </button>
         </div>
     );
@@ -188,45 +194,43 @@ function ScanStatsPanel({ stats, total_ads }: { stats: AdScanResponse['stats']; 
     if (!hasScamTypes && !hasPolicyViolations) return null;
 
     return (
-        <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
-            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <span>🔍</span>
-                <span>Scam Intelligence Report</span>
+        <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-6 shadow-2xl shadow-black/20">
+            <h3 className="text-white/70 text-[12px] font-semibold uppercase tracking-wider mb-5">
+                Intelligence Report
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Harm Score Overview */}
-                <div className="bg-[#0a0f1a]/60 rounded-lg p-4">
-                    <div className="text-slate-400 text-xs uppercase tracking-wider mb-2">Harm Assessment</div>
-                    <div className="flex items-center gap-4">
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-rose-400">{stats.avg_harm_score.toFixed(0)}</div>
-                            <div className="text-slate-500 text-xs">Avg Score</div>
+                <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/[0.04]">
+                    <div className="text-white/40 text-[11px] uppercase tracking-wider mb-3">Harm Assessment</div>
+                    <div className="flex items-center gap-6">
+                        <div>
+                            <div className="text-[32px] font-semibold text-red-400 tabular-nums">{stats.avg_harm_score.toFixed(0)}</div>
+                            <div className="text-white/30 text-[12px]">Avg Score</div>
                         </div>
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-amber-400">{stats.total_harm_score}</div>
-                            <div className="text-slate-500 text-xs">Total</div>
+                        <div>
+                            <div className="text-[32px] font-semibold text-amber-400 tabular-nums">{stats.total_harm_score}</div>
+                            <div className="text-white/30 text-[12px]">Total</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Scam Type Distribution */}
                 {hasScamTypes && (
-                    <div className="bg-[#0a0f1a]/60 rounded-lg p-4">
-                        <div className="text-slate-400 text-xs uppercase tracking-wider mb-2">Detected Scam Types</div>
+                    <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/[0.04]">
+                        <div className="text-white/40 text-[11px] uppercase tracking-wider mb-3">Scam Types Detected</div>
                         <div className="flex flex-wrap gap-2">
                             {Object.entries(stats.scam_type_distribution)
                                 .sort((a, b) => b[1] - a[1])
                                 .map(([type, count]) => {
-                                    const info = scamTypeLabels[type] || { label: type, emoji: '•', color: 'bg-slate-500' };
+                                    const info = scamTypeLabels[type] || { label: type, emoji: '', color: 'bg-white/[0.06] text-white/60 border-white/10' };
                                     return (
                                         <span
                                             key={type}
-                                            className={`${info.color} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1`}
+                                            className={`${info.color} border text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1.5`}
                                         >
-                                            <span>{info.emoji}</span>
                                             <span>{info.label}</span>
-                                            <span className="bg-black/20 px-1.5 rounded-full ml-1">{count}</span>
+                                            <span className="opacity-50">{count}</span>
                                         </span>
                                     );
                                 })}
@@ -237,10 +241,9 @@ function ScanStatsPanel({ stats, total_ads }: { stats: AdScanResponse['stats']; 
 
             {/* Policy Violations Summary */}
             {hasPolicyViolations && (
-                <div className="mt-4 bg-rose-950/30 border border-rose-500/30 rounded-lg p-4">
-                    <div className="text-rose-400 text-xs uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span>⚖️</span>
-                        <span>Meta Policy Violations Detected</span>
+                <div className="mt-5 bg-red-500/[0.06] border border-red-500/20 rounded-2xl p-5">
+                    <div className="text-red-400/70 text-[11px] uppercase tracking-wider mb-3">
+                        Meta Policy Violations
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {stats.top_policy_violations.map((pv, i) => (
@@ -249,10 +252,12 @@ function ScanStatsPanel({ stats, total_ads }: { stats: AdScanResponse['stats']; 
                                 href={pv.meta_policy_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-rose-900/40 hover:bg-rose-900/60 text-rose-200 text-xs px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                                className="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors border border-red-500/20"
                             >
                                 <span className="font-mono">{pv.policy_code}</span>
-                                <span>→</span>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
                             </a>
                         ))}
                     </div>
@@ -276,54 +281,54 @@ export function AdScanResults({ results }: AdScanResultsProps) {
 
     return (
         <div className="space-y-6">
-            {/* Summary Header */}
-            <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Summary Header - Apple style */}
+            <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-6 shadow-2xl shadow-black/20">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                     <div>
-                        <h2 className="text-white text-xl font-bold mb-1">
-                            Scan Results: &quot;{keyword}&quot;
+                        <h2 className="text-white text-[22px] font-semibold tracking-tight mb-1">
+                            Results for &quot;{keyword}&quot;
                         </h2>
-                        <p className="text-slate-400 text-sm">
-                            Analyzed {total_ads} ads • {new Date(scan_timestamp).toLocaleString()}
+                        <p className="text-white/40 text-[14px]">
+                            {total_ads} ads analyzed · {new Date(scan_timestamp).toLocaleString()}
                         </p>
                     </div>
 
-                    {/* Category Summary */}
-                    <div className="flex gap-4">
+                    {/* Category Summary - Apple number style */}
+                    <div className="flex gap-8">
                         <div className="text-center">
-                            <div className="text-rose-400 text-2xl font-bold">{violating.length}</div>
-                            <div className="text-slate-500 text-xs uppercase">Violating</div>
+                            <div className="text-red-400 text-[28px] font-semibold tabular-nums">{violating.length}</div>
+                            <div className="text-white/30 text-[11px] uppercase tracking-wider">Violating</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-amber-400 text-2xl font-bold">{mixed.length}</div>
-                            <div className="text-slate-500 text-xs uppercase">Mixed</div>
+                            <div className="text-amber-400 text-[28px] font-semibold tabular-nums">{mixed.length}</div>
+                            <div className="text-white/30 text-[11px] uppercase tracking-wider">Mixed</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-emerald-400 text-2xl font-bold">{benign.length}</div>
-                            <div className="text-slate-500 text-xs uppercase">Benign</div>
+                            <div className="text-emerald-400 text-[28px] font-semibold tabular-nums">{benign.length}</div>
+                            <div className="text-white/30 text-[11px] uppercase tracking-wider">Benign</div>
                         </div>
                     </div>
                 </div>
 
-                {/* Visual Breakdown Bar */}
-                <div className="mt-4 h-3 bg-[#1e293d] rounded-full overflow-hidden flex">
+                {/* Visual Breakdown Bar - Apple thin style */}
+                <div className="mt-6 h-1.5 bg-white/[0.06] rounded-full overflow-hidden flex">
                     {violating.length > 0 && (
                         <div
-                            className="bg-gradient-to-r from-rose-500 to-rose-600 h-full transition-all"
+                            className="bg-red-500 h-full transition-all duration-500"
                             style={{ width: `${(violating.length / total_ads) * 100}%` }}
                             title={`${violating.length} violating`}
                         />
                     )}
                     {mixed.length > 0 && (
                         <div
-                            className="bg-gradient-to-r from-amber-500 to-amber-600 h-full transition-all"
+                            className="bg-amber-500 h-full transition-all duration-500"
                             style={{ width: `${(mixed.length / total_ads) * 100}%` }}
                             title={`${mixed.length} mixed`}
                         />
                     )}
                     {benign.length > 0 && (
                         <div
-                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-full transition-all"
+                            className="bg-emerald-500 h-full transition-all duration-500"
                             style={{ width: `${(benign.length / total_ads) * 100}%` }}
                             title={`${benign.length} benign`}
                         />
@@ -331,7 +336,7 @@ export function AdScanResults({ results }: AdScanResultsProps) {
                 </div>
 
                 {/* Export Buttons */}
-                <div className="mt-4 pt-4 border-t border-[#1e293d]">
+                <div className="mt-6 pt-5 border-t border-white/[0.04]">
                     <ExportButton results={results} />
                 </div>
             </div>
@@ -339,88 +344,76 @@ export function AdScanResults({ results }: AdScanResultsProps) {
             {/* Scam Intelligence Panel - NEW */}
             <ScanStatsPanel stats={stats} total_ads={total_ads} />
 
-            {/* API Data Quality Panel - Shows landing page crawl results */}
+            {/* API Data Quality Panel - Apple style */}
             {(landingPageStats.crawled > 0 || landingPageStats.failed > 0) && (
-                <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
-                    <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <span>📡</span>
-                        <span>API Data Quality</span>
-                        <span className="text-xs font-normal text-slate-500 ml-2">Proof that landing page crawls worked</span>
-                    </h3>
+                <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-6 shadow-2xl shadow-black/20">
+                    <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-white/70 text-[12px] font-semibold uppercase tracking-wider">
+                            Data Quality
+                        </h3>
+                        {landingPageStats.total > 0 && (
+                            <span className="text-emerald-400 text-[13px] font-medium">
+                                {((landingPageStats.crawled / landingPageStats.total) * 100).toFixed(0)}% success
+                            </span>
+                        )}
+                    </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {/* Total with Landing Page URLs */}
-                        <div className="bg-[#0a0f1a]/60 rounded-lg p-4 text-center">
-                            <div className="text-2xl font-bold text-indigo-400">{landingPageStats.total}</div>
-                            <div className="text-slate-500 text-xs">Ads with Landing URLs</div>
+                        <div className="bg-white/[0.02] rounded-2xl p-4 text-center border border-white/[0.04]">
+                            <div className="text-[24px] font-semibold text-indigo-400 tabular-nums">{landingPageStats.total}</div>
+                            <div className="text-white/30 text-[11px]">Landing URLs</div>
                         </div>
 
-                        {/* Successfully Crawled */}
-                        <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-lg p-4 text-center">
-                            <div className="text-2xl font-bold text-emerald-400 flex items-center justify-center gap-1">
-                                <span>✓</span>
-                                <span>{landingPageStats.crawled}</span>
-                            </div>
-                            <div className="text-emerald-400/70 text-xs">Pages Crawled</div>
+                        <div className="bg-emerald-500/[0.08] rounded-2xl p-4 text-center border border-emerald-500/20">
+                            <div className="text-[24px] font-semibold text-emerald-400 tabular-nums">{landingPageStats.crawled}</div>
+                            <div className="text-emerald-400/60 text-[11px]">Crawled</div>
                         </div>
 
-                        {/* Failed Crawls */}
                         {landingPageStats.failed > 0 && (
-                            <div className="bg-amber-950/40 border border-amber-500/30 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-amber-400 flex items-center justify-center gap-1">
-                                    <span>⚠</span>
-                                    <span>{landingPageStats.failed}</span>
-                                </div>
-                                <div className="text-amber-400/70 text-xs">Crawl Errors</div>
+                            <div className="bg-amber-500/[0.08] rounded-2xl p-4 text-center border border-amber-500/20">
+                                <div className="text-[24px] font-semibold text-amber-400 tabular-nums">{landingPageStats.failed}</div>
+                                <div className="text-amber-400/60 text-[11px]">Errors</div>
                             </div>
                         )}
 
-                        {/* No URL Available */}
-                        <div className="bg-[#0a0f1a]/60 rounded-lg p-4 text-center">
-                            <div className="text-2xl font-bold text-slate-500">{landingPageStats.noUrl}</div>
-                            <div className="text-slate-600 text-xs">Ads without URL</div>
+                        <div className="bg-white/[0.02] rounded-2xl p-4 text-center border border-white/[0.04]">
+                            <div className="text-[24px] font-semibold text-white/30 tabular-nums">{landingPageStats.noUrl}</div>
+                            <div className="text-white/20 text-[11px]">No URL</div>
                         </div>
                     </div>
 
-                    {/* Success Rate Bar */}
                     {landingPageStats.total > 0 && (
-                        <div className="mt-4">
-                            <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                                <span>Crawl Success Rate</span>
-                                <span className="text-emerald-400">
-                                    {((landingPageStats.crawled / landingPageStats.total) * 100).toFixed(0)}%
-                                </span>
-                            </div>
-                            <div className="h-2 bg-[#1e293d] rounded-full overflow-hidden flex">
-                                <div
-                                    className="bg-emerald-500 h-full transition-all"
-                                    style={{ width: `${(landingPageStats.crawled / landingPageStats.total) * 100}%` }}
-                                />
-                                <div
-                                    className="bg-amber-500 h-full transition-all"
-                                    style={{ width: `${(landingPageStats.failed / landingPageStats.total) * 100}%` }}
-                                />
-                            </div>
+                        <div className="mt-5 h-1 bg-white/[0.06] rounded-full overflow-hidden flex">
+                            <div
+                                className="bg-emerald-500 h-full transition-all duration-500"
+                                style={{ width: `${(landingPageStats.crawled / landingPageStats.total) * 100}%` }}
+                            />
+                            <div
+                                className="bg-amber-500 h-full transition-all duration-500"
+                                style={{ width: `${(landingPageStats.failed / landingPageStats.total) * 100}%` }}
+                            />
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Three Column Results */}
+            {/* Three Column Results - Apple style */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Violating Column */}
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2 sticky top-0 bg-[#0a0f1a] py-2 z-10">
-                        <span className="text-2xl">🚫</span>
-                        <h3 className="text-rose-400 font-bold">Clearly Violating</h3>
-                        <span className="bg-rose-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    <div className="flex items-center gap-3 sticky top-0 bg-black/90 backdrop-blur-xl py-3 z-10 -mx-2 px-2 rounded-xl">
+                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                        <h3 className="text-white/80 text-[14px] font-semibold">Clearly Violating</h3>
+                        <span className="bg-red-500/20 text-red-400 text-[12px] px-2.5 py-0.5 rounded-full font-medium">
                             {violating.length}
                         </span>
                     </div>
                     {violating.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500">
-                            <div className="text-4xl mb-2">✨</div>
-                            <p className="text-sm">No clearly violating ads found</p>
+                        <div className="text-center py-12 text-white/30">
+                            <svg className="w-8 h-8 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-[13px]">No violating ads found</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -433,17 +426,19 @@ export function AdScanResults({ results }: AdScanResultsProps) {
 
                 {/* Mixed Column */}
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2 sticky top-0 bg-[#0a0f1a] py-2 z-10">
-                        <span className="text-2xl">⚠️</span>
-                        <h3 className="text-amber-400 font-bold">Mixed / Uncertain</h3>
-                        <span className="bg-amber-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    <div className="flex items-center gap-3 sticky top-0 bg-black/90 backdrop-blur-xl py-3 z-10 -mx-2 px-2 rounded-xl">
+                        <div className="w-2 h-2 rounded-full bg-amber-500" />
+                        <h3 className="text-white/80 text-[14px] font-semibold">Mixed / Uncertain</h3>
+                        <span className="bg-amber-500/20 text-amber-400 text-[12px] px-2.5 py-0.5 rounded-full font-medium">
                             {mixed.length}
                         </span>
                     </div>
                     {mixed.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500">
-                            <div className="text-4xl mb-2">🤷</div>
-                            <p className="text-sm">No mixed-consensus ads found</p>
+                        <div className="text-center py-12 text-white/30">
+                            <svg className="w-8 h-8 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p className="text-[13px]">No mixed-consensus ads</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -456,17 +451,19 @@ export function AdScanResults({ results }: AdScanResultsProps) {
 
                 {/* Benign Column */}
                 <div className="space-y-4">
-                    <div className="flex items-center gap-2 sticky top-0 bg-[#0a0f1a] py-2 z-10">
-                        <span className="text-2xl">✅</span>
-                        <h3 className="text-emerald-400 font-bold">Clearly Benign</h3>
-                        <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    <div className="flex items-center gap-3 sticky top-0 bg-black/90 backdrop-blur-xl py-3 z-10 -mx-2 px-2 rounded-xl">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <h3 className="text-white/80 text-[14px] font-semibold">Clearly Benign</h3>
+                        <span className="bg-emerald-500/20 text-emerald-400 text-[12px] px-2.5 py-0.5 rounded-full font-medium">
                             {benign.length}
                         </span>
                     </div>
                     {benign.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500">
-                            <div className="text-4xl mb-2">🔍</div>
-                            <p className="text-sm">No clearly benign ads found</p>
+                        <div className="text-center py-12 text-white/30">
+                            <svg className="w-8 h-8 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <p className="text-[13px]">No benign ads found</p>
                         </div>
                     ) : (
                         <div className="space-y-3">

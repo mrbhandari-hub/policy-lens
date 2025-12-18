@@ -8,11 +8,11 @@ interface ScanProgressProps {
 }
 
 const SCAN_STAGES = [
-    { id: 'fetch', label: 'Fetching ads from Meta', emoji: '🔍', duration: 20 },
-    { id: 'analyze', label: 'Running through judge panel', emoji: '⚖️', duration: 40 },
-    { id: 'scam', label: 'Detecting scam patterns', emoji: '🎯', duration: 25 },
-    { id: 'policy', label: 'Mapping policy violations', emoji: '📋', duration: 10 },
-    { id: 'finalize', label: 'Finalizing results', emoji: '✨', duration: 5 },
+    { id: 'fetch', label: 'Fetching ads', duration: 20 },
+    { id: 'analyze', label: 'AI analysis', duration: 40 },
+    { id: 'scam', label: 'Pattern detection', duration: 25 },
+    { id: 'policy', label: 'Policy mapping', duration: 10 },
+    { id: 'finalize', label: 'Finalizing', duration: 5 },
 ];
 
 export function ScanProgress({ keyword, maxAds }: ScanProgressProps) {
@@ -21,16 +21,13 @@ export function ScanProgress({ keyword, maxAds }: ScanProgressProps) {
     const [elapsedTime, setElapsedTime] = useState(0);
 
     useEffect(() => {
-        // Update elapsed time every second
         const timer = setInterval(() => {
             setElapsedTime(prev => prev + 1);
         }, 1000);
-
         return () => clearInterval(timer);
     }, []);
 
     useEffect(() => {
-        // Progress through stages
         let cumulativeDuration = 0;
         for (let i = 0; i < SCAN_STAGES.length; i++) {
             cumulativeDuration += SCAN_STAGES[i].duration;
@@ -39,10 +36,8 @@ export function ScanProgress({ keyword, maxAds }: ScanProgressProps) {
                 break;
             }
         }
-
-        // Calculate overall progress
         const totalDuration = SCAN_STAGES.reduce((sum, s) => sum + s.duration, 0);
-        setProgress(Math.min((elapsedTime / totalDuration) * 100, 95)); // Cap at 95% until complete
+        setProgress(Math.min((elapsedTime / totalDuration) * 100, 95));
     }, [elapsedTime]);
 
     const formatTime = (seconds: number) => {
@@ -51,84 +46,85 @@ export function ScanProgress({ keyword, maxAds }: ScanProgressProps) {
         return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
     };
 
-    const estimatedTotal = Math.max(30, maxAds * 2); // Rough estimate: 2 seconds per ad
+    const estimatedTotal = Math.max(30, maxAds * 2);
     const estimatedRemaining = Math.max(0, estimatedTotal - elapsedTime);
 
     return (
-        <div className="mt-8">
-            <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-8 shadow-xl">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+        <div className="mt-10">
+            <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/20">
+                {/* Header - Apple minimal */}
+                <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                            <span className="animate-pulse">🔬</span>
+                        <h3 className="text-white text-[20px] font-semibold tracking-tight flex items-center gap-3">
+                            <div className="relative w-5 h-5">
+                                <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+                                <div className="absolute inset-0 rounded-full border-2 border-white/60 border-t-transparent animate-spin" />
+                            </div>
                             Scanning &quot;{keyword}&quot;
                         </h3>
-                        <p className="text-slate-400 text-sm">
-                            Analyzing up to {maxAds} ads through AI judge panel
+                        <p className="text-white/40 text-[14px] mt-1">
+                            Analyzing up to {maxAds} ads
                         </p>
                     </div>
                     <div className="text-right">
-                        <div className="text-2xl font-mono text-pink-400">{formatTime(elapsedTime)}</div>
-                        <div className="text-slate-500 text-xs">
+                        <div className="text-[28px] font-medium text-white/80 tabular-nums tracking-tight">
+                            {formatTime(elapsedTime)}
+                        </div>
+                        <div className="text-white/30 text-[12px]">
                             ~{formatTime(estimatedRemaining)} remaining
                         </div>
                     </div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-6">
-                    <div className="h-3 bg-[#1e293d] rounded-full overflow-hidden">
+                {/* Progress Bar - Apple style thin */}
+                <div className="mb-8">
+                    <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 transition-all duration-500 ease-out relative"
+                            className="h-full bg-white transition-all duration-500 ease-out"
                             style={{ width: `${progress}%` }}
-                        >
-                            <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                        </div>
+                        />
                     </div>
-                    <div className="flex justify-between mt-2 text-xs text-slate-500">
+                    <div className="flex justify-between mt-3 text-[12px] text-white/30">
                         <span>{Math.round(progress)}% complete</span>
-                        <span>Processing with {5} judges</span>
+                        <span>5 AI judges</span>
                     </div>
                 </div>
 
-                {/* Stage Indicators */}
-                <div className="grid grid-cols-5 gap-2">
+                {/* Stage Indicators - Apple pill style */}
+                <div className="flex gap-2">
                     {SCAN_STAGES.map((stage, index) => (
                         <div
                             key={stage.id}
-                            className={`p-3 rounded-lg text-center transition-all duration-300 ${index < currentStage
-                                    ? 'bg-emerald-950/40 border border-emerald-500/40'
+                            className={`flex-1 py-3 px-4 rounded-xl text-center transition-all duration-300 ${
+                                index < currentStage
+                                    ? 'bg-white/[0.08] text-white/70'
                                     : index === currentStage
-                                        ? 'bg-pink-950/40 border border-pink-500/40 animate-pulse'
-                                        : 'bg-[#0a0f1a]/60 border border-[#1e293d]/50'
-                                }`}
+                                        ? 'bg-white text-black'
+                                        : 'bg-white/[0.02] text-white/20'
+                            }`}
                         >
-                            <div className="text-2xl mb-1">
-                                {index < currentStage ? '✅' : stage.emoji}
-                            </div>
-                            <div className={`text-xs ${index <= currentStage ? 'text-white' : 'text-slate-500'
-                                }`}>
+                            <div className={`text-[12px] font-medium ${
+                                index === currentStage ? 'text-black' : ''
+                            }`}>
+                                {index < currentStage && (
+                                    <svg className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                )}
                                 {stage.label}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Fun Facts / Tips */}
-                <div className="mt-6 p-4 bg-[#0a0f1a]/60 rounded-lg border border-[#1e293d]/50">
-                    <div className="flex items-start gap-3">
-                        <span className="text-xl">💡</span>
-                        <div>
-                            <div className="text-slate-300 text-sm font-medium">Did you know?</div>
-                            <div className="text-slate-400 text-sm">
-                                {currentStage === 0 && "Meta runs over 10 million ads daily across Facebook and Instagram."}
-                                {currentStage === 1 && "Each ad is evaluated by 5 specialized AI judges with different expertise."}
-                                {currentStage === 2 && "Our scam detector recognizes 11 different fraud patterns including crypto scams and fake celebrities."}
-                                {currentStage === 3 && "We map violations to specific Meta Advertising Standards policy codes."}
-                                {currentStage === 4 && "Results can be exported as CSV, JSON, or Markdown reports for investigations."}
-                            </div>
-                        </div>
+                {/* Insight - Apple style subtle */}
+                <div className="mt-8 p-5 bg-white/[0.02] rounded-2xl border border-white/[0.04]">
+                    <div className="text-white/50 text-[13px] leading-relaxed">
+                        {currentStage === 0 && "Fetching ads from Meta's Ad Library for comprehensive analysis."}
+                        {currentStage === 1 && "Each ad is evaluated by 5 specialized AI judges with different expertise areas."}
+                        {currentStage === 2 && "Detecting 11 different fraud patterns including crypto scams and fake celebrities."}
+                        {currentStage === 3 && "Mapping violations to specific Meta Advertising Standards policy codes."}
+                        {currentStage === 4 && "Preparing results for export as CSV, JSON, or Markdown reports."}
                     </div>
                 </div>
             </div>
