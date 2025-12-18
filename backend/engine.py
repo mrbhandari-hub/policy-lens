@@ -21,10 +21,8 @@ from judges import get_judge_prompt
 
 
 # Model configuration
-# gemini-3-flash-preview provides best balance of speed and quality
-# Set POLICYLENS_FAST_MODE=0 to use gemini-3-pro-preview for highest quality
-FAST_MODE = os.getenv("POLICYLENS_FAST_MODE", "1") == "1"
-MODEL_ID = "gemini-2.5-flash-preview-05-20" if FAST_MODE else "gemini-3-pro-preview"
+# Use gemini-2.0-flash for best rate limits and stability
+MODEL_ID = "gemini-2.0-flash"
 
 # Thread pool for parallel API calls (Gemini SDK is synchronous)
 # 25 workers ensures all 18 judges + synthesis can run truly in parallel
@@ -37,7 +35,7 @@ class JudgeEngine:
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
         self.api_key = api_key
-        print(f"  Using model: {MODEL_ID} ({'fast mode' if FAST_MODE else 'quality mode'})")
+        print(f"  Using model: {MODEL_ID}")
     
     async def evaluate_content(self, request: PolicyLensRequest) -> PolicyLensResponse:
         """Run all selected judges in TRUE parallel and synthesize results"""

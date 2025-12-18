@@ -26,9 +26,8 @@ from models import (
 # Thread pool for parallel API calls
 _executor = ThreadPoolExecutor(max_workers=15)
 
-# Model configuration - matches engine.py for consistency
-# Uses gemini-3-pro-preview for quality deep dive analysis
-MODEL_ID = "gemini-3-pro-preview"
+# Model configuration - use gemini-2.0-flash for best rate limits
+MODEL_ID = "gemini-2.0-flash"
 
 SAFETY_PREAMBLE = """
 CRITICAL SAFETY RULES:
