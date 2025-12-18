@@ -185,90 +185,8 @@ function ExportButton({ results }: { results: AdScanResponse }) {
     );
 }
 
-function ScanStatsPanel({ stats, total_ads }: { stats: AdScanResponse['stats']; total_ads: number }) {
-    if (!stats) return null;
-
-    const hasScamTypes = Object.keys(stats.scam_type_distribution).length > 0;
-    const hasPolicyViolations = stats.top_policy_violations.length > 0;
-
-    if (!hasScamTypes && !hasPolicyViolations) return null;
-
-    return (
-        <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-6 shadow-2xl shadow-black/20">
-            <h3 className="text-white/70 text-[12px] font-semibold uppercase tracking-wider mb-5">
-                Intelligence Report
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Harm Score Overview */}
-                <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/[0.04]">
-                    <div className="text-white/40 text-[11px] uppercase tracking-wider mb-3">Harm Assessment</div>
-                    <div className="flex items-center gap-6">
-                        <div>
-                            <div className="text-[32px] font-semibold text-red-400 tabular-nums">{stats.avg_harm_score.toFixed(0)}</div>
-                            <div className="text-white/30 text-[12px]">Avg Score</div>
-                        </div>
-                        <div>
-                            <div className="text-[32px] font-semibold text-amber-400 tabular-nums">{stats.total_harm_score}</div>
-                            <div className="text-white/30 text-[12px]">Total</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Scam Type Distribution */}
-                {hasScamTypes && (
-                    <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/[0.04]">
-                        <div className="text-white/40 text-[11px] uppercase tracking-wider mb-3">Scam Types Detected</div>
-                        <div className="flex flex-wrap gap-2">
-                            {Object.entries(stats.scam_type_distribution)
-                                .sort((a, b) => b[1] - a[1])
-                                .map(([type, count]) => {
-                                    const info = scamTypeLabels[type] || { label: type, emoji: '', color: 'bg-white/[0.06] text-white/60 border-white/10' };
-                                    return (
-                                        <span
-                                            key={type}
-                                            className={`${info.color} border text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1.5`}
-                                        >
-                                            <span>{info.label}</span>
-                                            <span className="opacity-50">{count}</span>
-                                        </span>
-                                    );
-                                })}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Policy Violations Summary */}
-            {hasPolicyViolations && (
-                <div className="mt-5 bg-red-500/[0.06] border border-red-500/20 rounded-2xl p-5">
-                    <div className="text-red-400/70 text-[11px] uppercase tracking-wider mb-3">
-                        Meta Policy Violations
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {stats.top_policy_violations.map((pv, i) => (
-                            <a
-                                key={i}
-                                href={pv.meta_policy_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-red-500/10 hover:bg-red-500/20 text-red-300 text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors border border-red-500/20"
-                            >
-                                <span className="font-mono">{pv.policy_code}</span>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
 export function AdScanResults({ results }: AdScanResultsProps) {
-    const { violating, mixed, benign, keyword, total_ads, scan_timestamp, stats } = results;
+    const { violating, mixed, benign, keyword, total_ads, scan_timestamp } = results;
 
     // Calculate landing page crawl stats
     const allAds = [...violating, ...mixed, ...benign];
@@ -340,9 +258,6 @@ export function AdScanResults({ results }: AdScanResultsProps) {
                     <ExportButton results={results} />
                 </div>
             </div>
-
-            {/* Scam Intelligence Panel - NEW */}
-            <ScanStatsPanel stats={stats} total_ads={total_ads} />
 
             {/* API Data Quality Panel - Apple style */}
             {(landingPageStats.crawled > 0 || landingPageStats.failed > 0) && (
