@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { getRandomScamQueries, TOTAL_QUERY_COUNT } from '@/data/scamQueries';
 import { AdScanRequest, AdScanResponse } from '@/types/adScanner';
 import { BatchScanResults } from '@/components/BatchScanResults';
+import { supabase } from '@/lib/supabaseClient';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -38,12 +39,47 @@ function BatchScannerContent() {
     const [hasInitialRun, setHasInitialRun] = useState(false);
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+    const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
-    // Load queries from URL on mount
+    // Load saved batch or queries from URL on mount
     useEffect(() => {
+        const batchId = searchParams.get('id');
         const queriesParam = searchParams.get('queries');
         const maxAdsParam = searchParams.get('max_ads');
         
+        // Priority 1: Load saved batch by ID
+        if (batchId && !hasInitialRun) {
+            setHasInitialRun(true);
+            setIsLoadingSaved(true);
+            
+            supabase
+                .from('batch_scans')
+                .select('*')
+                .eq('id', batchId)
+                .single()
+                .then(({ data, error }) => {
+                    setIsLoadingSaved(false);
+                    
+                    if (error || !data) {
+                        setLoadError('Batch scan not found or expired');
+                        return;
+                    }
+                    
+                    // Reconstruct query statuses from saved data
+                    const savedResults = data.results as QueryStatus[];
+                    setQueryStatuses(savedResults);
+                    setCustomQueries(data.queries.join('\n'));
+                    setMaxAdsPerQuery(data.max_ads_per_query);
+                    
+                    // Generate share URL for this batch
+                    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                    setShareUrl(`${baseUrl}/ad-scanner/batch?id=${batchId}`);
+                });
+            return;
+        }
+        
+        // Priority 2: Load queries from URL params (base64 encoded)
         if (queriesParam && !hasInitialRun) {
             try {
                 // Decode the base64-encoded query list
@@ -220,17 +256,65 @@ function BatchScannerContent() {
         await processQueue();
         setIsRunning(false);
         
-        // Generate share URL after completion (use same base64 encoding)
-        // Only generate if URL won't be too long
+        // Save results to Supabase for sharing (works for any batch size)
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-        const shareQueryString = btoa(queries.join('|'));
-        const potentialShareUrl = `${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`;
         
-        if (potentialShareUrl.length < 2000) {
-            setShareUrl(potentialShareUrl);
-        } else {
-            // URL too long for sharing - set to null to indicate not shareable
-            setShareUrl(null);
+        try {
+            // Get final query statuses for saving
+            const finalStatuses = await new Promise<QueryStatus[]>(resolve => {
+                setQueryStatuses(current => {
+                    resolve(current);
+                    return current;
+                });
+            });
+            
+            // Calculate summary stats
+            const totalAds = finalStatuses.reduce((sum, q) => sum + (q.result?.total_ads || 0), 0);
+            const violatingCount = finalStatuses.reduce((sum, q) => sum + (q.result?.violating.length || 0), 0);
+            const mixedCount = finalStatuses.reduce((sum, q) => sum + (q.result?.mixed.length || 0), 0);
+            const benignCount = finalStatuses.reduce((sum, q) => sum + (q.result?.benign.length || 0), 0);
+            
+            const { data, error } = await supabase
+                .from('batch_scans')
+                .insert({
+                    queries: queries,
+                    max_ads_per_query: maxAds,
+                    results: finalStatuses,
+                    summary: {
+                        totalQueries: queries.length,
+                        completedQueries: finalStatuses.filter(q => q.status === 'completed').length,
+                        scannedAt: new Date().toISOString()
+                    },
+                    total_ads: totalAds,
+                    violating_count: violatingCount,
+                    mixed_count: mixedCount,
+                    benign_count: benignCount
+                })
+                .select('id')
+                .single();
+            
+            if (data && !error) {
+                // Update URL with batch ID and set share URL
+                const batchId = data.id;
+                router.replace(`?id=${batchId}`, { scroll: false });
+                setShareUrl(`${baseUrl}/ad-scanner/batch?id=${batchId}`);
+            } else {
+                console.error('Failed to save batch:', error);
+                // Fallback to base64 URL if small enough
+                const shareQueryString = btoa(queries.join('|'));
+                const potentialShareUrl = `${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`;
+                if (potentialShareUrl.length < 2000) {
+                    setShareUrl(potentialShareUrl);
+                }
+            }
+        } catch (e) {
+            console.error('Error saving batch to Supabase:', e);
+            // Fallback to base64 URL if small enough
+            const shareQueryString = btoa(queries.join('|'));
+            const potentialShareUrl = `${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`;
+            if (potentialShareUrl.length < 2000) {
+                setShareUrl(potentialShareUrl);
+            }
         }
     };
 
@@ -298,8 +382,36 @@ function BatchScannerContent() {
                     </nav>
                 </header>
 
-                {/* Configuration Panel */}
-                <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/20 mb-8">
+                {/* Loading saved batch */}
+                {isLoadingSaved && (
+                    <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-12 shadow-2xl shadow-black/20 mb-8 text-center">
+                        <div className="w-12 h-12 border-3 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mx-auto mb-4" />
+                        <h2 className="text-white text-[18px] font-medium">Loading saved batch results...</h2>
+                        <p className="text-white/40 text-[14px] mt-2">Fetching from cache</p>
+                    </div>
+                )}
+
+                {/* Error loading saved batch */}
+                {loadError && (
+                    <div className="bg-red-500/10 backdrop-blur-2xl border border-red-500/20 rounded-3xl p-8 shadow-2xl shadow-black/20 mb-8">
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-red-300 text-[16px] font-medium">{loadError}</h3>
+                                <p className="text-red-400/60 text-[14px] mt-1">
+                                    The batch scan may have expired or the link is invalid. Try running a new scan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Configuration Panel - hide when loading saved batch */}
+                {!isLoadingSaved && <div className="bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-8 shadow-2xl shadow-black/20 mb-8">
                     <div className="mb-8">
                         <h1 className="text-white text-[28px] font-semibold tracking-tight flex items-center gap-3">
                             <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center">
@@ -420,7 +532,7 @@ function BatchScannerContent() {
                             </>
                         )}
                     </button>
-                </div>
+                </div>}
 
                 {/* Progress Panel */}
                 {queryStatuses.length > 0 && (
