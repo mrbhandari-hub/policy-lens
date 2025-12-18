@@ -30,15 +30,22 @@ class ApifyAdsClient:
         """Run the actor synchronously and get results directly."""
         run_url = f"{self.BASE_URL}/acts/{self.ACTOR_ID}/run-sync-get-dataset-items"
         
+        # Request more than we need since some will be filtered/deduplicated
+        request_limit = min(limit * 2, 50)  # For sync, cap lower to avoid timeout
+        
         # Input for the actor (matching the exact format from Apify)
         input_data = {
             "adLibraryUrl": ads_library_url,
-            "maxResults": limit
+            "maxResults": request_limit,
+            "proxyConfiguration": {
+                "useApifyProxy": True,
+                "apifyProxyGroups": ["RESIDENTIAL"]
+            }
         }
         
         print(f"Calling Apify Premium scraper (sync)...")
         print(f"URL: {ads_library_url[:80]}...")
-        print(f"Max results: {limit}")
+        print(f"Requesting: {request_limit} ads")
         
         response = await self.client.post(
             run_url,
@@ -62,16 +69,28 @@ class ApifyAdsClient:
         """Run the actor asynchronously and poll for results."""
         run_url = f"{self.BASE_URL}/acts/{self.ACTOR_ID}/runs"
         
+        # Request more than we need since some will be filtered/deduplicated
+        request_limit = min(limit * 2, 200)  # Request 2x but cap at 200
+        
         input_data = {
             "adLibraryUrl": ads_library_url,
-            "maxResults": limit
+            "maxResults": request_limit,
+            # Additional options to improve results
+            "proxyConfiguration": {
+                "useApifyProxy": True,
+                "apifyProxyGroups": ["RESIDENTIAL"]  # Use residential proxies for better results
+            }
         }
         
-        print("Starting async Apify run...")
+        print(f"Starting async Apify run (requesting {request_limit} ads)...")
         
         response = await self.client.post(
             run_url,
-            params={"token": self.api_token},
+            params={
+                "token": self.api_token,
+                "memory": 2048,  # 2GB memory for larger scrapes
+                "timeout": 300   # 5 minute timeout
+            },
             json=input_data,
             headers={"Content-Type": "application/json"}
         )
