@@ -14,6 +14,16 @@ from urllib.parse import urlencode
 from ad_scanner import MetaAd
 
 
+class ApifyConfigError(Exception):
+    """Raised when APIFY_API_TOKEN is not configured."""
+    pass
+
+
+class ApifyApiError(Exception):
+    """Raised when the Apify API call fails."""
+    pass
+
+
 class ApifyAdsClient:
     """Client for fetching real ads from Meta Ads Library via Apify's URL-based scraper."""
     
@@ -184,8 +194,7 @@ class ApifyAdsClient:
             List of MetaAd objects
         """
         if not self.api_token:
-            print("No APIFY_API_TOKEN found, cannot fetch real ads")
-            return []
+            raise ApifyConfigError("APIFY_API_TOKEN not configured. Set the environment variable and restart the server.")
         
         try:
             # For small requests (<=20), use sync mode (faster)
@@ -199,11 +208,13 @@ class ApifyAdsClient:
             print(f"Using async mode for {limit} ads...")
             return await self._run_async(ads_library_url, limit)
             
+        except ApifyConfigError:
+            raise  # Re-raise config errors
         except Exception as e:
             print(f"Error calling Apify: {e}")
             import traceback
             traceback.print_exc()
-            return []
+            raise ApifyApiError(f"Apify API error: {str(e)}")
 
     def build_ads_library_url(
         self,

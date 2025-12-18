@@ -56,13 +56,13 @@ class MetaAdsClient:
         # Try Apify next (most reliable for real ads)
         apify_token = os.getenv("APIFY_API_TOKEN")
         if apify_token:
+            # Let exceptions propagate - they contain useful error info
             ads = await self._search_via_apify(keyword, limit, country)
-            if ads:
-                return ads
+            return ads  # May be empty if no ads found (not an error)
         
-        # Fall back to sample ads
-        print("No API tokens available, returning sample ads")
-        return []
+        # No API tokens configured
+        from apify_ads_client import ApifyConfigError
+        raise ApifyConfigError("No API tokens configured. Set APIFY_API_TOKEN environment variable.")
 
     
     async def _search_via_api(
@@ -112,7 +112,7 @@ class MetaAdsClient:
     
     async def _search_via_apify(self, keyword: str, limit: int, country: str = "US") -> list[MetaAd]:
         """Search using Apify's Premium URL-based Facebook Ads Library scraper."""
-        from apify_ads_client import ApifyAdsClient
+        from apify_ads_client import ApifyAdsClient, ApifyConfigError, ApifyApiError
         
         client = ApifyAdsClient()
         try:
@@ -128,11 +128,13 @@ class MetaAdsClient:
             else:
                 print("Apify returned no ads")
                 return []
+        except (ApifyConfigError, ApifyApiError):
+            raise  # Propagate custom exceptions
         except Exception as e:
             print(f"Apify error: {e}")
             import traceback
             traceback.print_exc()
-            return []
+            raise ApifyApiError(f"Apify error: {str(e)}")
         finally:
             await client.close()
     

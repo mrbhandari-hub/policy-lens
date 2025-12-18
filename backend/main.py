@@ -375,24 +375,37 @@ async def scan_ads(request: AdScanRequest):
         
         # Fetch real ads if not cached
         if not ads_to_analyze:
+            from apify_ads_client import ApifyConfigError, ApifyApiError
             try:
                 ads_to_analyze = await fetch_real_ads(request.keyword, limit=request.max_ads)
                 if ads_to_analyze:
                     # Cache the raw ads
                     cache_ads(request.keyword, ads_to_analyze)
                 else:
-                    # No fallback - fail if no real ads found
+                    # No ads found for this keyword - this is a valid result, not an error
                     raise HTTPException(
                         status_code=404, 
-                        detail=f"No ads found for '{request.keyword}'. Make sure APIFY_API_TOKEN is configured."
+                        detail=f"NO_ADS_FOUND:No ads found for '{request.keyword}'. This keyword may not have any active ads on Meta."
                     )
             except HTTPException:
                 raise  # Re-raise our own HTTPException
-            except Exception as e:
-                # No fallback - fail if fetching fails
+            except ApifyConfigError as e:
+                # API token not configured
                 raise HTTPException(
                     status_code=503, 
-                    detail=f"Failed to fetch ads: {str(e)}. Check APIFY_API_TOKEN configuration."
+                    detail=f"API_CONFIG_ERROR:{str(e)}"
+                )
+            except ApifyApiError as e:
+                # API call failed
+                raise HTTPException(
+                    status_code=503, 
+                    detail=f"API_ERROR:{str(e)}"
+                )
+            except Exception as e:
+                # Unknown error
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"UNKNOWN_ERROR:Failed to fetch ads: {str(e)}"
                 )
     else:
         raise HTTPException(

@@ -197,20 +197,76 @@ function AdScannerContent() {
                     initialKeyword={initialQuery}
                 />
 
-                {/* Error Display - Apple style alert */}
-                {error && (
-                    <div className="mt-8 bg-red-500/10 backdrop-blur-xl border border-red-500/20 rounded-2xl p-5 flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                {/* Error/Info Display - Context-aware messaging */}
+                {error && (() => {
+                    // Parse error type from backend
+                    const isNoAdsFound = error.startsWith('NO_ADS_FOUND:');
+                    const isConfigError = error.startsWith('API_CONFIG_ERROR:');
+                    const isApiError = error.startsWith('API_ERROR:');
+                    const message = error.includes(':') ? error.split(':').slice(1).join(':') : error;
+                    
+                    // No ads found - informational, not an error
+                    if (isNoAdsFound) {
+                        return (
+                            <div className="mt-8 bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 flex items-start gap-4">
+                                <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="font-medium text-white/80 text-[15px]">No Ads Found</div>
+                                    <div className="text-white/40 text-[13px] mt-1 leading-relaxed">
+                                        No active ads match this search term on Meta&apos;s Ad Library. Try a different keyword or check{' '}
+                                        <a 
+                                            href={`https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=${encodeURIComponent(initialQuery)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-400 hover:text-blue-300 underline"
+                                        >
+                                            Meta Ad Library directly
+                                        </a>.
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    }
+                    
+                    // API configuration error
+                    if (isConfigError) {
+                        return (
+                            <div className="mt-8 bg-amber-500/10 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-5 flex items-start gap-4">
+                                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="font-medium text-amber-300 text-[15px]">Configuration Required</div>
+                                    <div className="text-amber-400/70 text-[13px] mt-1 leading-relaxed">{message}</div>
+                                </div>
+                            </div>
+                        );
+                    }
+                    
+                    // API error or unknown error
+                    return (
+                        <div className="mt-8 bg-red-500/10 backdrop-blur-xl border border-red-500/20 rounded-2xl p-5 flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div className="font-medium text-red-300 text-[15px]">
+                                    {isApiError ? 'API Error' : 'Scan Error'}
+                                </div>
+                                <div className="text-red-400/70 text-[13px] mt-1 leading-relaxed">{message}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div className="font-medium text-red-300 text-[15px]">Scan Error</div>
-                            <div className="text-red-400/70 text-[13px] mt-1 leading-relaxed">{error}</div>
-                        </div>
-                    </div>
-                )}
+                    );
+                })()}
 
                 {/* Loading State - Enhanced Progress */}
                 {loading && currentScanRequest && (
