@@ -98,8 +98,16 @@ function BatchScannerContent() {
         setShareUrl(null);
 
         // Update URL with queries for sharing (use base64 to avoid encoding issues)
+        // Only update URL if it won't be too long (browser limit ~2000 chars)
         const queryString = btoa(queries.join('|'));
-        router.replace(`?queries=${queryString}&max_ads=${maxAds}`, { scroll: false });
+        const fullUrl = `?queries=${queryString}&max_ads=${maxAds}`;
+        
+        if (fullUrl.length < 2000) {
+            router.replace(fullUrl, { scroll: false });
+        } else {
+            // URL too long, clear it to avoid issues
+            router.replace(`?max_ads=${maxAds}`, { scroll: false });
+        }
 
         // Run scans in parallel with controlled concurrency
         const concurrencyLimit = 3;
@@ -213,9 +221,17 @@ function BatchScannerContent() {
         setIsRunning(false);
         
         // Generate share URL after completion (use same base64 encoding)
+        // Only generate if URL won't be too long
         const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
         const shareQueryString = btoa(queries.join('|'));
-        setShareUrl(`${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`);
+        const potentialShareUrl = `${baseUrl}/ad-scanner/batch?queries=${shareQueryString}&max_ads=${maxAds}`;
+        
+        if (potentialShareUrl.length < 2000) {
+            setShareUrl(potentialShareUrl);
+        } else {
+            // URL too long for sharing - set to null to indicate not shareable
+            setShareUrl(null);
+        }
     };
 
     const runBatchScan = useCallback(async () => {
@@ -337,6 +353,9 @@ function BatchScannerContent() {
                                 <option value={20}>20 queries</option>
                                 <option value={25}>25 queries</option>
                                 <option value={30}>30 queries</option>
+                                <option value={50}>50 queries</option>
+                                <option value={75}>75 queries</option>
+                                <option value={100}>100 queries</option>
                             </select>
                         </div>
 
@@ -441,6 +460,15 @@ function BatchScannerContent() {
                                             </>
                                         )}
                                     </button>
+                                )}
+                                {/* Large batch - no share link */}
+                                {!shareUrl && !isRunning && queryStatuses.length > 30 && (
+                                    <span className="text-white/30 text-[12px] flex items-center gap-1.5">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Large batch — use Export instead
+                                    </span>
                                 )}
                                 
                                 {/* Aggregate Stats */}
