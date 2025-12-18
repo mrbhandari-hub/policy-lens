@@ -24,7 +24,7 @@ class ApifyAdsClient:
     
     def __init__(self, api_token: Optional[str] = None):
         self.api_token = api_token or os.getenv("APIFY_API_TOKEN")
-        self.client = httpx.AsyncClient(timeout=180.0)  # Long timeout for scraping
+        self.client = httpx.AsyncClient(timeout=300.0)  # 5 min timeout for scraping
     
     async def _run_sync(self, ads_library_url: str, limit: int) -> List[MetaAd]:
         """Run the actor synchronously and get results directly."""
@@ -89,8 +89,8 @@ class ApifyAdsClient:
         
         print(f"Actor run started with ID: {run_id}")
         
-        # Poll for completion (max 3 minutes)
-        for attempt in range(36):  # 36 * 5s = 180s
+        # Poll for completion (max 5 minutes)
+        for attempt in range(60):  # 60 * 5s = 300s
             await asyncio.sleep(5)
             
             status_url = f"{self.BASE_URL}/actor-runs/{run_id}"
@@ -105,7 +105,7 @@ class ApifyAdsClient:
             
             status_data = status_response.json()
             status = status_data.get("data", {}).get("status")
-            print(f"Run status: {status} (attempt {attempt + 1}/36)")
+            print(f"Run status: {status} (attempt {attempt + 1}/60)")
             
             if status == "SUCCEEDED":
                 dataset_id = status_data.get("data", {}).get("defaultDatasetId")
@@ -169,12 +169,15 @@ class ApifyAdsClient:
             return []
         
         try:
-            # First try sync method (faster for small requests)
-            ads = await self._run_sync(ads_library_url, limit)
-            if ads:
-                return ads
+            # For small requests (<=20), use sync mode (faster)
+            # For larger requests, use async mode (can handle more data)
+            if limit <= 20:
+                ads = await self._run_sync(ads_library_url, limit)
+                if ads:
+                    return ads
             
-            # Fall back to async method
+            # Use async method for large requests or if sync failed
+            print(f"Using async mode for {limit} ads...")
             return await self._run_async(ads_library_url, limit)
             
         except Exception as e:
