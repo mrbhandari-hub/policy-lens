@@ -21,10 +21,10 @@ from judges import get_judge_prompt
 
 
 # Model configuration
-# gemini-2.0-flash is ~3x faster than gemini-3-pro-preview
-# Set POLICYLENS_FAST_MODE=1 for speed, or leave unset for quality
+# gemini-3-flash-preview provides best balance of speed and quality
+# Set POLICYLENS_FAST_MODE=0 to use gemini-3-pro-preview for highest quality
 FAST_MODE = os.getenv("POLICYLENS_FAST_MODE", "1") == "1"
-MODEL_ID = "gemini-2.0-flash" if FAST_MODE else "gemini-3-pro-preview"
+MODEL_ID = "gemini-2.5-flash-preview-05-20" if FAST_MODE else "gemini-3-pro-preview"
 
 # Thread pool for parallel API calls (Gemini SDK is synchronous)
 # 25 workers ensures all 18 judges + synthesis can run truly in parallel

@@ -14,6 +14,13 @@ export interface MetaAd {
     country_targeting?: string[];
     spend_range?: string;
     impressions_range?: string;
+    // NEW: Landing page context
+    landing_page_url?: string;
+    landing_page_content?: string;
+    landing_page_crawl_error?: string;
+    // NEW: Video and thumbnails
+    video_url?: string;
+    thumbnail_urls?: string[];
 }
 
 export type AdCategoryType = 'violating' | 'mixed' | 'benign';

@@ -210,12 +210,88 @@ export function AdCard({ analysis }: AdCardProps) {
                                 <span>View on Meta</span>
                             </a>
                         )}
+                        {analysis.ad.landing_page_url && (
+                            <a
+                                href={analysis.ad.landing_page_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded flex items-center gap-1 transition-colors"
+                            >
+                                <span>🌐</span>
+                                <span>Visit Landing Page</span>
+                            </a>
+                        )}
                         <CopyButton text={analysis.ad.text} label="Copy Ad Text" />
                         <CopyButton
                             text={`Ad ID: ${analysis.ad.ad_id}\nAdvertiser: ${analysis.ad.advertiser_name}\nCategory: ${analysis.category}\nHarm Score: ${analysis.harm_score || 'N/A'}\n\nAd Text:\n${analysis.ad.text}\n\nAnalysis: ${analysis.crux_narrative}`}
                             label="Copy Evidence"
                         />
                     </div>
+
+                    {/* Landing Page Context - NEW: Shows crawl worked */}
+                    {(analysis.ad.landing_page_url || analysis.ad.landing_page_content || analysis.ad.landing_page_crawl_error) && (
+                        <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-lg p-4">
+                            <h4 className="text-indigo-400 text-xs uppercase tracking-wider mb-3 font-semibold flex items-center gap-2">
+                                <span>🌐</span>
+                                <span>Landing Page Analysis</span>
+                                {analysis.ad.landing_page_content ? (
+                                    <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                        <span>✓</span> Crawled
+                                    </span>
+                                ) : analysis.ad.landing_page_crawl_error ? (
+                                    <span className="bg-amber-600 text-white text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                        <span>⚠</span> Failed
+                                    </span>
+                                ) : (
+                                    <span className="bg-slate-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                                        No URL
+                                    </span>
+                                )}
+                            </h4>
+
+                            {/* Landing Page URL */}
+                            {analysis.ad.landing_page_url && (
+                                <div className="mb-3">
+                                    <div className="text-slate-500 text-xs mb-1">Destination URL:</div>
+                                    <a
+                                        href={analysis.ad.landing_page_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-indigo-300 text-sm font-mono break-all hover:text-indigo-200 transition-colors"
+                                    >
+                                        {analysis.ad.landing_page_url}
+                                    </a>
+                                </div>
+                            )}
+
+                            {/* Crawl Error */}
+                            {analysis.ad.landing_page_crawl_error && (
+                                <div className="bg-amber-950/40 border border-amber-500/30 rounded-lg p-2 mb-3">
+                                    <div className="text-amber-400 text-xs flex items-center gap-1">
+                                        <span>⚠️</span>
+                                        <span>Crawl Error: {analysis.ad.landing_page_crawl_error}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Crawled Content Preview */}
+                            {analysis.ad.landing_page_content && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="text-slate-500 text-xs">
+                                            Crawled Content ({analysis.ad.landing_page_content.length.toLocaleString()} chars):
+                                        </div>
+                                        <CopyButton text={analysis.ad.landing_page_content} label="Copy" />
+                                    </div>
+                                    <div className="bg-[#0a0f1a]/60 rounded-lg p-3 max-h-48 overflow-y-auto">
+                                        <pre className="text-slate-300 text-xs whitespace-pre-wrap font-mono">
+                                            {analysis.ad.landing_page_content}
+                                        </pre>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Policy Violations - NEW */}
                     {hasPolicyViolations && (

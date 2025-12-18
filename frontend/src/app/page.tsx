@@ -33,7 +33,7 @@ function LandingContent() {
         <div className="container mx-auto px-4 max-w-6xl">
           <p className="text-slate-500 text-sm mb-4">
             PolicyLens v2.0 — Powered by{' '}
-            <span className="text-purple-400">Gemini 3 Pro Preview</span>
+            <span className="text-purple-400">Gemini 2.5 Flash</span>
           </p>
           <div className="flex items-center justify-center gap-6 text-sm text-slate-600">
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">

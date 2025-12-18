@@ -225,8 +225,8 @@ function AdScannerContent() {
                                                         key={type}
                                                         onClick={() => toggleScamTypeFilter(type)}
                                                         className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 transition-all ${isSelected
-                                                                ? 'bg-pink-600 text-white ring-2 ring-pink-400'
-                                                                : 'bg-slate-700/60 text-slate-300 hover:bg-slate-600'
+                                                            ? 'bg-pink-600 text-white ring-2 ring-pink-400'
+                                                            : 'bg-slate-700/60 text-slate-300 hover:bg-slate-600'
                                                             }`}
                                                     >
                                                         <span>{info.emoji}</span>
@@ -305,7 +305,7 @@ function AdScannerContent() {
                 <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
                     <p className="text-slate-500 text-sm">
                         PolicyLens Ad Scanner — Powered by{' '}
-                        <span className="text-pink-400">Gemini 2.0 Flash</span>
+                        <span className="text-pink-400">Gemini 2.5 Flash</span>
                     </p>
                     <p className="text-slate-600 text-xs mt-2">
                         Built for investigative journalism and consumer protection

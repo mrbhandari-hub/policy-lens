@@ -265,6 +265,15 @@ function ScanStatsPanel({ stats, total_ads }: { stats: AdScanResponse['stats']; 
 export function AdScanResults({ results }: AdScanResultsProps) {
     const { violating, mixed, benign, keyword, total_ads, scan_timestamp, stats } = results;
 
+    // Calculate landing page crawl stats
+    const allAds = [...violating, ...mixed, ...benign];
+    const landingPageStats = {
+        total: allAds.filter(a => a.ad.landing_page_url).length,
+        crawled: allAds.filter(a => a.ad.landing_page_content).length,
+        failed: allAds.filter(a => a.ad.landing_page_crawl_error).length,
+        noUrl: allAds.filter(a => !a.ad.landing_page_url).length
+    };
+
     return (
         <div className="space-y-6">
             {/* Summary Header */}
@@ -329,6 +338,73 @@ export function AdScanResults({ results }: AdScanResultsProps) {
 
             {/* Scam Intelligence Panel - NEW */}
             <ScanStatsPanel stats={stats} total_ads={total_ads} />
+
+            {/* API Data Quality Panel - Shows landing page crawl results */}
+            {(landingPageStats.crawled > 0 || landingPageStats.failed > 0) && (
+                <div className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-6 shadow-xl">
+                    <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <span>📡</span>
+                        <span>API Data Quality</span>
+                        <span className="text-xs font-normal text-slate-500 ml-2">Proof that landing page crawls worked</span>
+                    </h3>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Total with Landing Page URLs */}
+                        <div className="bg-[#0a0f1a]/60 rounded-lg p-4 text-center">
+                            <div className="text-2xl font-bold text-indigo-400">{landingPageStats.total}</div>
+                            <div className="text-slate-500 text-xs">Ads with Landing URLs</div>
+                        </div>
+
+                        {/* Successfully Crawled */}
+                        <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-lg p-4 text-center">
+                            <div className="text-2xl font-bold text-emerald-400 flex items-center justify-center gap-1">
+                                <span>✓</span>
+                                <span>{landingPageStats.crawled}</span>
+                            </div>
+                            <div className="text-emerald-400/70 text-xs">Pages Crawled</div>
+                        </div>
+
+                        {/* Failed Crawls */}
+                        {landingPageStats.failed > 0 && (
+                            <div className="bg-amber-950/40 border border-amber-500/30 rounded-lg p-4 text-center">
+                                <div className="text-2xl font-bold text-amber-400 flex items-center justify-center gap-1">
+                                    <span>⚠</span>
+                                    <span>{landingPageStats.failed}</span>
+                                </div>
+                                <div className="text-amber-400/70 text-xs">Crawl Errors</div>
+                            </div>
+                        )}
+
+                        {/* No URL Available */}
+                        <div className="bg-[#0a0f1a]/60 rounded-lg p-4 text-center">
+                            <div className="text-2xl font-bold text-slate-500">{landingPageStats.noUrl}</div>
+                            <div className="text-slate-600 text-xs">Ads without URL</div>
+                        </div>
+                    </div>
+
+                    {/* Success Rate Bar */}
+                    {landingPageStats.total > 0 && (
+                        <div className="mt-4">
+                            <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                                <span>Crawl Success Rate</span>
+                                <span className="text-emerald-400">
+                                    {((landingPageStats.crawled / landingPageStats.total) * 100).toFixed(0)}%
+                                </span>
+                            </div>
+                            <div className="h-2 bg-[#1e293d] rounded-full overflow-hidden flex">
+                                <div
+                                    className="bg-emerald-500 h-full transition-all"
+                                    style={{ width: `${(landingPageStats.crawled / landingPageStats.total) * 100}%` }}
+                                />
+                                <div
+                                    className="bg-amber-500 h-full transition-all"
+                                    style={{ width: `${(landingPageStats.failed / landingPageStats.total) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Three Column Results */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -2,12 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { 
-  InputModule, 
-  SynthesisCard, 
-  DisagreementMatrix, 
-  JudgeDetailCards, 
-  DebateCard, 
+import {
+  InputModule,
+  SynthesisCard,
+  DisagreementMatrix,
+  JudgeDetailCards,
+  DebateCard,
   CrossModelCard,
   ShareButton,
   VerdictSummary,
@@ -134,26 +134,26 @@ function AnalyzeContent() {
       // Handle both array and object formats of verdict_distribution
       let verdictLabel = 'ANALYSIS';
       const dist = response.synthesis.verdict_distribution;
-      
+
       if (Array.isArray(dist) && dist.length > 0) {
         const majorityVerdict = dist.reduce((a, b) => (a.count > b.count) ? a : b);
         verdictLabel = majorityVerdict.tier === 'REMOVE' ? 'REMOVE' :
-                      majorityVerdict.tier === 'ALLOW' ? 'ALLOW' :
-                      majorityVerdict.tier === 'REDUCE_REACH' ? 'REDUCE' :
-                      majorityVerdict.tier === 'AGE_GATE' ? 'AGE-GATE' :
-                      majorityVerdict.tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+          majorityVerdict.tier === 'ALLOW' ? 'ALLOW' :
+            majorityVerdict.tier === 'REDUCE_REACH' ? 'REDUCE' :
+              majorityVerdict.tier === 'AGE_GATE' ? 'AGE-GATE' :
+                majorityVerdict.tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
       } else if (!Array.isArray(dist)) {
         const entries = Object.entries(dist as Record<string, number>);
         if (entries.length > 0) {
           const [tier] = entries.sort((a, b) => b[1] - a[1])[0];
           verdictLabel = tier === 'REMOVE' ? 'REMOVE' :
-                        tier === 'ALLOW' ? 'ALLOW' :
-                        tier === 'REDUCE_REACH' ? 'REDUCE' :
-                        tier === 'AGE_GATE' ? 'AGE-GATE' :
-                        tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
+            tier === 'ALLOW' ? 'ALLOW' :
+              tier === 'REDUCE_REACH' ? 'REDUCE' :
+                tier === 'AGE_GATE' ? 'AGE-GATE' :
+                  tier === 'LABEL' ? 'LABEL' : 'ANALYSIS';
         }
       }
-      
+
       document.title = `${verdictLabel} | PolicyLens Analysis`;
     } else {
       document.title = 'PolicyLens - Content Moderation Analysis';
@@ -236,7 +236,7 @@ function AnalyzeContent() {
         </header>
 
         {/* Analysis History */}
-        <AnalysisHistory 
+        <AnalysisHistory
           onLoadAnalysis={(loadedResponse) => {
             setResponse(loadedResponse);
             // Try to extract content from response if available
@@ -279,145 +279,145 @@ function AnalyzeContent() {
             <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 lg:pb-0">
               {/* Results Header with Share/Export and Summary */}
               <div id="section-summary" className="bg-[#0f1629]/90 backdrop-blur-sm border border-[#1e293d] rounded-2xl p-4 md:p-6 shadow-xl scroll-mt-24">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
-                <div>
-                  <h2 className="text-white text-xl font-bold mb-2">Analysis Results</h2>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
-                    <span>{response.judge_verdicts.length} judges</span>
-                    {response.debate && <span>• Debate</span>}
-                    {response.cross_model && <span>• Cross-Model</span>}
-                    {response.counterfactual && <span>• Counterfactual</span>}
-                    {response.red_team && <span>• Red Team</span>}
-                    {response.temporal && <span>• Temporal</span>}
-                    {response.appeal && <span>• Appeal</span>}
-                    {response.sycophancy && <span>• Sycophancy</span>}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
+                  <div>
+                    <h2 className="text-white text-xl font-bold mb-2">Analysis Results</h2>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                      <span>{response.judge_verdicts.length} judges</span>
+                      {response.debate && <span>• Debate</span>}
+                      {response.cross_model && <span>• Cross-Model</span>}
+                      {response.counterfactual && <span>• Counterfactual</span>}
+                      {response.red_team && <span>• Red Team</span>}
+                      {response.temporal && <span>• Temporal</span>}
+                      {response.appeal && <span>• Appeal</span>}
+                      {response.sycophancy && <span>• Sycophancy</span>}
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                    <button
+                      onClick={exportJSON}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/60 hover:text-white hover:border-teal-500/30 transition-all text-sm font-medium min-h-[44px]"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Export JSON
+                    </button>
+                    {shareId && (
+                      <div className="min-h-[44px]">
+                        <ShareButton shareId={shareId} />
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                  <button
-                    onClick={exportJSON}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1e293d]/60 text-slate-300 border border-[#2d3a52] hover:bg-[#2d3a52]/60 hover:text-white hover:border-teal-500/30 transition-all text-sm font-medium min-h-[44px]"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export JSON
-                  </button>
-                  {shareId && (
-                    <div className="min-h-[44px]">
-                      <ShareButton shareId={shareId} />
-                    </div>
-                  )}
+                <div className="text-slate-500 text-xs">
+                  Request ID: <code className="bg-[#0a0f1a] px-2 py-1 rounded text-teal-400/70 font-mono">{response.request_id}</code>
                 </div>
               </div>
-              <div className="text-slate-500 text-xs">
-                Request ID: <code className="bg-[#0a0f1a] px-2 py-1 rounded text-teal-400/70 font-mono">{response.request_id}</code>
+
+              {/* At-a-Glance Verdict Summary */}
+              <VerdictSummary verdicts={response.judge_verdicts} />
+
+              {/* Synthesis Card */}
+              <div id="section-synthesis" className="scroll-mt-24">
+                <SynthesisCard synthesis={response.synthesis} />
               </div>
-            </div>
 
-            {/* At-a-Glance Verdict Summary */}
-            <VerdictSummary verdicts={response.judge_verdicts} />
-
-            {/* Synthesis Card */}
-            <div id="section-synthesis" className="scroll-mt-24">
-              <SynthesisCard synthesis={response.synthesis} />
-            </div>
-
-            {/* Middle: Disagreement Matrix */}
-            <div id="section-distribution" className="scroll-mt-24">
-              <DisagreementMatrix
-                verdicts={response.judge_verdicts}
-                distribution={response.synthesis.verdict_distribution}
-              />
-            </div>
-
-            {/* Bottom: Detailed Rationale */}
-            <div id="section-rationale" className="scroll-mt-24">
-              <JudgeDetailCards verdicts={response.judge_verdicts} />
-            </div>
-
-            {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
-            {(response.debate || response.cross_model || response.counterfactual || 
-              response.red_team || response.temporal || response.appeal || response.sycophancy) && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
-                  <h2 className="text-white text-lg font-semibold flex items-center gap-2">
-                    <span>🔬</span> Deep Dives
-                  </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-[#2d3a52] via-[#2d3a52] to-transparent" />
-                </div>
-
-                <div className="grid gap-6">
-                  {/* Debate & Cross-Model */}
-                  {(response.debate || response.cross_model) && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {response.debate && (
-                        <div id="section-debate" className="scroll-mt-24">
-                          <CollapsibleSection id="debate" title="Pro/Con Debate" icon="⚔️">
-                            <DebateCard debate={response.debate} />
-                          </CollapsibleSection>
-                        </div>
-                      )}
-                      {response.cross_model && (
-                        <div id="section-crossmodel" className="scroll-mt-24">
-                          <CollapsibleSection id="crossmodel" title="Cross-Model Agreement" icon="🤖">
-                            <CrossModelCard crossModel={response.cross_model} />
-                          </CollapsibleSection>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Boundary Analysis */}
-                  {response.counterfactual && (
-                    <div id="section-counterfactual" className="scroll-mt-24">
-                      <CollapsibleSection id="counterfactual" title="Counterfactual Analysis" icon="🔀">
-                        <CounterfactualCard data={response.counterfactual} />
-                      </CollapsibleSection>
-                    </div>
-                  )}
-
-                  {/* Security Analysis */}
-                  {response.red_team && (
-                    <div id="section-redteam" className="scroll-mt-24">
-                      <CollapsibleSection id="redteam" title="Red Team Analysis" icon="🎯">
-                        <RedTeamCard data={response.red_team} />
-                      </CollapsibleSection>
-                    </div>
-                  )}
-
-                  {/* Context & Appeals */}
-                  {(response.temporal || response.appeal) && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                      {response.temporal && (
-                        <div id="section-temporal" className="scroll-mt-24">
-                          <CollapsibleSection id="temporal" title="Temporal Sensitivity" icon="⏰">
-                            <TemporalCard data={response.temporal} />
-                          </CollapsibleSection>
-                        </div>
-                      )}
-                      {response.appeal && (
-                        <div id="section-appeal" className="scroll-mt-24">
-                          <CollapsibleSection id="appeal" title="Appeal Anticipation" icon="📝">
-                            <AppealCard data={response.appeal} />
-                          </CollapsibleSection>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Bias Detection */}
-                  {response.sycophancy && (
-                    <div id="section-sycophancy" className="scroll-mt-24">
-                      <CollapsibleSection id="sycophancy" title="Sycophancy Detection" icon="🎭">
-                        <SycophancyCard data={response.sycophancy} />
-                      </CollapsibleSection>
-                    </div>
-                  )}
-                </div>
+              {/* Middle: Disagreement Matrix */}
+              <div id="section-distribution" className="scroll-mt-24">
+                <DisagreementMatrix
+                  verdicts={response.judge_verdicts}
+                  distribution={response.synthesis.verdict_distribution}
+                />
               </div>
-            )}
+
+              {/* Bottom: Detailed Rationale */}
+              <div id="section-rationale" className="scroll-mt-24">
+                <JudgeDetailCards verdicts={response.judge_verdicts} />
+              </div>
+
+              {/* Deep Dives Section - includes Debate, Cross-Model, and all Advanced */}
+              {(response.debate || response.cross_model || response.counterfactual ||
+                response.red_team || response.temporal || response.appeal || response.sycophancy) && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#2d3a52] to-transparent" />
+                      <h2 className="text-white text-lg font-semibold flex items-center gap-2">
+                        <span>🔬</span> Deep Dives
+                      </h2>
+                      <div className="h-px flex-1 bg-gradient-to-r from-[#2d3a52] via-[#2d3a52] to-transparent" />
+                    </div>
+
+                    <div className="grid gap-6">
+                      {/* Debate & Cross-Model */}
+                      {(response.debate || response.cross_model) && (
+                        <div className="grid md:grid-cols-2 gap-6">
+                          {response.debate && (
+                            <div id="section-debate" className="scroll-mt-24">
+                              <CollapsibleSection id="debate" title="Pro/Con Debate" icon="⚔️">
+                                <DebateCard debate={response.debate} />
+                              </CollapsibleSection>
+                            </div>
+                          )}
+                          {response.cross_model && (
+                            <div id="section-crossmodel" className="scroll-mt-24">
+                              <CollapsibleSection id="crossmodel" title="Cross-Model Agreement" icon="🤖">
+                                <CrossModelCard crossModel={response.cross_model} />
+                              </CollapsibleSection>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Boundary Analysis */}
+                      {response.counterfactual && (
+                        <div id="section-counterfactual" className="scroll-mt-24">
+                          <CollapsibleSection id="counterfactual" title="Counterfactual Analysis" icon="🔀">
+                            <CounterfactualCard data={response.counterfactual} />
+                          </CollapsibleSection>
+                        </div>
+                      )}
+
+                      {/* Security Analysis */}
+                      {response.red_team && (
+                        <div id="section-redteam" className="scroll-mt-24">
+                          <CollapsibleSection id="redteam" title="Red Team Analysis" icon="🎯">
+                            <RedTeamCard data={response.red_team} />
+                          </CollapsibleSection>
+                        </div>
+                      )}
+
+                      {/* Context & Appeals */}
+                      {(response.temporal || response.appeal) && (
+                        <div className="grid md:grid-cols-2 gap-6">
+                          {response.temporal && (
+                            <div id="section-temporal" className="scroll-mt-24">
+                              <CollapsibleSection id="temporal" title="Temporal Sensitivity" icon="⏰">
+                                <TemporalCard data={response.temporal} />
+                              </CollapsibleSection>
+                            </div>
+                          )}
+                          {response.appeal && (
+                            <div id="section-appeal" className="scroll-mt-24">
+                              <CollapsibleSection id="appeal" title="Appeal Anticipation" icon="📝">
+                                <AppealCard data={response.appeal} />
+                              </CollapsibleSection>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Bias Detection */}
+                      {response.sycophancy && (
+                        <div id="section-sycophancy" className="scroll-mt-24">
+                          <CollapsibleSection id="sycophancy" title="Sycophancy Detection" icon="🎭">
+                            <SycophancyCard data={response.sycophancy} />
+                          </CollapsibleSection>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
             </div>
           </>
         )}
@@ -426,7 +426,7 @@ function AnalyzeContent() {
         <footer className="text-center mt-16 py-8 border-t border-[#1e293d]">
           <p className="text-slate-500 text-sm">
             PolicyLens v2.0 — Powered by{' '}
-            <span className="text-teal-400">Gemini 3 Pro Preview</span>
+            <span className="text-teal-400">Gemini 2.5 Flash</span>
           </p>
           <p className="text-slate-600 text-xs mt-2">
             ⚠️ This is a diagnostic tool, not an enforcement tool. All verdicts are simulated.
