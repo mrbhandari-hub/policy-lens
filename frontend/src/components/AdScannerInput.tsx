@@ -124,6 +124,15 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
                         </svg>
                         <span>Random Query</span>
                     </button>
+                    <a
+                        href="/ad-scanner/batch"
+                        className="group px-4 py-2.5 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 hover:from-violet-500/20 hover:to-fuchsia-500/20 border border-violet-500/20 hover:border-violet-500/30 rounded-xl text-violet-300/70 hover:text-violet-200 transition-all duration-200 text-[13px] font-medium flex items-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <span>Batch Scan</span>
+                    </a>
                     <span className="text-white/20 text-[12px]">
                         {TOTAL_QUERY_COUNT.toLocaleString()} investigation terms
                     </span>

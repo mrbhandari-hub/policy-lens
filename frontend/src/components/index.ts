@@ -20,6 +20,7 @@ export { MobileResultsNav } from './MobileResultsNav';
 export { AdScannerInput } from './AdScannerInput';
 export { AdCard } from './AdCard';
 export { AdScanResults } from './AdScanResults';
+export { BatchScanResults } from './BatchScanResults';
 
 // Advanced Deep Dive Cards
 export {

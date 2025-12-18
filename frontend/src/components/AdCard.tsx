@@ -6,6 +6,7 @@ import { ImageLightbox } from './ImageLightbox';
 
 interface AdCardProps {
     analysis: AdAnalysis;
+    compact?: boolean;
 }
 
 const categoryConfig = {
@@ -109,12 +110,75 @@ function HarmScoreBadge({ score }: { score: number }) {
     );
 }
 
-export function AdCard({ analysis }: AdCardProps) {
+export function AdCard({ analysis, compact = false }: AdCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const config = categoryConfig[analysis.category];
 
     const hasScamFingerprints = analysis.scam_fingerprints && analysis.scam_fingerprints.length > 0;
     const hasPolicyViolations = analysis.policy_violations && analysis.policy_violations.length > 0;
+
+    // Compact mode: Show minimal info for batch results
+    if (compact) {
+        return (
+            <div className={`${config.bgColor} border ${config.borderColor} rounded-xl p-3 transition-all duration-200`}>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                            {analysis.ad.advertiser_name.charAt(0)}
+                        </div>
+                        <span className="text-white font-medium text-xs truncate">
+                            {analysis.ad.advertiser_name}
+                        </span>
+                    </div>
+                    {analysis.harm_score && (
+                        <HarmScoreBadge score={analysis.harm_score} />
+                    )}
+                </div>
+                
+                {/* Scam type tags */}
+                {hasScamFingerprints && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                        {analysis.scam_fingerprints!.slice(0, 2).map((fp, i) => {
+                            const scamInfo = scamTypeLabels[fp.type] || scamTypeLabels.none;
+                            return (
+                                <span
+                                    key={i}
+                                    className={`${scamInfo.color} text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5`}
+                                >
+                                    <span>{scamInfo.emoji}</span>
+                                    <span>{scamInfo.label}</span>
+                                </span>
+                            );
+                        })}
+                    </div>
+                )}
+
+                <p className="text-slate-300 text-xs line-clamp-2 mb-2">
+                    {analysis.ad.text}
+                </p>
+
+                <div className="flex items-center justify-between">
+                    <span className="text-slate-500 text-[10px]">
+                        {analysis.consensus_badge}
+                    </span>
+                    {analysis.ad.ad_library_url && (
+                        <a
+                            href={analysis.ad.ad_library_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 text-[10px] flex items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            View
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`${config.bgColor} border ${config.borderColor} rounded-xl overflow-hidden transition-all duration-200`}>
