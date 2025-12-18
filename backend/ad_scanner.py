@@ -538,10 +538,14 @@ def categorize_by_consensus(
     Categorize an ad based on judge consensus.
     
     Logic:
-    - VIOLATING: Majority voted REMOVE or AGE_GATE
-    - BENIGN: Majority voted ALLOW or LABEL  
-    - MIXED: Split or chaotic verdicts
+    - MIXED: Split or chaotic verdicts (judges disagree) - check badge first!
+    - VIOLATING: Majority voted REMOVE or AGE_GATE (with UNANIMOUS or MAJORITY consensus)
+    - BENIGN: Majority voted ALLOW or LABEL (with UNANIMOUS or MAJORITY consensus)
     """
+    # SPLIT or CHAOS badges always go to MIXED - judges disagree
+    if consensus_badge in ("SPLIT", "CHAOS"):
+        return AdCategory.MIXED
+    
     total = sum(verdict_distribution.values())
     if total == 0:
         return AdCategory.MIXED
@@ -550,7 +554,7 @@ def categorize_by_consensus(
     restrictive = verdict_distribution.get("REMOVE", 0) + verdict_distribution.get("AGE_GATE", 0)
     permissive = verdict_distribution.get("ALLOW", 0) + verdict_distribution.get("LABEL", 0)
     
-    # Use 50% threshold for categorization
+    # Use 50% threshold for categorization (only applies when consensus is UNANIMOUS or MAJORITY)
     if restrictive > total / 2:
         return AdCategory.VIOLATING
     elif permissive > total / 2:
