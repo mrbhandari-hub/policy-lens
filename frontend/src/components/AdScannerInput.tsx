@@ -2,21 +2,13 @@
 
 import { useState } from 'react';
 import { AdScanRequest } from '@/types/adScanner';
+import { getRandomScamQuery, TOTAL_QUERY_COUNT } from '@/data/scamQueries';
 
 interface AdScannerInputProps {
     onScan: (request: AdScanRequest) => void;
     loading: boolean;
     initialKeyword?: string;
 }
-
-const SUGGESTED_KEYWORDS = [
-    { keyword: 'free', label: '💸 Free', description: 'Ads using "free" tactics' },
-    { keyword: 'weight loss', label: '⚖️ Weight Loss', description: 'Diet & weight claims' },
-    { keyword: 'crypto', label: '₿ Crypto', description: 'Cryptocurrency ads' },
-    { keyword: 'money', label: '💰 Money', description: 'Financial claims' },
-    { keyword: 'health', label: '💊 Health', description: 'Health-related ads' },
-    { keyword: 'urgent', label: '⚠️ Urgent', description: 'Urgency tactics' },
-];
 
 const DEFAULT_JUDGES = [
     'meta_ads_integrity',
@@ -43,10 +35,11 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
         });
     };
 
-    const handleSuggestedClick = (suggestedKeyword: string) => {
-        setKeyword(suggestedKeyword);
+    const handleRandomQuery = () => {
+        const randomQuery = getRandomScamQuery();
+        setKeyword(randomQuery);
         onScan({
-            keyword: suggestedKeyword,
+            keyword: randomQuery,
             selected_judges: DEFAULT_JUDGES,
             max_ads: maxAds,
             use_real_ads: true,
@@ -115,24 +108,20 @@ export function AdScannerInput({ onScan, loading, initialKeyword = '' }: AdScann
                 </div>
             </form>
 
-            {/* Suggested Keywords */}
-            <div>
-                <div className="text-slate-400 text-xs uppercase tracking-wider mb-3">
-                    Quick Search
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    {SUGGESTED_KEYWORDS.map((item) => (
-                        <button
-                            key={item.keyword}
-                            onClick={() => handleSuggestedClick(item.keyword)}
-                            disabled={loading}
-                            className="px-3 py-2 bg-[#1e293d]/60 hover:bg-[#2d3a52]/60 border border-[#2d3a52] hover:border-pink-500/30 rounded-lg text-slate-300 hover:text-white transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={item.description}
-                        >
-                            {item.label}
-                        </button>
-                    ))}
-                </div>
+            {/* Random Query Generator */}
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={handleRandomQuery}
+                    disabled={loading}
+                    className="group px-4 py-2.5 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 hover:from-violet-600/30 hover:to-fuchsia-600/30 border border-violet-500/30 hover:border-violet-400/50 rounded-xl text-violet-300 hover:text-violet-200 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    title={`Generate a random scam investigation query from ${TOTAL_QUERY_COUNT}+ options`}
+                >
+                    <span className="text-lg group-hover:animate-spin">🎲</span>
+                    <span>Random Query</span>
+                </button>
+                <span className="text-slate-500 text-xs">
+                    from {TOTAL_QUERY_COUNT} scam investigation terms
+                </span>
             </div>
 
             {/* Max Ads Slider */}
