@@ -164,7 +164,7 @@ Be specific and cite sources where possible. Focus on factual findings from the 
                         "Content-Type": "application/json"
                     },
                     json={
-                        "model": "llama-3.1-sonar-small-128k-online",
+                        "model": "sonar",
                         "messages": [
                             {
                                 "role": "system",
@@ -243,19 +243,53 @@ def parse_research_response(content: str, citations: List[str]) -> WebResearch:
     
     content_lower = content.lower()
     
+    def is_valid_flag(flag: str, is_green: bool = False) -> bool:
+        """Check if a flag is valid (not a section header)"""
+        flag_lower = flag.lower()
+        # Skip markdown headers and section titles
+        if flag.endswith('**:') or flag.endswith(':'):
+            return False
+        if flag.startswith('**') and flag.endswith('**'):
+            return False
+        if len(flag) < 10:  # Too short to be a meaningful flag
+            return False
+        if flag_lower.startswith(('red flag', 'green flag', 'overall', 'based on')):
+            return False
+        # For green flags, skip items that say "none found" or "no evidence"
+        if is_green:
+            negative_phrases = ['none found', 'no credible', 'no evidence', 'i found no', 'not found', 'absent', 'lacking']
+            if any(phrase in flag_lower for phrase in negative_phrases):
+                return False
+            # Skip items that are actually assessments or recommendations
+            if any(phrase in flag_lower for phrase in ['likely_scam', 'do not deposit', 'my findings']):
+                return False
+        return True
+    
+    def clean_flag(flag: str) -> str:
+        """Clean up flag text by removing markdown and extra formatting"""
+        # Remove leading markdown bold markers
+        flag = flag.lstrip('*').rstrip('*')
+        # Remove ** patterns
+        flag = flag.replace('**', '')
+        # Remove leading colons and spaces
+        flag = flag.lstrip(': ')
+        return flag.strip()
+    
     # Extract red flags
     if "red flag" in content_lower:
         lines = content.split('\n')
         in_red_flags = False
         for line in lines:
-            if "red flag" in line.lower():
+            line_lower = line.lower()
+            if "red flag" in line_lower:
                 in_red_flags = True
                 continue
             if in_red_flags and line.strip().startswith(('-', '•', '*', '1', '2', '3', '4', '5')):
                 flag = line.strip().lstrip('-•*0123456789. ')
-                if flag and len(flag) > 5:
+                flag = clean_flag(flag)
+                if is_valid_flag(flag):
                     red_flags.append(flag)
-            elif in_red_flags and ("green flag" in line.lower() or "assessment" in line.lower()):
+            elif in_red_flags and ("green flag" in line_lower or "assessment" in line_lower or "overall" in line_lower):
                 in_red_flags = False
     
     # Extract green flags
@@ -263,14 +297,16 @@ def parse_research_response(content: str, citations: List[str]) -> WebResearch:
         lines = content.split('\n')
         in_green_flags = False
         for line in lines:
-            if "green flag" in line.lower():
+            line_lower = line.lower()
+            if "green flag" in line_lower:
                 in_green_flags = True
                 continue
             if in_green_flags and line.strip().startswith(('-', '•', '*', '1', '2', '3', '4', '5')):
                 flag = line.strip().lstrip('-•*0123456789. ')
-                if flag and len(flag) > 5:
+                flag = clean_flag(flag)
+                if is_valid_flag(flag, is_green=True):
                     green_flags.append(flag)
-            elif in_green_flags and ("assessment" in line.lower() or "conclusion" in line.lower()):
+            elif in_green_flags and ("assessment" in line_lower or "conclusion" in line_lower or "overall" in line_lower):
                 in_green_flags = False
     
     # Determine assessment
