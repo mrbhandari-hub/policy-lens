@@ -358,16 +358,14 @@ export function AdCard({ analysis, compact = false }: AdCardProps) {
                         </div>
                     )}
 
-                    {/* Web Research / Enrichment - Only show for violating/mixed ads */}
-                    {(analysis.category === 'violating' || analysis.category === 'mixed') && (
-                        <AdEnrichmentPanel
-                            adId={analysis.ad.ad_id}
-                            advertiserName={analysis.ad.advertiser_name}
-                            adText={analysis.ad.text}
-                            landingPageUrl={analysis.ad.landing_page_url}
-                            scamTypes={analysis.scam_fingerprints?.map(fp => fp.type) || []}
-                        />
-                    )}
+                    {/* Web Research / Enrichment - Available for all ads */}
+                    <AdEnrichmentPanel
+                        adId={analysis.ad.ad_id}
+                        advertiserName={analysis.ad.advertiser_name}
+                        adText={analysis.ad.text}
+                        landingPageUrl={analysis.ad.landing_page_url}
+                        scamTypes={analysis.scam_fingerprints?.map(fp => fp.type) || []}
+                    />
 
                     {/* Policy Violations - NEW */}
                     {hasPolicyViolations && (
