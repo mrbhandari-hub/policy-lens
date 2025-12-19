@@ -117,10 +117,8 @@ async def research_with_perplexity(
 ) -> WebResearch:
     """
     Use Perplexity API to research the advertiser and detect scams.
-    Falls back to OpenAI if Perplexity is unavailable.
     """
     perplexity_key = os.getenv("PERPLEXITY_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
     
     # Build the research query
     domain = ""
@@ -187,49 +185,19 @@ Be specific and cite sources where possible. Focus on factual findings from the 
                     
                     # Parse the response to extract structured data
                     return parse_research_response(content, citations)
+                else:
+                    return WebResearch(
+                        error=f"Perplexity API error: {resp.status_code}"
+                    )
                     
         except Exception as e:
             print(f"Perplexity API error: {e}")
-    
-    # Fallback to OpenAI (without live web search, but still useful)
-    if openai_key:
-        try:
-            async with httpx.AsyncClient(timeout=60) as client:
-                resp = await client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {openai_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": "gpt-4o-mini",
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": "You are an investigative researcher helping identify potential scam advertisements. Based on the information provided and your training knowledge, assess the legitimacy of this advertiser. Note that you cannot do live web searches, so base your assessment on patterns and known scam tactics."
-                            },
-                            {
-                                "role": "user",
-                                "content": research_prompt
-                            }
-                        ],
-                        "temperature": 0.2,
-                        "max_tokens": 1500
-                    }
-                )
-                
-                if resp.status_code == 200:
-                    data = resp.json()
-                    content = data["choices"][0]["message"]["content"]
-                    result = parse_research_response(content, [])
-                    result.error = "Used OpenAI fallback (no live web search)"
-                    return result
-                    
-        except Exception as e:
-            print(f"OpenAI API error: {e}")
+            return WebResearch(
+                error=f"Perplexity API error: {str(e)}"
+            )
     
     return WebResearch(
-        error="No API keys configured for web research (need PERPLEXITY_API_KEY or OPENAI_API_KEY)"
+        error="PERPLEXITY_API_KEY not configured"
     )
 
 
