@@ -2,7 +2,14 @@
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { getRandomScamQueries, TOTAL_QUERY_COUNT } from '@/data/scamQueries';
+import { 
+    getRandomScamQueries, 
+    getRandomFinancialQueries, 
+    getRandomImpersonationQueries,
+    TOTAL_QUERY_COUNT,
+    FINANCIAL_QUERY_COUNT,
+    IMPERSONATION_QUERY_COUNT
+} from '@/data/scamQueries';
 import { AdScanRequest, AdScanResponse } from '@/types/adScanner';
 import { BatchScanResults } from '@/components/BatchScanResults';
 import { supabase } from '@/lib/supabaseClient';
@@ -532,6 +539,59 @@ function BatchScannerContent() {
                             </>
                         )}
                     </button>
+
+                    {/* Quick Category Buttons */}
+                    <div className="mt-6 pt-6 border-t border-white/[0.06]">
+                        <label className="block text-white/50 text-[12px] uppercase tracking-wider mb-3">
+                            Quick Scan by Category
+                        </label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {/* Financial Scams */}
+                            <button
+                                onClick={() => {
+                                    const queries = getRandomFinancialQueries(numQueries);
+                                    setCustomQueries(queries.join('\n'));
+                                    runBatchScanWithQueries(queries, maxAdsPerQuery);
+                                }}
+                                disabled={isRunning}
+                                className="py-3 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 text-emerald-300 text-[14px] font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                            >
+                                <span>💰</span>
+                                <span>Financial Scams</span>
+                                <span className="text-emerald-400/50 text-[11px]">({FINANCIAL_QUERY_COUNT})</span>
+                            </button>
+
+                            {/* Celebrity Impersonation */}
+                            <button
+                                onClick={() => {
+                                    const queries = getRandomImpersonationQueries(numQueries);
+                                    setCustomQueries(queries.join('\n'));
+                                    runBatchScanWithQueries(queries, maxAdsPerQuery);
+                                }}
+                                disabled={isRunning}
+                                className="py-3 px-4 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/30 text-purple-300 text-[14px] font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                            >
+                                <span>🎭</span>
+                                <span>Impersonation</span>
+                                <span className="text-purple-400/50 text-[11px]">({IMPERSONATION_QUERY_COUNT})</span>
+                            </button>
+
+                            {/* All Scams (Random) */}
+                            <button
+                                onClick={() => {
+                                    const queries = getRandomScamQueries(numQueries);
+                                    setCustomQueries(queries.join('\n'));
+                                    runBatchScanWithQueries(queries, maxAdsPerQuery);
+                                }}
+                                disabled={isRunning}
+                                className="py-3 px-4 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/30 text-amber-300 text-[14px] font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                            >
+                                <span>🎲</span>
+                                <span>Random All</span>
+                                <span className="text-amber-400/50 text-[11px]">({TOTAL_QUERY_COUNT})</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>}
 
                 {/* Progress Panel */}

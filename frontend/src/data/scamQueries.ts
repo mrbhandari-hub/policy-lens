@@ -1732,5 +1732,40 @@ export function getRandomScamQueries(count: number): string[] {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
+// Category-specific query getters
+export function getRandomFinancialQueries(count: number): string[] {
+  const financialQueries = [...FINANCIAL_SCAMS, ...LOANS_CREDIT, ...REAL_ESTATE_HOUSING, ...GAMBLING_BETTING];
+  const shuffled = financialQueries.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+export function getRandomImpersonationQueries(count: number): string[] {
+  const impersonationQueries = [...CELEBRITY_IMPERSONATION_TARGETS, ...CELEBRITY_ENDORSEMENT];
+  const shuffled = impersonationQueries.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+export function getRandomHealthQueries(count: number): string[] {
+  const healthQueries = [...WEIGHT_LOSS_HEALTH, ...BEAUTY_COSMETICS, ...SPECIFIC_PRODUCTS];
+  const shuffled = healthQueries.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+export function getRandomGiveawayQueries(count: number): string[] {
+  const giveawayQueries = [...GIVEAWAYS_PRIZES, ...URGENCY_SCARCITY, ...SHOPPING_DEALS];
+  const shuffled = giveawayQueries.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+export function getRandomJobQueries(count: number): string[] {
+  const jobQueries = [...WORK_FROM_HOME, ...EDUCATION_COURSES];
+  const shuffled = jobQueries.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
 // Export total count for display
 export const TOTAL_QUERY_COUNT = SCAM_INVESTIGATION_QUERIES.length;
+
+// Export category counts
+export const FINANCIAL_QUERY_COUNT = FINANCIAL_SCAMS.length + LOANS_CREDIT.length + REAL_ESTATE_HOUSING.length + GAMBLING_BETTING.length;
+export const IMPERSONATION_QUERY_COUNT = CELEBRITY_IMPERSONATION_TARGETS.length + CELEBRITY_ENDORSEMENT.length;
