@@ -112,3 +112,34 @@ export interface ExportOptions {
     include_images: boolean;
     include_full_analysis: boolean;
 }
+
+// Ad Enrichment Types
+export interface DomainInfo {
+    domain: string;
+    registration_date?: string;
+    registrar?: string;
+    country?: string;
+    age_days?: number;
+    is_newly_registered: boolean;
+    ssl_valid?: boolean;
+    error?: string;
+}
+
+export interface WebResearch {
+    company_info?: string;
+    scam_reports?: string;
+    legitimacy_assessment?: string;
+    red_flags: string[];
+    green_flags: string[];
+    sources: string[];
+    confidence: 'low' | 'medium' | 'high';
+    error?: string;
+}
+
+export interface AdEnrichment {
+    ad_id: string;
+    domain_info?: DomainInfo;
+    web_research?: WebResearch;
+    overall_risk_assessment: 'likely_scam' | 'suspicious' | 'unclear' | 'likely_legitimate' | 'unknown';
+    enriched_at: string;
+}

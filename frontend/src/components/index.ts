@@ -21,6 +21,7 @@ export { AdScannerInput } from './AdScannerInput';
 export { AdCard } from './AdCard';
 export { AdScanResults } from './AdScanResults';
 export { BatchScanResults } from './BatchScanResults';
+export { AdEnrichmentPanel } from './AdEnrichmentPanel';
 
 // Advanced Deep Dive Cards
 export {

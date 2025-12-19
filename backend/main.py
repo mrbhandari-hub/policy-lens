@@ -688,6 +688,83 @@ When making your decision:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# =============================================================================
+# AD ENRICHMENT ENDPOINTS
+# =============================================================================
+
+from ad_enrichment import enrich_ad, enrich_ads_batch, AdEnrichment
+from pydantic import BaseModel as PydanticBaseModel
+from typing import List, Optional
+
+
+class EnrichAdRequest(PydanticBaseModel):
+    ad_id: str
+    advertiser_name: str
+    ad_text: str
+    landing_page_url: Optional[str] = None
+    scam_types: List[str] = []
+
+
+class EnrichAdsRequest(PydanticBaseModel):
+    ads: List[EnrichAdRequest]
+
+
+@app.post("/enrich-ad", response_model=AdEnrichment)
+async def enrich_single_ad(request: EnrichAdRequest):
+    """
+    Enrich a single ad with web research and domain analysis.
+    
+    Uses Perplexity API for web search (or OpenAI fallback) to research:
+    - Company/advertiser legitimacy
+    - Scam reports and complaints
+    - Domain registration info (age, registrar)
+    
+    Returns structured risk assessment with red/green flags.
+    """
+    try:
+        result = await enrich_ad(
+            ad_id=request.ad_id,
+            advertiser_name=request.advertiser_name,
+            ad_text=request.ad_text,
+            landing_page_url=request.landing_page_url,
+            scam_types=request.scam_types
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/enrich-ads")
+async def enrich_multiple_ads(request: EnrichAdsRequest):
+    """
+    Enrich multiple ads in batch (with rate limiting).
+    Limited to 10 ads per request to avoid API rate limits.
+    """
+    if len(request.ads) > 10:
+        raise HTTPException(
+            status_code=400, 
+            detail="Maximum 10 ads per batch request. For more, make multiple requests."
+        )
+    
+    try:
+        ads_data = [
+            {
+                "ad_id": ad.ad_id,
+                "advertiser_name": ad.advertiser_name,
+                "text": ad.ad_text,
+                "landing_page_url": ad.landing_page_url,
+                "scam_types": ad.scam_types
+            }
+            for ad in request.ads
+        ]
+        
+        results = await enrich_ads_batch(ads_data, max_concurrent=2)
+        return {"enrichments": [r.model_dump() for r in results]}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
